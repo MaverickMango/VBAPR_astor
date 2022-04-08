@@ -78,7 +78,7 @@ public class StatementOperatorInstance extends OperatorInstance {
 			}
 
 		} else {
-			log.error("Parent null or it is not a block");
+//			log.error("Parent null or it is not a block");
 		}
 		return false;
 	}

@@ -159,34 +159,37 @@ public class GraggBulirschStoerIntegratorTest {
   }
 
   @Test
-  public void testIntegratorControls()
-  throws MathUserException, IntegratorException {
-
-    TestProblem3 pb = new TestProblem3(0.999);
-    GraggBulirschStoerIntegrator integ =
-        new GraggBulirschStoerIntegrator(0, pb.getFinalTime() - pb.getInitialTime(),
-                1.0e-8, 1.0e-10);
-
-    double errorWithDefaultSettings = getMaxError(integ, pb);
-
-    // stability control
-    integ.setStabilityCheck(true, 2, 1, 0.99);
-    Assert.assertTrue(errorWithDefaultSettings < getMaxError(integ, pb));
-    integ.setStabilityCheck(true, -1, -1, -1);
-
-    integ.setStepsizeControl(0.5, 0.99, 0.1, 2.5);
-    Assert.assertTrue(errorWithDefaultSettings < getMaxError(integ, pb));
-    integ.setStepsizeControl(-1, -1, -1, -1);
-
-    integ.setOrderControl(10, 0.7, 0.95);
-    Assert.assertTrue(errorWithDefaultSettings < getMaxError(integ, pb));
-    integ.setOrderControl(-1, -1, -1);
-
-    integ.setInterpolationControl(true, 3);
-    Assert.assertTrue(errorWithDefaultSettings < getMaxError(integ, pb));
-    integ.setInterpolationControl(true, -1);
-
-  }
+  public void testIntegratorControls() {}
+// Defects4J: flaky method
+//   @Test
+//   public void testIntegratorControls()
+//   throws MathUserException, IntegratorException {
+// 
+//     TestProblem3 pb = new TestProblem3(0.999);
+//     GraggBulirschStoerIntegrator integ =
+//         new GraggBulirschStoerIntegrator(0, pb.getFinalTime() - pb.getInitialTime(),
+//                 1.0e-8, 1.0e-10);
+// 
+//     double errorWithDefaultSettings = getMaxError(integ, pb);
+// 
+//     // stability control
+//     integ.setStabilityCheck(true, 2, 1, 0.99);
+//     Assert.assertTrue(errorWithDefaultSettings < getMaxError(integ, pb));
+//     integ.setStabilityCheck(true, -1, -1, -1);
+// 
+//     integ.setStepsizeControl(0.5, 0.99, 0.1, 2.5);
+//     Assert.assertTrue(errorWithDefaultSettings < getMaxError(integ, pb));
+//     integ.setStepsizeControl(-1, -1, -1, -1);
+// 
+//     integ.setOrderControl(10, 0.7, 0.95);
+//     Assert.assertTrue(errorWithDefaultSettings < getMaxError(integ, pb));
+//     integ.setOrderControl(-1, -1, -1);
+// 
+//     integ.setInterpolationControl(true, 3);
+//     Assert.assertTrue(errorWithDefaultSettings < getMaxError(integ, pb));
+//     integ.setInterpolationControl(true, -1);
+// 
+//   }
 
   private double getMaxError(FirstOrderIntegrator integrator, TestProblemAbstract pb)
     throws MathUserException, IntegratorException {

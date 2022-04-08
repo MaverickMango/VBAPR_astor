@@ -135,6 +135,7 @@ public class CMAESOptimizerTest {
     @Test
     @Retry(3)
     public void testMaximize() {}
+// Defects4J: flaky method
 //     public void testMaximize() {
 //         double[] startPoint = point(DIM,1.0);
 //         double[] insigma = point(DIM,0.1);
@@ -215,19 +216,22 @@ public class CMAESOptimizerTest {
     }
 
     @Test
-    public void testCigTab() {
-        double[] startPoint = point(DIM,1.0);
-        double[] insigma = point(DIM,0.3);
-        double[][] boundaries = null;
-        RealPointValuePair expected =
-            new RealPointValuePair(point(DIM,0.0),0.0);
-        doTest(new CigTab(), startPoint, insigma, boundaries,
-                GoalType.MINIMIZE, LAMBDA, true, 0, 1e-13,
-                1e-13, 5e-5, 100000, expected);
-        doTest(new CigTab(), startPoint, insigma, boundaries,
-                GoalType.MINIMIZE, LAMBDA, false, 0, 1e-13,
-                1e-13, 5e-5, 100000, expected);
-    }
+    public void testCigTab() {}
+// Defects4J: flaky method
+//     @Test
+//     public void testCigTab() {
+//         double[] startPoint = point(DIM,1.0);
+//         double[] insigma = point(DIM,0.3);
+//         double[][] boundaries = null;
+//         RealPointValuePair expected =
+//             new RealPointValuePair(point(DIM,0.0),0.0);
+//         doTest(new CigTab(), startPoint, insigma, boundaries,
+//                 GoalType.MINIMIZE, LAMBDA, true, 0, 1e-13,
+//                 1e-13, 5e-5, 100000, expected);
+//         doTest(new CigTab(), startPoint, insigma, boundaries,
+//                 GoalType.MINIMIZE, LAMBDA, false, 0, 1e-13,
+//                 1e-13, 5e-5, 100000, expected);
+//     }
 
     @Test
     public void testSphere() {
@@ -335,16 +339,19 @@ public class CMAESOptimizerTest {
     }
 
     @Test
-    public void testDiagonalRosen() {
-        double[] startPoint = point(DIM,0.1);
-        double[] insigma = point(DIM,0.1);
-        double[][] boundaries = null;
-        RealPointValuePair expected =
-            new RealPointValuePair(point(DIM,1.0),0.0);
-        doTest(new Rosen(), startPoint, insigma, boundaries,
-                GoalType.MINIMIZE, LAMBDA, false, 1, 1e-13,
-                1e-10, 1e-4, 1000000, expected);
-     }
+    public void testDiagonalRosen() {}
+// Defects4J: flaky method
+//     @Test
+//     public void testDiagonalRosen() {
+//         double[] startPoint = point(DIM,0.1);
+//         double[] insigma = point(DIM,0.1);
+//         double[][] boundaries = null;
+//         RealPointValuePair expected =
+//             new RealPointValuePair(point(DIM,1.0),0.0);
+//         doTest(new Rosen(), startPoint, insigma, boundaries,
+//                 GoalType.MINIMIZE, LAMBDA, false, 1, 1e-13,
+//                 1e-10, 1e-4, 1000000, expected);
+//      }
 
     /**
      * @param func Function to optimize.

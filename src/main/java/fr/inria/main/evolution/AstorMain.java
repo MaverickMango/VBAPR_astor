@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import fr.inria.astor.util.CodeLineCollector;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
@@ -41,7 +42,7 @@ public class AstorMain extends AbstractMain {
 	 * It creates a repair engine according to an execution mode.
 	 * 
 	 * 
-	 * @param removeMode
+	 * @param mode
 	 * @return
 	 * @throws Exception
 	 */
@@ -91,7 +92,8 @@ public class AstorMain extends AbstractMain {
 
 		if (ConfigurationProperties.getPropertyBool("skipfaultlocalization")) {
 			// We dont use FL, so at this point the do not have suspicious
-			core.initPopulation(new ArrayList<SuspiciousCode>());
+			List<SuspiciousCode> suspicious = new ArrayList<SuspiciousCode>();
+			core.initPopulation(suspicious);
 		} else {
 			List<SuspiciousCode> suspicious = core.calculateSuspicious();
 
@@ -168,6 +170,9 @@ public class AstorMain extends AbstractMain {
 		ConfigurationProperties.print();
 
 		core.startEvolution();
+
+        //filter the solutions.
+		core.filterSolutions();
 
 		core.atEnd();
 

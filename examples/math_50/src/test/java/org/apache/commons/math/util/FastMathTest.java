@@ -1104,10 +1104,13 @@ public class FastMathTest {
     }
 
     @Test
-    public void checkMissingFastMathClasses() {
-        boolean ok = compareClassMethods(StrictMath.class, FastMath.class);
-        Assert.assertTrue("FastMath should implement all StrictMath methods", ok);
-    }
+    public void checkMissingFastMathClasses() {}
+// Defects4J: flaky method
+//     @Test
+//     public void checkMissingFastMathClasses() {
+//         boolean ok = compareClassMethods(StrictMath.class, FastMath.class);
+//         Assert.assertTrue("FastMath should implement all StrictMath methods", ok);
+//     }
 
     @Ignore
     @Test

@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import fr.inria.astor.approaches.jgenprog.extension.VBAPR;
 import org.apache.commons.collections.map.HashedMap;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -22,6 +23,7 @@ import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.stats.Stats.GeneralStatEnum;
 import fr.inria.astor.util.StringUtil;
 import fr.inria.main.AstorOutputStatus;
+import org.apache.log4j.Logger;
 
 /**
  * Evolutionary program transformation Loop
@@ -30,6 +32,7 @@ import fr.inria.main.AstorOutputStatus;
  *
  */
 public class EvolutionarySearchEngine extends AstorCoreEngine {
+	protected static Logger log = Logger.getLogger(EvolutionarySearchEngine.class.getSimpleName());
 
 	public EvolutionarySearchEngine(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade)
 			throws JSAPException {

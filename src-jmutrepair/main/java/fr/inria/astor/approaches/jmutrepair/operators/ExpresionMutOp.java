@@ -20,7 +20,7 @@ import spoon.reflect.declaration.CtElement;
 @SuppressWarnings("rawtypes")
 public abstract class ExpresionMutOp extends AutonomousOperator {
 
-	MutatorComposite mutatorBinary = null;
+	protected MutatorComposite mutatorBinary = null;
 
 	public ExpresionMutOp() {
 		super();

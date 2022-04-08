@@ -189,6 +189,7 @@ public class BOBYQAOptimizerTest {
 
     @Test
     public void testDiffPow() {}
+// Defects4J: flaky method
 //     @Test
 //     public void testDiffPow() {
 //         double[] startPoint = point(DIM/2,1.0);
@@ -213,6 +214,7 @@ public class BOBYQAOptimizerTest {
 
     @Test
     public void testAckley() {}
+// Defects4J: flaky method
 //     @Test
 //     public void testAckley() {
 //         double[] startPoint = point(DIM,0.1);
