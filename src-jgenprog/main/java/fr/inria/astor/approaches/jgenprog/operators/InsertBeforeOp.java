@@ -38,11 +38,12 @@ public class InsertBeforeOp extends InsertStatementOp {
 			ctst.insertBefore((CtStatement) fix);
 			fix.setParent(parentBlock);
 			successful = true;
-			operation.setSuccessfulyApplied(successful);
 			StatementSupporter.updateBlockImplicitly(parentBlock, true);
 		} else {
 			log.error("Operation not applied. Parent null ");
+			successful = false;
 		}
+		operation.setSuccessfulyApplied(successful);
 		return successful;
 
 	}

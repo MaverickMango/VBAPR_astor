@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import fr.inria.astor.approaches.jgenprog.LocalVariableProcessor;
 import fr.inria.astor.approaches.jgenprog.VariableReferenceProcessor;
+import fr.inria.astor.core.manipulation.filters.*;
 import fr.inria.astor.util.ReadGT;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
@@ -39,12 +40,6 @@ import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
 import fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalization;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.bytecode.entities.CompilationResult;
-import fr.inria.astor.core.manipulation.filters.ExpressionIngredientSpaceProcessor;
-import fr.inria.astor.core.manipulation.filters.IFConditionFixSpaceProcessor;
-import fr.inria.astor.core.manipulation.filters.IFExpressionFixSpaceProcessor;
-import fr.inria.astor.core.manipulation.filters.ReturnFixSpaceProcessor;
-import fr.inria.astor.core.manipulation.filters.SingleStatementFixSpaceProcessor;
-import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.manipulation.sourcecode.BlockReificationScanner;
 import fr.inria.astor.core.output.PatchJSONStandarOutput;
 import fr.inria.astor.core.output.ReportResults;
@@ -562,6 +557,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 				saveVariant(programVariant);
 
 				return true;
+			} else {
+				ReadGT.compileButFail ++ ;
 			}
 		} else {
 			log.debug("-The child does NOT compile: " + programVariant.getId() + ", errors: "
@@ -1259,6 +1256,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 					TargetElementProcessor proc_i = (TargetElementProcessor) PlugInLoader.loadPlugin(processor,
 							epoint._class);
 					loadedTargetElementProcessors.add(new SingleStatementFixSpaceProcessor());
+//					loadedTargetElementProcessors.add(new SingleTypeReferenceFixSpaceProcessor());
 					loadedTargetElementProcessors.add(proc_i);
 				}
 			}

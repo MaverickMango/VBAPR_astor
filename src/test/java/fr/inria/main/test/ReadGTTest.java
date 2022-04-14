@@ -30,7 +30,7 @@ class ReadGTTest {
 
     @Test
     void testotal() {
-        String result = "/home/liu/Desktop/simpleResult";
+        String result = "/home/liu/Desktop/VBAPRResult/filtered";
         ReadGT.sumResult(result);
     }
 

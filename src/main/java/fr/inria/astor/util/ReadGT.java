@@ -4,12 +4,20 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fr.inria.astor.approaches.jgenprog.LocalVariableProcessor;
 import fr.inria.astor.approaches.jgenprog.VariableReferenceProcessor;
+import fr.inria.astor.approaches.jgenprog.extension.ExpressionFilter;
+import fr.inria.astor.approaches.jgenprog.extension.StatementFilter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import org.json.simple.JSONObject;
+import spoon.SpoonModelBuilder;
+import spoon.compiler.SpoonResourceHelper;
 import spoon.processing.ProcessingManager;
+import spoon.reflect.code.CtStatement;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
 import spoon.support.QueueProcessingManager;
+import spoon.support.compiler.jdt.JDTBasedSpoonCompiler;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -20,9 +28,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ReadGT {
+    private static final String buggyFileDir = "/home/liu/Desktop/groundtruth/buggyfiles/";
+    private static final String fileBase = "/home/liu/Desktop/groundtruth/groundtruth/";
     public static String outputSrc = "/home/liu/Desktop/VBAPRResult/filtered";
+    public static String errorOutput = "/home/liu/Desktop/VBAPRResult/NoSuspiciousLine";
+    public static String timeOutput = "/home/liu/Desktop/VBAPRResult/NoSuspiciousLine";
+    public static int compileButFail = 0;
     public static List<GroundTruth> GTs = null;
-    static String fileBase = "/home/liu/Desktop/groundtruth/";
+    public static String proj = "", version = "";
+//    static String fileBase = "/home/liu/Desktop/groundtruth/";
 
     public static boolean hasThisVar(String name) {
         for (GroundTruth gt :GTs) {
@@ -31,6 +45,18 @@ public class ReadGT {
             }
         }
         return false;
+    }
+
+    public static boolean hasThisElement(CtElement element) {
+        boolean flag = false;
+        for (GroundTruth gt :GTs) {
+            List<CtElement> nodes = gt.getNodes();
+            for (CtElement node :nodes) {
+                List<CtElement> temp = element.getElements(new ExpressionFilter(node.toString()));
+                flag = flag || temp.size() != 0;
+            }
+        }
+        return flag;
     }
 
     public static boolean hasThisExp(String exp) {
@@ -99,7 +125,9 @@ public class ReadGT {
         String temp = location.substring(0, location.length()-1);
         String[] info = temp.substring(temp.lastIndexOf("/") + 1).split("_");
         assert info.length == 2;
+        info[0] = info[0].toLowerCase();
 //        info[0] = fileBase + info[0] +".csv";
+        proj = info[0]; version = info[1];
         return info;
     }
 
@@ -117,7 +145,7 @@ public class ReadGT {
             int idx = 0;
             while ((tempString = reader.readLine()) != null) {
                 idx ++;
-                if (idx <= version) {
+                if (!tempString.startsWith(String.valueOf(version))) {
                     continue;
                 }
                 tempString.replace('\r', ' ');
@@ -262,7 +290,7 @@ public class ReadGT {
     }
 
     public static Map<String, List<String>> removeRepetition(String projIDs, String result) throws IOException {
-        String base = "/home/liu/Desktop/FilterResult/";
+        String base = "/home/liu/Desktop/VBAPRResult/";
         List<String> ids = readIDs(projIDs);
         Map<String, List<String>> map = new HashMap<>();
         String proj, version, dirPath;
@@ -385,7 +413,7 @@ public class ReadGT {
 //                if (tempString.startsWith("bug:")) {
 //                    bug = tempString.split(":")[1];
 //                }
-                if (tempString.startsWith("orginal solutions:")) {
+                if (tempString.startsWith("original solutions:")) {
                     total += Integer.parseInt(tempString.split(":")[1].trim());
                 }
                 if (tempString.startsWith("filtered numbers:")) {
@@ -438,4 +466,110 @@ public class ReadGT {
         return status;
     }
 
+
+    public static List<CtElement> getNodes(List<CtStatement> stmts, String name) {
+        ExpressionFilter filter = new ExpressionFilter();
+        filter.set_name(name);
+        List<CtElement> list = new ArrayList<>();
+        for (CtStatement stmt :stmts) {
+            list.addAll(stmt.getElements(filter));
+        }
+        return list;
+    }
+
+    public static boolean setGTElements(Factory factory) throws FileNotFoundException {
+        String lowerP = proj.toLowerCase();
+        String buggyFileDir = ReadGT.buggyFileDir + lowerP + "/" + lowerP + "_" + version + "_buggy";
+        List<String> buggyFilePath = getFilePaths(buggyFileDir, ".java");
+        List<GroundTruth> gts =  ReadGT.GTs;
+        if (gts.size() == 0) {
+            return false;
+        }
+        for (String str :buggyFilePath) {
+            SpoonModelBuilder compiler = new JDTBasedSpoonCompiler(factory);
+//            compiler.getFactory().getEnvironment().setLevel("OFF");
+            compiler.addInputSource(SpoonResourceHelper.createResource(new File(str)));
+            compiler.build();
+            if (factory.Type().getAll().size() == 0) {
+                continue;
+            }
+            CtType type = factory.Type().getAll().get(0);
+            for (GroundTruth gt :gts) {
+                if (!str.replace(".java", "")
+                        .replace("/", ".").endsWith(gt.getLocation())) {
+                    continue;
+                }
+                List<Integer> poses = new ArrayList<>();
+                if (gt.isOnlyOneLine()) {
+                    poses.add(gt.getLinenumber());
+                } else {
+                    int start = gt.getStartLineNumber();
+                    int end = gt.getEndLineNumber();
+                    while (start <= end) {
+                        poses.add(start);
+                        start ++;
+                    }
+                }
+                StatementFilter stamentFilter = new StatementFilter();
+                stamentFilter.set_positions(poses);
+                List<CtStatement> stmts = type.getElements(stamentFilter);
+                stmts = removeSame(stmts);
+                String name = gt.getName();
+                List<CtElement> nodes = getNodes(stmts, name);
+                gt.setNodes(nodes);
+            }
+        }
+        return true;
+    }
+
+    public static List<CtStatement> removeSame(List<CtStatement> nodes) {
+//        nodes = reverseList(nodes);
+        List<CtStatement> newOne = new ArrayList<>();
+        for (CtStatement exp :nodes) {
+            int start = exp.getPosition().getLine();
+            int end = exp.getPosition().getEndLine();
+            if (!hasSame(newOne, start, end)) {
+                newOne.add(exp);
+            }
+        }
+        return newOne;
+    }
+
+    public static List<CtStatement> reverseList(List<CtStatement> nodes) {
+        List<CtStatement> list = new ArrayList<>();
+        for (int i = nodes.size() - 1; i >= 0; i --) {
+            list.add(nodes.get(i));
+        }
+        return list;
+    }
+
+    public static boolean hasSame(List<CtStatement> list, int start, int end) {
+        for (CtStatement exp :list) {
+            int oldstart = exp.getPosition().getLine();
+            int oldend = exp.getPosition().getEndLine();
+            if ((oldstart <= start && oldend >= end) || (oldstart >= start && oldend <=end))
+                return true;
+        }
+        return false;
+    }
+
+    public static List<String> getFilePaths(String fileDir, String postfix) {
+        List<String> paths = new ArrayList<>();
+        //读取输入路径的文件
+        File[] list = new File(fileDir).listFiles();
+        for(File file : list)
+        {
+            if(file.isFile())
+            {
+                if (file.getName().endsWith(postfix)) {
+                    // 就输出该文件的绝对路径
+                    paths.add(file.getAbsolutePath());
+                }
+
+            } else if (file.isDirectory()) {
+                paths.addAll(getFilePaths(file.getAbsolutePath(), postfix));
+            }
+        }
+        return paths;
+    }
 }

@@ -53,6 +53,7 @@ public abstract class IngredientBasedOperator extends AstorOperator {
 			OperatorInstance opInstance = createOperatorInstance(modificationPoint);
 			opInstance.setModified(ingredient.getCode());
 			opInstance.setIngredient(ingredient);
+			operatorIntances.add(opInstance);//todo
 		}
 		return operatorIntances;
 	}

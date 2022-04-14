@@ -1,6 +1,11 @@
 package fr.inria.astor.util;
 
+import spoon.reflect.declaration.CtElement;
+
+import java.util.List;
+
 public class GroundTruth {
+    private List<CtElement> nodes = null;
     private String location = "";
     private String name = "";
     private int startLineNumber;
@@ -27,12 +32,21 @@ public class GroundTruth {
         setExp(name);
     }
 
+    public List<CtElement> getNodes() {
+        return nodes;
+    }
+
+    public void setNodes(List<CtElement> nodes) {
+        this.nodes = nodes;
+    }
+
     public boolean isExp() {
         return isExp;
     }
 
     private void setExp(String name) {
-        isExp = !(name.matches("^\\w+$"));
+        boolean flag1  = !(name.matches("^\\w+$")), flag2 = !(name.matches("^[\\w\\.]+$"));
+        isExp = flag1 && flag2;
     }
 
     public String getLocation() {

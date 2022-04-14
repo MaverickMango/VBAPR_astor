@@ -66,18 +66,6 @@ public class BinaryExpressionMutOp extends ExpresionMutOp {
     public boolean canBeAppliedToPoint(ModificationPoint point) {
         boolean flag = (point.getCodeElement().getElements(new TypeFilter(CtBinaryOperator.class)).size() > 0
                 || point.getCodeElement().getElements(new TypeFilter(CtUnaryOperator.class)).size() > 0);
-        if (!flag)
-            return false;
-        CtElement element = point.getCodeElement();
-        List<CtBinaryOperator> list1 = element.getElements(new TypeFilter<>(CtBinaryOperator.class));
-        List<CtUnaryOperator> list2 = element.getElements(new TypeFilter<>(CtUnaryOperator.class));
-        VariableReferenceProcessor processor = new VariableReferenceProcessor();
-        QueueProcessingManager processingManager = new QueueProcessingManager(MutationSupporter.getFactory());
-        processingManager.addProcessor(processor);
-        if (list1.size() > 0)
-            processingManager.process(list1.get(0));
-        else if (list2.size() > 0)
-            processingManager.process(list2.get(0));
-        return processor.varList.size() != 0;
+        return flag;
     }
 }

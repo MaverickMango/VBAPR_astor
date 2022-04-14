@@ -10,19 +10,25 @@ import fr.inria.astor.core.entities.StatementOperatorInstance;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.declaration.CtElement;
+import spoon.reflect.reference.CtVariableReference;
 
 public class ReplaceVarOp extends ReplaceOp {
 
     @Override
     public boolean canBeAppliedToPoint(ModificationPoint point) {
-        return point.getCodeElement() instanceof CtVariableAccess;
+        return point.getCodeElement() instanceof CtVariableAccess || point.getCodeElement() instanceof CtVariableReference;
     }
 
     @Override
-    public boolean applyChangesInModel(OperatorInstance operation, ProgramVariant p) {//todo
+    public boolean applyChangesInModel(OperatorInstance operation, ProgramVariant p) {
         StatementOperatorInstance stmtoperator = (StatementOperatorInstance) operation;
         boolean successful = false;
-        CtVariableAccess ctst = (CtVariableAccess) operation.getOriginal();
+        CtElement ctst = null;
+        if (operation.getOriginal() instanceof CtVariableAccess)
+            ctst = (CtVariableAccess) operation.getOriginal();
+        else
+            ctst = (CtVariableReference) operation.getOriginal();
 
             try {
                 ctst.replace(stmtoperator.getModified());
@@ -44,9 +50,15 @@ public class ReplaceVarOp extends ReplaceOp {
     @Override
     public boolean undoChangesInModel(OperatorInstance operation, ProgramVariant p) {
         StatementOperatorInstance stmtoperator = (StatementOperatorInstance) operation;
-        CtVariableAccess ctst = (CtVariableAccess) operation.getOriginal();
-        CtVariableAccess fix = (CtVariableAccess) operation.getModified();
+        if (operation.getOriginal() instanceof CtVariableAccess) {
+            CtVariableAccess ctst = (CtVariableAccess) operation.getOriginal();
+            CtVariableAccess fix = (CtVariableAccess) operation.getModified();
             fix.replace(ctst);
-            return true;
+        } else {
+            CtVariableReference ctst = (CtVariableReference) operation.getOriginal();
+            CtVariableReference fix = (CtVariableReference) operation.getModified();
+            fix.replace(ctst);
+        }
+        return true;
     }
 }

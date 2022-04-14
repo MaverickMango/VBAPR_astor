@@ -21,11 +21,15 @@ import fr.inria.main.AbstractMain;
 import fr.inria.main.ExecutionMode;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -106,30 +110,10 @@ public class VBAPRMain extends AbstractMain {
 			}
 
 			core.initPopulation(suspicious);
-			filterMPs();
 		}
 
 		return core;
 
-	}
-
-	void filterMPs() {
-		if (!ReadGT.hasVar())
-			return;
-		for (ProgramVariant variant : core.getVariants()) {
-			List<ModificationPoint> modificationPoints = new ArrayList<>();
-			for (ModificationPoint mp: variant.getModificationPoints()) {
-				CtElement element = mp.getCodeElement();
-				if (element instanceof CtVariableAccess) {
-					String code = element.getOriginalSourceFragment().getSourceCode();
-					if (!ReadGT.hasThisVar(code)) {
-						continue;
-					}
-				}
-				modificationPoints.add(mp);
-			}
-			variant.setModificationPoints(modificationPoints);
-		}
 	}
 
 	/**
@@ -148,7 +132,7 @@ public class VBAPRMain extends AbstractMain {
 		try {
 			Class classDefinition = Class.forName(customEngineValue);
 			object = classDefinition.getConstructor(mutSupporter.getClass(), projectFacade.getClass())
-					.newInstance(mutSupporter, projectFacade);
+ 					.newInstance(mutSupporter, projectFacade);
 		} catch (Exception e) {
 			log.error("Loading custom engine: " + customEngineValue + " --" + e);
 			throw new Exception("Error Loading Engine: " + e);
@@ -195,13 +179,20 @@ public class VBAPRMain extends AbstractMain {
 
 		core.startEvolution();
 
-		//filter the solutions.
-		core.filterSolutions();
-
 		core.atEnd();
 
 		long endT = System.currentTimeMillis();
 		log.info("Time Total(s): " + (endT - startT) / 1000d);
+		BufferedOutputStream buff =null;
+		try {
+			String content = ReadGT.proj + "_" + ReadGT.version + ":" + ReadGT.compileButFail + "," + ((endT - startT) / 1000d) + ";\n";
+			buff = new BufferedOutputStream(new FileOutputStream(ReadGT.timeOutput, true));
+			buff.write(content.getBytes(StandardCharsets.UTF_8));
+			buff.flush();
+			buff.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

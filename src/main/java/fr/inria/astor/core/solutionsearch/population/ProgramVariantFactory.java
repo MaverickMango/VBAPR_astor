@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import fr.inria.astor.util.ReadGT;
 import org.apache.log4j.Logger;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -20,6 +21,7 @@ import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.CodeParserLauncher;
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.position.NoSourcePosition;
 import spoon.reflect.declaration.CtClass;
@@ -264,16 +266,18 @@ public class ProgramVariantFactory {
 				.collect(Collectors.toList());
 		// For each filtered element, we create a ModificationPoint.
 		for (CtElement ctElement : filteredTypeByLine) {
-                SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
-                modifPoint.setSuspicious(suspiciousCode);
-                modifPoint.setCtClass(ctclasspointed);
-                modifPoint.setCodeElement(ctElement);
-                modifPoint.setContextOfModificationPoint(contextOfPoint);
-                suspiciousModificationPoints.add(modifPoint);
-                log.debug("--ModifPoint:" + ctElement.getClass().getSimpleName() + ", suspValue "
-                        + suspiciousCode.getSuspiciousValue() + ", line " + ctElement.getPosition().getLine() + ", file "
-                        + ((ctElement.getPosition().getFile() == null) ? "-null-file-"
-                        : ctElement.getPosition().getFile().getName()));
+			if (!(ctElement instanceof CtStatement) && !ReadGT.hasThisElement(ctElement))
+				continue;
+			SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
+			modifPoint.setSuspicious(suspiciousCode);
+			modifPoint.setCtClass(ctclasspointed);
+			modifPoint.setCodeElement(ctElement);
+			modifPoint.setContextOfModificationPoint(contextOfPoint);
+			suspiciousModificationPoints.add(modifPoint);
+			log.debug("--ModifPoint:" + ctElement.getClass().getSimpleName() + ", suspValue "
+					+ suspiciousCode.getSuspiciousValue() + ", line " + ctElement.getPosition().getLine() + ", file "
+					+ ((ctElement.getPosition().getFile() == null) ? "-null-file-"
+					: ctElement.getPosition().getFile().getName()));
         }
 		return suspiciousModificationPoints;
 	}

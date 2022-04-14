@@ -15,8 +15,12 @@ import fr.inria.astor.util.ReadGT;
 import org.apache.log4j.Logger;
 import spoon.reflect.declaration.CtClass;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,8 +93,19 @@ public class GZoltarFaultLocalizationWithGT implements FaultLocalizationStrategy
 		List<SuspiciousCode> suspiciousStatemens = flResult.getCandidates();
 
 		if ((suspiciousStatemens == null || suspiciousStatemens.isEmpty())
-				&& !ConfigurationProperties.getPropertyBool("canhavezerosusp"))
+				&& !ConfigurationProperties.getPropertyBool("canhavezerosusp")) {
+			BufferedOutputStream buff =null;
+			try {
+				String content = ReadGT.proj + "_" + ReadGT.version + "\n";
+				buff = new BufferedOutputStream(new FileOutputStream(ReadGT.errorOutput, true));
+				buff.write(content.getBytes(StandardCharsets.UTF_8));
+				buff.flush();
+				buff.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			throw new IllegalArgumentException("No suspicious gen for analyze");
+		}
 
 		if (ConfigurationProperties.getPropertyBool("ignoreflakyinfl")) {
 			addFlakyFailingTestToIgnoredList(flResult.getFailingTestCases(), project);
@@ -239,7 +254,7 @@ public class GZoltarFaultLocalizationWithGT implements FaultLocalizationStrategy
 		// If we do not have candidate due the threshold is to high, we add all
 		// as suspicious
 		if (gzCandidates.isEmpty()) {
-			gzCandidates.addAll(gz.getSuspiciousStatements());
+			gzCandidates.addAll(temp);
 
 		}
 

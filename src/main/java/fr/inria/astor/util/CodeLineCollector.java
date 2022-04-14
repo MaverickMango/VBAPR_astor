@@ -49,7 +49,6 @@ public class CodeLineCollector  {
 
     public static void getClazzElements() {
         Factory spoon = MutationSupporter.getFactory();
-        ReadGT.getGTs(ReadGT.getInfos());
         for (GroundTruth gt :ReadGT.GTs) {
             String filePath = gt.getLocation();
             CtClass clazz = (CtClass) spoon.Type().get(filePath);

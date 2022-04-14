@@ -14,13 +14,13 @@ import spoon.reflect.code.CtStatement;
  *
  */
 public class InsertAfterOp extends InsertStatementOp {
+	boolean successful = false;
 
 	@Override
 	public boolean applyChangesInModel(OperatorInstance operation, ProgramVariant p) {
 
 		StatementOperatorInstance stmtoperator = (StatementOperatorInstance) operation;
 
-		boolean successful = false;
 		CtStatement ctst = (CtStatement) operation.getOriginal();
 		CtStatement fix = (CtStatement) operation.getModified();
 
@@ -30,11 +30,12 @@ public class InsertAfterOp extends InsertStatementOp {
 			ctst.insertAfter((CtStatement) fix);
 			fix.setParent(parentBlock);
 			successful = true;
-			operation.setSuccessfulyApplied(successful);
 			StatementSupporter.updateBlockImplicitly(parentBlock, true);
 		} else {
 			log.error("Operation not applied. Parent null");
+			successful = false;
 		}
+		operation.setSuccessfulyApplied(successful);
 		return successful;
 	}
 

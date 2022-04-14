@@ -55,13 +55,67 @@ public class VBAPRTest extends BaseEvolutionaryTest {
         cs.command.put("-srctestfolder", "/src/test/");
         cs.command.put("-binjavafolder", "/target/classes/");
         cs.command.put("-bintestfolder", "/target/test-classes/");
-        cs.command.put("-location", "/home/liu/Desktop/astor/examples/math_86/");
-        cs.command.put("-dependencies", "examples/math_86/lib");
+        cs.command.put("-location", "/home/liu/Desktop/astor/examples/math_5/");
+        cs.command.put("-dependencies", "examples/math_5/lib");
+        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
+        cs.command.put("-maxgen", "1");
+//        cs.command.put("-population", "2");
+        cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
+        cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
+        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");
+        cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
+
+        main1.execute(cs.flat());
+        AstorCoreEngine engine = main1.getEngine();
+        List<ProgramVariant> variants = engine.getVariants();
+        assertTrue(variants.size() > 0);
+    }
+
+    @Test
+    public void testVBAPRLang() throws Exception {
+        org.apache.log4j.LogManager.getLogger(EvolutionarySearchEngine.class).setLevel(Level.DEBUG);
+//        org.apache.log4j.LogManager.getRootLogger().setLevel(Level.DEBUG);
+        VBAPRMain main1 = new VBAPRMain();
+        CommandSummary cs = new CommandSummary();
+        cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR");
+        cs.command.put("-srcjavafolder", "/src/main/java/");
+        cs.command.put("-srctestfolder", "/src/test/");
+        cs.command.put("-binjavafolder", "/target/classes/");
+        cs.command.put("-bintestfolder", "/target/test-classes/");
+        cs.command.put("-location", "/home/liu/Desktop/astor/examples/lang_6/");
+        cs.command.put("-dependencies", "examples/lang_6/lib");
         cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
         cs.command.put("-maxgen", "100");
 //        cs.command.put("-population", "2");
         cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
-        cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleVariableFixSpaceProcessor");
+        cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
+        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");
+        cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
+
+        main1.execute(cs.flat());
+        AstorCoreEngine engine = main1.getEngine();
+        List<ProgramVariant> variants = engine.getVariants();
+        assertTrue(variants.size() > 0);
+    }
+
+    @Test
+    public void testVBAPRTime() throws Exception {
+        org.apache.log4j.LogManager.getLogger(EvolutionarySearchEngine.class).setLevel(Level.DEBUG);
+//        org.apache.log4j.LogManager.getRootLogger().setLevel(Level.DEBUG);
+        VBAPRMain main1 = new VBAPRMain();
+        CommandSummary cs = new CommandSummary();
+        cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR");
+        cs.command.put("-srcjavafolder", "/src/main/java/");
+        cs.command.put("-srctestfolder", "/src/test/");
+        cs.command.put("-binjavafolder", "/build/classes/");
+        cs.command.put("-bintestfolder", "/build/tests/");
+        cs.command.put("-location", "/home/liu/Desktop/astor/examples/time_7/");
+        cs.command.put("-dependencies", "examples/time_7/lib");
+        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
+        cs.command.put("-maxgen", "100");
+//        cs.command.put("-population", "2");
+        cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
+        cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
         cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");
         cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
 
@@ -82,13 +136,13 @@ public class VBAPRTest extends BaseEvolutionaryTest {
         cs.command.put("-srctestfolder", "/tests/");
         cs.command.put("-binjavafolder", "/build/");
         cs.command.put("-bintestfolder", "/build-tests/");
-        cs.command.put("-location", "/home/liu/Desktop/astor/examples/chart_3/");
-        cs.command.put("-dependencies", "examples/chart_3/lib");
+        cs.command.put("-location", "/home/liu/Desktop/astor/examples/chart_1/");
+        cs.command.put("-dependencies", "examples/chart_1/lib");
         cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
         cs.command.put("-maxgen", "100");
 //        cs.command.put("-population", "2");
         cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
-        cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleVariableFixSpaceProcessor");
+        cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
         cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");
         cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
 

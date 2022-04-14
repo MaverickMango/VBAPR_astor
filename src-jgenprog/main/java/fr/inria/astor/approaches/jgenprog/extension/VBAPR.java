@@ -9,27 +9,36 @@ import fr.inria.astor.core.entities.OperatorInstance;
 import fr.inria.astor.core.entities.SuspiciousModificationPoint;
 import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
 import fr.inria.astor.core.manipulation.MutationSupporter;
+import fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor;
+import fr.inria.astor.core.manipulation.filters.SingleStatementFixSpaceProcessor;
+import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
+import fr.inria.astor.core.solutionsearch.population.ProgramVariantFactory;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.IngredientBasedOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSelectionStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSpace;
 import fr.inria.astor.util.ReadGT;
 import fr.inria.main.evolution.ExtensionPoints;
+import fr.inria.main.evolution.PlugInLoader;
 import org.apache.log4j.Logger;
+import spoon.processing.AbstractProcessor;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class VBAPR  extends JGenProg {
     protected static Logger log = Logger.getLogger(VBAPR.class.getSimpleName());
 
-    public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException {
+    public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
         ReadGT.getGTs(ReadGT.getInfos());
+        ReadGT.setGTElements(MutationSupporter.getFactory());
     }
 
     @Override
@@ -109,5 +118,27 @@ public class VBAPR  extends JGenProg {
         if (this.getOperatorSpace() == null) {
             this.setOperatorSpace(new VBAPRSpace());
         }
+    }
+
+    protected List<AbstractProcessor<?>> targetElementProcessors = null;
+
+    protected void loadTargetElements() throws Exception {
+
+        ExtensionPoints epoint = ExtensionPoints.TARGET_CODE_PROCESSOR;
+
+        List<TargetElementProcessor<?>> loadedTargetElementProcessors = new ArrayList<TargetElementProcessor<?>>();
+
+        String ingrProcessors = ConfigurationProperties.getProperty(epoint.identifier);
+        String[] in = ingrProcessors.split(File.pathSeparator);
+        for (String processor : in) {
+//            TargetElementProcessor proc_i = (TargetElementProcessor) PlugInLoader.loadPlugin(processor,
+//                    epoint._class);
+            loadedTargetElementProcessors.add(new SingleExpressionFixSpaceProcessor());
+            loadedTargetElementProcessors.add(new SingleStatementFixSpaceProcessor());
+//					loadedTargetElementProcessors.add(new SingleTypeReferenceFixSpaceProcessor());
+//            loadedTargetElementProcessors.add(proc_i);
+        }
+        this.setTargetElementProcessors(loadedTargetElementProcessors);
+        this.setVariantFactory(new ProgramVariantFactory(this.getTargetElementProcessors()));
     }
 }

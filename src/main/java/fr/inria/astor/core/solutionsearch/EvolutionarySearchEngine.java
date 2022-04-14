@@ -149,7 +149,7 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 
 			this.saveOriginalVariant(parentVariant);
 			ProgramVariant newVariant = createNewProgramVariant(parentVariant, generation);
-			this.saveModifVariant(parentVariant);
+			this.saveModifVariant(parentVariant);//todo newVariant???
 
 			if (newVariant == null) {
 				continue;
@@ -173,7 +173,7 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 			}
 			foundOneVariant = true;
 			// Finally, reverse the changes done by the child
-			reverseOperationInModel(newVariant, generation);
+			reverseOperationInModel(newVariant, generation);//todo if the change compile, still need to reserve?
 			boolean validation = this.validateReversedOriginalVariant(newVariant);
 
 			if (solution) {

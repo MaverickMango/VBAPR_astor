@@ -1,16 +1,22 @@
 package fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch;
 
+import fr.inria.astor.approaches.jgenprog.extension.ReplaceInvocationOp;
+import fr.inria.astor.approaches.jgenprog.operators.InsertAfterOp;
+import fr.inria.astor.approaches.jgenprog.operators.InsertBeforeOp;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.util.CodeLineCollector;
 import fr.inria.astor.util.StringUtil;
 import org.apache.log4j.Logger;
-import spoon.reflect.code.CtStatement;
-import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.*;
+import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.reference.CtVariableReference;
+import spoon.support.reflect.code.CtInvocationImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,24 +31,51 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         super(space);
     }
 
-    public List<Ingredient> searchFitScope(List<Ingredient> baseElements, int type) {
-        List<Ingredient> ingredients = new ArrayList<>();
-        for (int i = 0; i < baseElements.size(); i++) {
-            Ingredient ingredient = baseElements.get(i);
-            if (type == 1 && ingredient.getCode() instanceof CtStatement) {
-                ingredients.add(ingredient);
-            }
-            if (type == 2 && ingredient.getCode() instanceof CtVariableAccess) {
-                for (CtVariableAccess va : CodeLineCollector.varElements) {
-                    if (va.toString().equals(ingredient.toString())) {
-                        ingredients.add(ingredient);
-                        break;
-                    }
-                }
+    protected Ingredient getRandomVarFromContext(List<Ingredient> fixSpace, List<CtVariable> context) {
+        if (context == null || context.size() == 0)
+            return null;
+        int size = context.size();
+        int index = RandomManager.nextInt(size);
+        Ingredient ingredient = fixSpace.get(RandomManager.nextInt(fixSpace.size()));
+        ingredient.setCode(context.get(index).getReference());
+        return ingredient;
+
+    }
+    protected Ingredient getRandomFromSpace(List<Ingredient> fixSpace) {
+        if (fixSpace == null)
+            return null;
+        int size = fixSpace.size();
+        int index = RandomManager.nextInt(size);
+        return fixSpace.get(index);
+
+    }
+
+    List<Ingredient> getstmts(List<Ingredient> base, AstorOperator operationType) {
+        List<Ingredient> stmts = new ArrayList<>();
+        for (Ingredient in :base) {
+            if (operationType instanceof InsertBeforeOp && in.getCode() instanceof CtReturn)
+                continue;
+            if (in.getCode() instanceof CtStatement
+                    && !(in.getCode() instanceof CtInvocation) && !(in.getCode() instanceof CtLocalVariable)) {
+                stmts.add(in);
             }
         }
-        return ingredients;
+        return stmts;
     }
+
+    List<Ingredient> getInvocations(List<Ingredient> base, ModificationPoint point) {
+        String name = ((CtInvocationImpl)point.getCodeElement()).getExecutable().getSimpleName();
+        List<Ingredient> stmts = new ArrayList<>();
+        for (Ingredient in :base) {
+            CtInvocationImpl invocation = (CtInvocationImpl) in.getCode();
+            String change = invocation.getExecutable().getSimpleName();
+            if (change.equals(name)) {
+                stmts.add(in);
+            }
+        }
+        return stmts;
+    }
+
     /**
      * Method that returns an Ingredient from the ingredient space given a
      * modification point and a Operator
@@ -58,13 +91,11 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
         List<Ingredient> baseElements = geIngredientsFromSpace(modificationPoint, operationType);
 
-        //filter the gt scope vars
-        CodeLineCollector.getVarsInscope();
-        if (modificationPoint.getCodeElement() instanceof CtVariableAccess) {
-            baseElements = searchFitScope(baseElements, 2);
-        } else {
-            baseElements = searchFitScope(baseElements, 1);
-        }
+        if (operationType instanceof InsertBeforeOp || operationType instanceof InsertAfterOp)
+            baseElements = getstmts(baseElements, operationType);
+
+        if (operationType instanceof ReplaceInvocationOp)
+            baseElements = getInvocations(baseElements, modificationPoint);
 
         if (baseElements == null || baseElements.isEmpty()) {
             log.debug("Any element available for mp " + modificationPoint);
@@ -83,7 +114,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             log.debug(String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients,
                     elementsFromFixSpace));
 
-            Ingredient baseIngredient = getRandomStatementFromSpace(baseElements);
+            Ingredient baseIngredient = getRandomFromSpace(baseElements);
 
             String newingredientkey = getKey(modificationPoint, operationType);
 
