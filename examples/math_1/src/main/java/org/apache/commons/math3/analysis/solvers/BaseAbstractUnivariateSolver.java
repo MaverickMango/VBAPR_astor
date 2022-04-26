@@ -166,13 +166,11 @@ public abstract class BaseAbstractUnivariateSolver<FUNC extends UnivariateFuncti
      * @param max Upper bound for the interval.
      * @param startValue Start value to use.
      * @param maxEval Maximum number of evaluations.
-     * @exception NullArgumentException if f is null
      */
     protected void setup(int maxEval,
                          FUNC f,
                          double min, double max,
-                         double startValue)
-        throws NullArgumentException {
+                         double startValue) {
         // Checks.
         MathUtils.checkNotNull(f);
 

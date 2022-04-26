@@ -21,7 +21,6 @@ import java.util.TreeMap;
 import org.apache.commons.math3.util.Pair;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
-import org.apache.commons.math3.exception.util.LocalizedFormats;
 
 /**
  * Base class for rules that determines the integration nodes and their
@@ -49,17 +48,9 @@ public abstract class BaseRuleFactory<T extends Number> {
      * @param numberOfPoints Number of integration points.
      * @return a copy of the integration rule.
      * @throws NotStrictlyPositiveException if {@code numberOfPoints < 1}.
-     * @throws DimensionMismatchException if the elements of the rule pair do not
-     * have the same length.
      */
     public Pair<double[], double[]> getRule(int numberOfPoints)
-        throws NotStrictlyPositiveException, DimensionMismatchException {
-
-        if (numberOfPoints <= 0) {
-            throw new NotStrictlyPositiveException(LocalizedFormats.NUMBER_OF_POINTS,
-                                                   numberOfPoints);
-        }
-
+        throws NotStrictlyPositiveException {
         // Try to obtain the rule from the cache.
         Pair<double[], double[]> cached = pointsAndWeightsDouble.get(numberOfPoints);
 
@@ -87,11 +78,10 @@ public abstract class BaseRuleFactory<T extends Number> {
      *
      * @param numberOfPoints Order of the rule to be retrieved.
      * @return the points and weights corresponding to the given order.
-     * @throws DimensionMismatchException if the elements of the rule pair do not
-     * have the same length.
+     * @throws NotStrictlyPositiveException if {@code numberOfPoints < 1}.
      */
     protected synchronized Pair<T[], T[]> getRuleInternal(int numberOfPoints)
-        throws DimensionMismatchException {
+        throws NotStrictlyPositiveException {
         final Pair<T[], T[]> rule = pointsAndWeights.get(numberOfPoints);
         if (rule == null) {
             addRule(computeRule(numberOfPoints));
@@ -108,7 +98,7 @@ public abstract class BaseRuleFactory<T extends Number> {
      * @throws DimensionMismatchException if the elements of the pair do not
      * have the same length.
      */
-    protected void addRule(Pair<T[], T[]> rule) throws DimensionMismatchException {
+    protected void addRule(Pair<T[], T[]> rule) {
         if (rule.getFirst().length != rule.getSecond().length) {
             throw new DimensionMismatchException(rule.getFirst().length,
                                                  rule.getSecond().length);
@@ -122,11 +112,8 @@ public abstract class BaseRuleFactory<T extends Number> {
      *
      * @param numberOfPoints Order of the rule to be computed.
      * @return the computed rule.
-     * @throws DimensionMismatchException if the elements of the pair do not
-     * have the same length.
      */
-    protected abstract Pair<T[], T[]> computeRule(int numberOfPoints)
-        throws DimensionMismatchException;
+    protected abstract Pair<T[], T[]> computeRule(int numberOfPoints);
 
     /**
      * Converts the from the actual {@code Number} type to {@code double}

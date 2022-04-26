@@ -41,7 +41,7 @@ import org.junit.Test;
  * @version $Id$
  */
 
-public abstract class RandomGeneratorAbstractTest extends RandomDataGeneratorTest {
+public abstract class RandomGeneratorAbstractTest extends RandomDataTest {
 
     /** RandomGenerator under test */
     protected RandomGenerator generator;
@@ -57,7 +57,7 @@ public abstract class RandomGeneratorAbstractTest extends RandomDataGeneratorTes
      */
     public RandomGeneratorAbstractTest() {
         generator = makeGenerator();
-        randomData = new RandomDataGenerator(generator);
+        randomData = new RandomDataImpl(generator);
     }
 
     /**
@@ -136,7 +136,7 @@ public abstract class RandomGeneratorAbstractTest extends RandomDataGeneratorTes
                 (double) ((binUpperBounds[0] + 1) * smallSampleSize) / (double) n;
             for (int k = 1; k < binCount; k++) {
                 expected[k] = (double) smallSampleSize *
-                (double) (binUpperBounds[k] - binUpperBounds[k - 1]) / n;
+                (double) (binUpperBounds[k] - binUpperBounds[k - 1]) / (double) n;
             }
             for (int j = 0; j < numTests; j++) {
                 Arrays.fill(observed, 0);
@@ -161,19 +161,16 @@ public abstract class RandomGeneratorAbstractTest extends RandomDataGeneratorTes
         }
     }
 
-    @Test
-    public void testNextIntIAE2() {
+    @Override // TODO is this supposed to be an override?
+    @Test(expected=MathIllegalArgumentException.class)
+    public void testNextIntIAE() {
         try {
             generator.nextInt(-1);
             Assert.fail("MathIllegalArgumentException expected");
         } catch (MathIllegalArgumentException ex) {
             // ignored
         }
-        try {
-            generator.nextInt(0);
-        } catch (MathIllegalArgumentException ex) {
-            // ignored
-        }
+        generator.nextInt(0);
     }
 
     @Test

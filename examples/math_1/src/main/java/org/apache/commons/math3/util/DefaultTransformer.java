@@ -56,7 +56,7 @@ public class DefaultTransformer implements NumberTransformer, Serializable {
         }
 
         try {
-            return Double.parseDouble(o.toString());
+            return Double.valueOf(o.toString()).doubleValue();
         } catch (NumberFormatException e) {
             throw new MathIllegalArgumentException(LocalizedFormats.CANNOT_TRANSFORM_TO_DOUBLE,
                                                    o.toString());

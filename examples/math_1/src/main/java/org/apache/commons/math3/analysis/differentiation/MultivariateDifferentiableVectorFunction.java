@@ -35,7 +35,7 @@ public interface MultivariateDifferentiableVectorFunction
      * @param point point at which the function must be evaluated
      * @return function value for the given point
      * @exception MathIllegalArgumentException if {@code point} does not
-     * satisfy the function's constraints (wrong dimension, argument out of bound,
+     * fulfill functions constraints (wrong dimension, argument out of bound,
      * or unsupported derivative order for example)
      */
     DerivativeStructure[] value(DerivativeStructure[] point)

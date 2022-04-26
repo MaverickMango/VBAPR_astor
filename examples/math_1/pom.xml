@@ -19,18 +19,18 @@
   <parent>
     <groupId>org.apache.commons</groupId>
     <artifactId>commons-parent</artifactId>
-    <version>32</version>
+    <version>28</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.apache.commons</groupId>
   <artifactId>commons-math3</artifactId>
-  <version>3.3-SNAPSHOT</version>
+  <version>3.2-SNAPSHOT</version>
   <name>Commons Math</name>
 
   <inceptionYear>2003</inceptionYear>
   <description>The Math project is a library of lightweight, self-contained mathematics and statistics components addressing the most common practical problems not immediately available in the Java programming language or commons-lang.</description>
 
-  <url>http://commons.apache.org/proper/commons-math/</url>
+  <url>http://commons.apache.org/math/</url>
 
   <issueManagement>
     <system>jira</system>
@@ -133,16 +133,10 @@
       <name>Eldar Agalarov</name>
     </contributor>
     <contributor>
-      <name>Tim Allison</name>
-    </contributor>
-    <contributor>
       <name>C. Scott Ananian</name>
     </contributor>
     <contributor>
       <name>Mark Anderson</name>
-    </contributor>
-    <contributor>
-      <name>Peter Andrews</name>
     </contributor>
     <contributor>
       <name>R&#233;mi Arntzen</name>
@@ -152,9 +146,6 @@
     </contributor>
     <contributor>
       <name>Michael Bjorkegren</name>
-    </contributor>
-    <contributor>
-      <name>Brian Bloniarz</name>
     </contributor>
     <contributor>
       <name>John Bollinger</name>
@@ -167,9 +158,6 @@
     </contributor>
     <contributor>
       <name>Dan Checkoway</name>
-    </contributor>
-    <contributor>
-      <name>Charles Cooper</name>
     </contributor>
     <contributor>
       <name>Paul Cowan</name>
@@ -188,9 +176,6 @@
     </contributor>
     <contributor>
       <name>Ted Dunning</name>
-    </contributor>
-    <contributor>
-      <name>Ajo Fod</name>
     </contributor>
     <contributor>
       <name>John Gant</name>
@@ -221,9 +206,6 @@
     </contributor>
     <contributor>
       <name>Eugene Kirpichov</name>
-    </contributor>
-    <contributor>
-      <name>Oleksandr Kornieiev</name>
     </contributor>
     <contributor>
       <name>Piotr Kochanski</name>
@@ -259,9 +241,6 @@
       <name>Andreas Rieger</name>
     </contributor>
     <contributor>
-      <name>S&#233;bastien Riou</name>
-    </contributor>
-    <contributor>
       <name>Bill Rossi</name>
     </contributor>
     <contributor>
@@ -275,9 +254,6 @@
     </contributor>
     <contributor>
       <name>Michael Saunders</name>
-    </contributor>
-    <contributor>
-      <name>Thorsten Schaefer</name>
     </contributor>
     <contributor>
       <name>Christopher Schuck</name>
@@ -298,12 +274,6 @@
       <name>Kim van der Linde</name>
     </contributor>
     <contributor>
-      <name>Evan Ward</name>
-    </contributor>
-    <contributor>
-      <name>Andrew Waterman</name>
-    </contributor>
-    <contributor>
       <name>J&#246;rg Weimar</name>
     </contributor>
     <contributor>
@@ -321,7 +291,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.11</version>
+      <version>4.10</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
@@ -334,7 +304,7 @@
     <!-- This value must reflect the current name of the base package. -->
     <commons.osgi.symbolicName>org.apache.commons.math3</commons.osgi.symbolicName>
     <!-- do not use snapshot suffix here -->
-    <commons.release.version>3.3</commons.release.version>
+    <commons.release.version>3.2</commons.release.version>
     <commons.release.desc>(requires Java 1.5+)</commons.release.desc>
     <!-- <commons.rc.version>RC1</commons.rc.version> -->
     <commons.binary.suffix>-bin</commons.binary.suffix>
@@ -348,13 +318,9 @@
     <commons.jira.id>MATH</commons.jira.id>
     <commons.jira.pid>12310485</commons.jira.pid>
     <commons.encoding>UTF-8</commons.encoding>
-    <maven.compiler.source>1.5</maven.compiler.source>
-    <maven.compiler.target>1.5</maven.compiler.target>
+    <maven.compile.source>1.5</maven.compile.source>
+    <maven.compile.target>1.5</maven.compile.target>
     <math.pmd.version>2.7.1</math.pmd.version>
-    <math.findbugs.version>2.5.1</math.findbugs.version>
-    <math.checkstyle.version>2.9.1</math.checkstyle.version>
-    <!-- Temporary downdate: 0.6.3 uses different tags and CP32 was not updated -->
-    <commons.jacoco.version>0.6.2.201302030002</commons.jacoco.version>
   </properties> 
 
   <build>
@@ -380,8 +346,6 @@
               <descriptor>src/main/assembly/src.xml</descriptor>
               <descriptor>src/main/assembly/bin.xml</descriptor>
             </descriptors>
-            <!-- There are a lot of long file names. Suppress the warnings. -->
-            <tarLongFileMode>gnu</tarLongFileMode>
           </configuration>
         </plugin>
         <plugin>
@@ -399,7 +363,7 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${math.pmd.version}</version>
         <configuration>
-          <targetJdk>${maven.compiler.target}</targetJdk>  
+          <targetJdk>${maven.compile.target}</targetJdk>  
         </configuration>
         </plugin>
         <plugin>
@@ -411,69 +375,37 @@
             </ignorePathsToDelete>
           </configuration>
         </plugin>
-
       <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <configuration>
-              <target>
-                <jar destfile="target/commons-math3-tools-${project.version}.jar">
-                  <metainf dir="${basedir}" includes="NOTICE.txt,LICENSE.txt" />
-                  <manifest>
-                    <attribute name="Extension-Name" value="org.apache.commons.net" />
-                    <attribute name="Specification-Title" value="${project.name}" />
-                    <attribute name="Implementation-Title" value="${project.name}" />
-                    <attribute name="Implementation-Vendor" value="${project.organization.name}" />
-                    <attribute name="Implementation-Version" value="${project.version}" />
-                    <attribute name="Implementation-Vendor-Id" value="org.apache" />
-                    <attribute name="Implementation-Build" value="${implementation.build}"/>
-                    <attribute name="X-Compile-Source-JDK" value="${maven.compiler.source}" />
-                    <attribute name="X-Compile-Target-JDK" value="${maven.compiler.target}" />
-                  </manifest>
-                  <fileset dir="target/test-classes"
-                           includes="org/apache/commons/math3/PerfTestUtils*" />
-                </jar>
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <!--  Attaches the commons-math3-tools JAR to the Maven lifecycle
-            to ensure they will be signed and deployed as normal -->
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>1.7</version>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>target/commons-math3-tools-${project.version}.jar</file>
-                  <type>jar</type>
-                  <classifier>tools</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-      <!--  MathJax -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
+        <groupId>org.apache.rat</groupId>
+        <artifactId>apache-rat-plugin</artifactId>
+        <version>${commons.rat.version}</version>
         <configuration>
-          <additionalparam>-header &apos;&lt;script type=&quot;text/javascript&quot; src=&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;&gt;&lt;/script&gt;&apos;</additionalparam>
+          <excludes>
+
+            <!-- MANIFEST files cannot have any comments, so we can't put license header -->
+            <exclude>src/test/maxima/special/RealFunctionValidation/MANIFEST.txt</exclude>
+
+            <!-- the following are test data files with specific syntax that cannot include
+                 Apache header (and the contained data is public, it is not owned by Apache) -->
+            <exclude>src/test/resources/org/apache/commons/math3/random/testData.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/random/emptyFile.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/PiDigits.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/NumAcc3.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/Lew.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/NumAcc2.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/NumAcc1.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/Lottery.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/NumAcc4.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/Michelso.txt</exclude>
+            <exclude>src/test/resources/org/apache/commons/math3/stat/data/Mavro.txt</exclude>
+
+            <!-- version 0.8 of apache-rat-plugin does not exclude properly
+                 some default development tools files (see RAT-126) -->
+            <exclude>bin/**</exclude>
+            <exclude>.gitignore</exclude>
+            <exclude>.git/**</exclude>
+
+          </excludes>
         </configuration>
       </plugin>
     </plugins>
@@ -511,43 +443,11 @@
           </reportSet>
         </reportSets>
       </plugin>
-      <plugin>
-        <groupId>org.apache.rat</groupId>
-        <artifactId>apache-rat-plugin</artifactId>
-        <version>${commons.rat.version}</version>
-        <configuration>
-          <excludes>
 
-            <!-- MANIFEST files cannot have any comments, so we can't put license header -->
-            <exclude>src/test/maxima/special/RealFunctionValidation/MANIFEST.txt</exclude>
-
-            <!-- the following are test data files with specific syntax that cannot include
-                 Apache header (and the contained data is public, it is not owned by Apache) -->
-            <exclude>src/test/resources/org/apache/commons/math3/random/testData.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/random/emptyFile.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/PiDigits.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/NumAcc3.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/Lew.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/NumAcc2.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/NumAcc1.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/Lottery.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/NumAcc4.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/Michelso.txt</exclude>
-            <exclude>src/test/resources/org/apache/commons/math3/stat/data/Mavro.txt</exclude>
-
-            <!-- version 0.8 of apache-rat-plugin does not exclude properly
-                 some default development tools files (see RAT-126) -->
-            <exclude>bin/**</exclude>
-            <exclude>.gitignore</exclude>
-            <exclude>.git/**</exclude>
-
-          </excludes>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
-        <version>${math.findbugs.version}</version>
+        <version>2.4.0</version>
         <configuration>
           <threshold>Normal</threshold>
           <effort>Default</effort>
@@ -557,19 +457,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
-        <version>${math.checkstyle.version}</version>
+        <version>2.7</version>
         <configuration>
           <configLocation>${basedir}/checkstyle.xml</configLocation>
           <enableRulesSummary>false</enableRulesSummary>
           <headerLocation>${basedir}/license-header.txt</headerLocation>
         </configuration>
-        <reportSets>
-          <reportSet>
-            <reports>
-              <report>checkstyle</report>
-            </reports>
-          </reportSet>
-        </reportSets>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -583,28 +476,16 @@
         <artifactId>maven-pmd-plugin</artifactId>
         <version>${math.pmd.version}</version>
         <configuration>
-          <targetJdk>${maven.compiler.target}</targetJdk>  
+          <targetJdk>${maven.compile.target}</targetJdk>  
         </configuration>
         <reportSets>
           <reportSet>
             <reports>
               <report>pmd</report>
-              <!-- As of 3.x series, the cpd report sees (correctly) numerous duplications -->
-              <!-- This is due to packages being renamed, and the old name still needs to be -->
-              <!-- available for compatibility. They will be removed in 4.0 -->
-              <!-- So we temporarily disable the CPD report -->
-              <!-- <report>cpd</report> -->
+              <report>cpd</report>
             </reports>
           </reportSet>
         </reportSets>
-      </plugin>
-      <!--  MathJax -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
-        <configuration>
-          <additionalparam>-header &apos;&lt;script type=&quot;text/javascript&quot; src=&quot;http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;&gt;&lt;/script&gt;&apos;</additionalparam>
-        </configuration>
       </plugin>
     </plugins>
   </reporting>

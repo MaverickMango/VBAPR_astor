@@ -156,7 +156,7 @@ public class MultidimensionalCounterTest {
             if (!iter.hasNext()) {
                 Assert.fail("Too short");
             }
-            final int uniDimIndex = iter.next().intValue();
+            final int uniDimIndex = iter.next();
             Assert.assertEquals("Wrong iteration at " + i, i, uniDimIndex);
 
             for (int dimIndex = 0; dimIndex < nDim; dimIndex++) {

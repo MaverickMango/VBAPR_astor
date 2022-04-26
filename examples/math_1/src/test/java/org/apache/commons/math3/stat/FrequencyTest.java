@@ -24,7 +24,6 @@ import java.util.List;
 
 
 import org.apache.commons.math3.TestUtils;
-import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -36,14 +35,13 @@ import org.junit.Test;
  */
 
 public final class FrequencyTest {
-    private static final long ONE_LONG = 1L;
-    private static final long TWO_LONG = 2L;
-    private static final long THREE_LONG = 3L;
-    private static final int ONE = 1;
-    private static final int TWO = 2;
-    private static final int THREEE = 3 ;
-    private static final double TOLERANCE = 10E-15d;
-
+    private long oneL = 1;
+    private long twoL = 2;
+    private long threeL = 3;
+    private int oneI = 1;
+    private int twoI = 2;
+    private int threeI=3;
+    private double tolerance = 10E-15;
     private Frequency f = null;
 
     @Before
@@ -55,10 +53,10 @@ public final class FrequencyTest {
     @Test
     public void testCounts() {
         Assert.assertEquals("total count",0,f.getSumFreq());
-        f.addValue(ONE_LONG);
-        f.addValue(TWO_LONG);
+        f.addValue(oneL);
+        f.addValue(twoL);
         f.addValue(1);
-        f.addValue(ONE);
+        f.addValue(oneI);
         Assert.assertEquals("one frequency count",3,f.getCount(1));
         Assert.assertEquals("two frequency count",1,f.getCount(2));
         Assert.assertEquals("three frequency count",0,f.getCount(3));
@@ -79,9 +77,9 @@ public final class FrequencyTest {
         f.addValue("oNe");
         f.addValue("Z");
         Assert.assertEquals("one cumulative frequency", 1 ,  f.getCount("one"));
-        Assert.assertEquals("Z cumulative pct", 0.5,  f.getCumPct("Z"), TOLERANCE);
-        Assert.assertEquals("z cumulative pct", 1.0,  f.getCumPct("z"), TOLERANCE);
-        Assert.assertEquals("Ot cumulative pct", 0.25,  f.getCumPct("Ot"), TOLERANCE);
+        Assert.assertEquals("Z cumulative pct", 0.5,  f.getCumPct("Z"), tolerance);
+        Assert.assertEquals("z cumulative pct", 1.0,  f.getCumPct("z"), tolerance);
+        Assert.assertEquals("Ot cumulative pct", 0.25,  f.getCumPct("Ot"), tolerance);
         f.clear();
 
         f = null;
@@ -93,10 +91,10 @@ public final class FrequencyTest {
         f.addValue(Integer.valueOf(-1));
         Assert.assertEquals("1 count", 3, f.getCount(1));
         Assert.assertEquals("1 count", 3, f.getCount(Integer.valueOf(1)));
-        Assert.assertEquals("0 cum pct", 0.2, f.getCumPct(0), TOLERANCE);
-        Assert.assertEquals("1 pct", 0.6, f.getPct(Integer.valueOf(1)), TOLERANCE);
-        Assert.assertEquals("-2 cum pct", 0, f.getCumPct(-2), TOLERANCE);
-        Assert.assertEquals("10 cum pct", 1, f.getCumPct(10), TOLERANCE);
+        Assert.assertEquals("0 cum pct", 0.2, f.getCumPct(0), tolerance);
+        Assert.assertEquals("1 pct", 0.6, f.getPct(Integer.valueOf(1)), tolerance);
+        Assert.assertEquals("-2 cum pct", 0, f.getCumPct(-2), tolerance);
+        Assert.assertEquals("10 cum pct", 1, f.getCumPct(10), tolerance);
 
         f = null;
         f = new Frequency(String.CASE_INSENSITIVE_ORDER);
@@ -105,8 +103,8 @@ public final class FrequencyTest {
         f.addValue("oNe");
         f.addValue("Z");
         Assert.assertEquals("one count", 3 ,  f.getCount("one"));
-        Assert.assertEquals("Z cumulative pct -- case insensitive", 1 ,  f.getCumPct("Z"), TOLERANCE);
-        Assert.assertEquals("z cumulative pct -- case insensitive", 1 ,  f.getCumPct("z"), TOLERANCE);
+        Assert.assertEquals("Z cumulative pct -- case insensitive", 1 ,  f.getCumPct("Z"), tolerance);
+        Assert.assertEquals("z cumulative pct -- case insensitive", 1 ,  f.getCumPct("z"), tolerance);
 
         f = null;
         f = new Frequency();
@@ -128,26 +126,26 @@ public final class FrequencyTest {
     /** test pcts */
     @Test
     public void testPcts() {
-        f.addValue(ONE_LONG);
-        f.addValue(TWO_LONG);
-        f.addValue(ONE);
-        f.addValue(TWO);
-        f.addValue(THREE_LONG);
-        f.addValue(THREE_LONG);
+        f.addValue(oneL);
+        f.addValue(twoL);
+        f.addValue(oneI);
+        f.addValue(twoI);
+        f.addValue(threeL);
+        f.addValue(threeL);
         f.addValue(3);
-        f.addValue(THREEE);
-        Assert.assertEquals("one pct",0.25,f.getPct(1),TOLERANCE);
-        Assert.assertEquals("two pct",0.25,f.getPct(Long.valueOf(2)),TOLERANCE);
-        Assert.assertEquals("three pct",0.5,f.getPct(THREE_LONG),TOLERANCE);
-        Assert.assertEquals("five pct",0,f.getPct(5),TOLERANCE);
-        Assert.assertEquals("foo pct",0,f.getPct("foo"),TOLERANCE);
-        Assert.assertEquals("one cum pct",0.25,f.getCumPct(1),TOLERANCE);
-        Assert.assertEquals("two cum pct",0.50,f.getCumPct(Long.valueOf(2)),TOLERANCE);
-        Assert.assertEquals("Integer argument",0.50,f.getCumPct(Integer.valueOf(2)),TOLERANCE);
-        Assert.assertEquals("three cum pct",1.0,f.getCumPct(THREE_LONG),TOLERANCE);
-        Assert.assertEquals("five cum pct",1.0,f.getCumPct(5),TOLERANCE);
-        Assert.assertEquals("zero cum pct",0.0,f.getCumPct(0),TOLERANCE);
-        Assert.assertEquals("foo cum pct",0,f.getCumPct("foo"),TOLERANCE);
+        f.addValue(threeI);
+        Assert.assertEquals("one pct",0.25,f.getPct(1),tolerance);
+        Assert.assertEquals("two pct",0.25,f.getPct(Long.valueOf(2)),tolerance);
+        Assert.assertEquals("three pct",0.5,f.getPct(threeL),tolerance);
+        Assert.assertEquals("five pct",0,f.getPct(5),tolerance);
+        Assert.assertEquals("foo pct",0,f.getPct("foo"),tolerance);
+        Assert.assertEquals("one cum pct",0.25,f.getCumPct(1),tolerance);
+        Assert.assertEquals("two cum pct",0.50,f.getCumPct(Long.valueOf(2)),tolerance);
+        Assert.assertEquals("Integer argument",0.50,f.getCumPct(Integer.valueOf(2)),tolerance);
+        Assert.assertEquals("three cum pct",1.0,f.getCumPct(threeL),tolerance);
+        Assert.assertEquals("five cum pct",1.0,f.getCumPct(5),tolerance);
+        Assert.assertEquals("zero cum pct",0.0,f.getCumPct(0),tolerance);
+        Assert.assertEquals("foo cum pct",0,f.getCumPct("foo"),tolerance);
     }
 
     /** test adding incomparable values */
@@ -170,10 +168,10 @@ public final class FrequencyTest {
         } catch (IllegalArgumentException ex) {
             // expected
         }
-        Assert.assertEquals("a pct",0.5,f.getPct(aChar),TOLERANCE);
-        Assert.assertEquals("b cum pct",1.0,f.getCumPct(bChar),TOLERANCE);
-        Assert.assertEquals("a string pct",0.0,f.getPct(aString),TOLERANCE);
-        Assert.assertEquals("a string cum pct",0.0,f.getCumPct(aString),TOLERANCE);
+        Assert.assertEquals("a pct",0.5,f.getPct(aChar),tolerance);
+        Assert.assertEquals("b cum pct",1.0,f.getCumPct(bChar),tolerance);
+        Assert.assertEquals("a string pct",0.0,f.getPct(aString),tolerance);
+        Assert.assertEquals("a string cum pct",0.0,f.getCumPct(aString),tolerance);
 
         f = new Frequency();
         f.addValue("One");
@@ -199,29 +197,15 @@ public final class FrequencyTest {
         Assert.assertTrue("cum pct, empty table", Double.isNaN(f.getCumPct(Integer.valueOf(0))));
     }
 
-    @Test
-    public void testNonComparableCumPct() {
-        f.addValue("a");
-        Assert.assertEquals("cum freq, single entry", 1.0d, f.getCumPct("a"),TOLERANCE);
-        Assert.assertEquals("cum freq, single entry non comparable", 0.0d, f.getCumPct(100),TOLERANCE);
-    }
-
-    @Test
-    public void testNonComparablePct() {
-        f.addValue("a");
-        Assert.assertEquals("cum freq, single entry", 1.0d, f.getPct("a"),TOLERANCE);
-        Assert.assertEquals("cum freq, single entry non comparable", 0.0d, f.getPct(100),TOLERANCE);
-    }
-
     /**
      * Tests toString()
      */
     @Test
     public void testToString() throws Exception {
-        f.addValue(ONE_LONG);
-        f.addValue(TWO_LONG);
-        f.addValue(ONE);
-        f.addValue(TWO);
+        f.addValue(oneL);
+        f.addValue(twoL);
+        f.addValue(oneI);
+        f.addValue(twoI);
 
         String s = f.toString();
         //System.out.println(s);
@@ -252,9 +236,9 @@ public final class FrequencyTest {
         Assert.assertEquals("Integer 1 count", 2, f.getCount(1));
         Assert.assertEquals("Integer 1 count", 2, f.getCount(Integer.valueOf(1)));
         Assert.assertEquals("Integer 1 count", 2, f.getCount(Long.valueOf(1)));
-        Assert.assertEquals("Integer 1 cumPct", 0.5, f.getCumPct(1), TOLERANCE);
-        Assert.assertEquals("Integer 1 cumPct", 0.5, f.getCumPct(Long.valueOf(1)), TOLERANCE);
-        Assert.assertEquals("Integer 1 cumPct", 0.5, f.getCumPct(Integer.valueOf(1)), TOLERANCE);
+        Assert.assertEquals("Integer 1 cumPct", 0.5, f.getCumPct(1), tolerance);
+        Assert.assertEquals("Integer 1 cumPct", 0.5, f.getCumPct(Long.valueOf(1)), tolerance);
+        Assert.assertEquals("Integer 1 cumPct", 0.5, f.getCumPct(Integer.valueOf(1)), tolerance);
         Iterator<?> it = f.valuesIterator();
         while (it.hasNext()) {
             Assert.assertTrue(it.next() instanceof Long);
@@ -263,80 +247,80 @@ public final class FrequencyTest {
 
     @Test
     public void testSerial() {
-        f.addValue(ONE_LONG);
-        f.addValue(TWO_LONG);
-        f.addValue(ONE);
-        f.addValue(TWO);
+        f.addValue(oneL);
+        f.addValue(twoL);
+        f.addValue(oneI);
+        f.addValue(twoI);
         Assert.assertEquals(f, TestUtils.serializeAndRecover(f));
     }
     
     @Test
     public void testGetUniqueCount() {
         Assert.assertEquals(0, f.getUniqueCount());
-        f.addValue(ONE_LONG);
+        f.addValue(oneL);
         Assert.assertEquals(1, f.getUniqueCount());
-        f.addValue(ONE_LONG);
+        f.addValue(oneL);
         Assert.assertEquals(1, f.getUniqueCount());
-        f.addValue(TWO);
+        f.addValue(twoI);
         Assert.assertEquals(2, f.getUniqueCount());
     }
     
     @Test
     public void testIncrement() {
         Assert.assertEquals(0, f.getUniqueCount());
-        f.incrementValue(ONE_LONG, 1);
-        Assert.assertEquals(1, f.getCount(ONE_LONG));
+        f.incrementValue(oneL, 1);
+        Assert.assertEquals(1, f.getCount(oneL));
 
-        f.incrementValue(ONE_LONG, 4);
-        Assert.assertEquals(5, f.getCount(ONE_LONG));
+        f.incrementValue(oneL, 4);
+        Assert.assertEquals(5, f.getCount(oneL));
         
-        f.incrementValue(ONE_LONG, -5);
-        Assert.assertEquals(0, f.getCount(ONE_LONG));
+        f.incrementValue(oneL, -5);
+        Assert.assertEquals(0, f.getCount(oneL));
     }
     
     @Test
     public void testMerge() {
         Assert.assertEquals(0, f.getUniqueCount());
-        f.addValue(ONE_LONG);
-        f.addValue(TWO_LONG);
-        f.addValue(ONE);
-        f.addValue(TWO);
+        f.addValue(oneL);
+        f.addValue(twoL);
+        f.addValue(oneI);
+        f.addValue(twoI);
         
         Assert.assertEquals(2, f.getUniqueCount());
-        Assert.assertEquals(2, f.getCount(ONE));
-        Assert.assertEquals(2, f.getCount(TWO));
+        Assert.assertEquals(2, f.getCount(oneI));
+        Assert.assertEquals(2, f.getCount(twoI));
 
         Frequency g = new Frequency();
-        g.addValue(ONE_LONG);
-        g.addValue(THREE_LONG);
-        g.addValue(THREEE);
+        g.addValue(oneL);
+        g.addValue(threeL);
+        g.addValue(threeI);
 
         Assert.assertEquals(2, g.getUniqueCount());
-        Assert.assertEquals(1, g.getCount(ONE));
-        Assert.assertEquals(2, g.getCount(THREEE));
+        Assert.assertEquals(1, g.getCount(oneI));
+        Assert.assertEquals(2, g.getCount(threeI));
 
         f.merge(g);
         
         Assert.assertEquals(3, f.getUniqueCount());
-        Assert.assertEquals(3, f.getCount(ONE));
-        Assert.assertEquals(2, f.getCount(TWO));
-        Assert.assertEquals(2, f.getCount(THREEE));        
+        Assert.assertEquals(3, f.getCount(oneI));
+        Assert.assertEquals(2, f.getCount(twoI));
+        Assert.assertEquals(2, f.getCount(threeI));        
     }
     
     @Test
     public void testMergeCollection() {
         Assert.assertEquals(0, f.getUniqueCount());
-        f.addValue(ONE_LONG);
+        f.addValue(oneL);
         
         Assert.assertEquals(1, f.getUniqueCount());
-        Assert.assertEquals(1, f.getCount(ONE));
-        Assert.assertEquals(0, f.getCount(TWO));
+        Assert.assertEquals(1, f.getCount(oneI));
+        Assert.assertEquals(0, f.getCount(twoI));
 
         Frequency g = new Frequency();
-        g.addValue(TWO_LONG);
+        g.addValue(twoL);
 
         Frequency h = new Frequency();
-        h.addValue(THREE_LONG);
+        h.addValue(threeL);
         
         List<Frequency> coll = new ArrayList<Frequency>();
         coll.add(g);
@@ -344,91 +328,9 @@ public final class FrequencyTest {
         f.merge(coll);
         
         Assert.assertEquals(3, f.getUniqueCount());
-        Assert.assertEquals(1, f.getCount(ONE));
-        Assert.assertEquals(1, f.getCount(TWO));
-        Assert.assertEquals(1, f.getCount(THREEE));        
+        Assert.assertEquals(1, f.getCount(oneI));
+        Assert.assertEquals(1, f.getCount(twoI));
+        Assert.assertEquals(1, f.getCount(threeI));        
     }
-    
-    @Test
-    public void testMode() {
-        List<Comparable<?>> mode;
-        mode = f.getMode();
-        Assert.assertEquals(0, mode.size());
-
-        f.addValue("3");
-        mode = f.getMode();
-        Assert.assertEquals(1, mode.size());
-        Assert.assertEquals("3", mode.get(0));
-
-        f.addValue("2");
-        mode = f.getMode();
-        Assert.assertEquals(2, mode.size());
-        Assert.assertEquals("2", mode.get(0));
-        Assert.assertEquals("3",mode.get(1));
-
-        f.addValue("2");
-        mode = f.getMode();
-        Assert.assertEquals(1, mode.size());
-        Assert.assertEquals("2", mode.get(0));
-        Assert.assertFalse(mode.contains("1"));
-        Assert.assertTrue(mode.contains("2"));
-
-        try {
-            f.addValue(Double.valueOf(Double.NaN));
-            Assert.fail("Expected MathIllegalArgumentException");
-        } catch (MathIllegalArgumentException e) {
-            // expected
-        }
-    }
-
-    @Test
-    public void testModeDoubleNan() {
-        List<Comparable<?>> mode;
-        f.addValue(Double.valueOf(Double.NaN));
-        f.addValue(Double.valueOf(Double.NaN));
-        f.addValue(Double.valueOf(Double.NaN));
-        f.addValue(Double.valueOf(Double.NEGATIVE_INFINITY));
-        f.addValue(Double.valueOf(Double.POSITIVE_INFINITY));
-        f.addValue(Double.valueOf(Double.NEGATIVE_INFINITY));
-        f.addValue(Double.valueOf(Double.POSITIVE_INFINITY));
-        f.addValue(Double.valueOf(Double.NEGATIVE_INFINITY));
-        f.addValue(Double.valueOf(Double.POSITIVE_INFINITY));
-        mode = f.getMode();
-        Assert.assertEquals(3, mode.size());
-        Assert.assertEquals(Double.valueOf(Double.NEGATIVE_INFINITY), mode.get(0));
-        Assert.assertEquals(Double.valueOf(Double.POSITIVE_INFINITY), mode.get(1));
-        Assert.assertEquals(Double.valueOf(Double.NaN), mode.get(2));
-        try {
-            f.addValue(Float.valueOf(Float.NaN));
-            Assert.fail("Expected MathIllegalArgumentException");
-        } catch (MathIllegalArgumentException e) {
-            // expected
-        }
-    }
-
-    @Test
-    public void testModeFloatNan() {
-        List<Comparable<?>> mode;
-        f.addValue(Float.valueOf(Float.NaN));
-        f.addValue(Float.valueOf(Float.NaN));
-        f.addValue(Float.valueOf(Float.NaN));
-        f.addValue(Float.valueOf(Float.NEGATIVE_INFINITY));
-        f.addValue(Float.valueOf(Float.POSITIVE_INFINITY));
-        f.addValue(Float.valueOf(Float.NEGATIVE_INFINITY));
-        f.addValue(Float.valueOf(Float.POSITIVE_INFINITY));
-        f.addValue(Float.valueOf(Float.NEGATIVE_INFINITY));
-        f.addValue(Float.valueOf(Float.POSITIVE_INFINITY));
-        mode = f.getMode();
-        Assert.assertEquals(3, mode.size());
-        Assert.assertEquals(Float.valueOf(Float.NEGATIVE_INFINITY), mode.get(0));
-        Assert.assertEquals(Float.valueOf(Float.POSITIVE_INFINITY), mode.get(1));
-        Assert.assertEquals(Float.valueOf(Float.NaN), mode.get(2));
-        try {
-            f.addValue(Double.valueOf(Double.NaN));
-            Assert.fail("Expected MathIllegalArgumentException");
-        } catch (MathIllegalArgumentException e) {
-            // expected
-        }
-    }
-
 }
+

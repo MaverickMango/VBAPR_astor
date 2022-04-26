@@ -17,6 +17,7 @@
  */
 package org.apache.commons.math3.optim.nonlinear.scalar.noderiv;
 
+import java.util.Arrays;
 import org.apache.commons.math3.exception.MathIllegalStateException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.OutOfRangeException;
@@ -1387,10 +1388,12 @@ public class BOBYQAOptimizer
                     vlag = tmp;
                     isbd = iubd;
                 }
-                if (subd > HALF && Math.abs(vlag) < ONE_OVER_FOUR) {
-                    step = HALF;
-                    vlag = ONE_OVER_FOUR;
-                    isbd = 0;
+                if (subd > HALF) {
+                    if (Math.abs(vlag) < ONE_OVER_FOUR) {
+                        step = HALF;
+                        vlag = ONE_OVER_FOUR;
+                        isbd = 0;
+                    }
                 }
                 vlag *= dderiv;
             }
@@ -1710,14 +1713,16 @@ public class BOBYQAOptimizer
                     final double diff = stepb - stepa;
                     modelSecondDerivativesValues.setEntry(ih, TWO * (tmp - gradientAtTrustRegionCenter.getEntry(nfxm)) / diff);
                     gradientAtTrustRegionCenter.setEntry(nfxm, (gradientAtTrustRegionCenter.getEntry(nfxm) * stepb - tmp * stepa) / diff);
-                    if (stepa * stepb < ZERO && f < fAtInterpolationPoints.getEntry(nfm - n)) {
-                        fAtInterpolationPoints.setEntry(nfm, fAtInterpolationPoints.getEntry(nfm - n));
-                        fAtInterpolationPoints.setEntry(nfm - n, f);
-                        if (trustRegionCenterInterpolationPointIndex == nfm) {
-                            trustRegionCenterInterpolationPointIndex = nfm - n;
+                    if (stepa * stepb < ZERO) {
+                        if (f < fAtInterpolationPoints.getEntry(nfm - n)) {
+                            fAtInterpolationPoints.setEntry(nfm, fAtInterpolationPoints.getEntry(nfm - n));
+                            fAtInterpolationPoints.setEntry(nfm - n, f);
+                            if (trustRegionCenterInterpolationPointIndex == nfm) {
+                                trustRegionCenterInterpolationPointIndex = nfm - n;
+                            }
+                            interpolationPoints.setEntry(nfm - n, nfxm, stepb);
+                            interpolationPoints.setEntry(nfm, nfxm, stepa);
                         }
-                        interpolationPoints.setEntry(nfm - n, nfxm, stepb);
-                        interpolationPoints.setEntry(nfm, nfxm, stepa);
                     }
                     bMatrix.setEntry(0, nfxm, -(stepa + stepb) / (stepa * stepb));
                     bMatrix.setEntry(nfm, nfxm, -HALF / interpolationPoints.getEntry(nfm - n, nfxm));
@@ -1845,9 +1850,10 @@ public class BOBYQAOptimizer
                 if (gradientAtTrustRegionCenter.getEntry(i) >= ZERO) {
                     xbdi.setEntry(i, MINUS_ONE);
                 }
-            } else if (trustRegionCenterOffset.getEntry(i) >= upperDifference.getEntry(i) &&
-                    gradientAtTrustRegionCenter.getEntry(i) <= ZERO) {
-                xbdi.setEntry(i, ONE);
+            } else if (trustRegionCenterOffset.getEntry(i) >= upperDifference.getEntry(i)) {
+                if (gradientAtTrustRegionCenter.getEntry(i) <= ZERO) {
+                    xbdi.setEntry(i, ONE);
+                }
             }
             if (xbdi.getEntry(i) != ZERO) {
                 ++nact;
@@ -2424,6 +2430,21 @@ public class BOBYQAOptimizer
         trialStepPoint = new ArrayRealVector(dimension);
         lagrangeValuesAtNewPoint = new ArrayRealVector(dimension + numberOfInterpolationPoints);
         modelSecondDerivativesValues = new ArrayRealVector(dimension * (dimension + 1) / 2);
+    }
+
+    /**
+     * Creates a new array.
+     *
+     * @param n Dimension of the returned array.
+     * @param value Value for each element.
+     * @return an array containing {@code n} elements set to the given
+     * {@code value}.
+     */
+    private static double[] fillNewArray(int n,
+                                         double value) {
+        double[] ds = new double[n];
+        Arrays.fill(ds, value);
+        return ds;
     }
 
     // XXX utility for figuring out call sequence.

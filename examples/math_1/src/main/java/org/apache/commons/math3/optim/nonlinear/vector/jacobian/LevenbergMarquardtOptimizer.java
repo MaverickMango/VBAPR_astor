@@ -109,16 +109,9 @@ import org.apache.commons.math3.util.FastMath;
  *
  * @version $Id$
  * @since 2.0
- * @deprecated All classes and interfaces in this package are deprecated.
- * The optimizers that were provided here were moved to the
- * {@link org.apache.commons.math3.fitting.leastsquares} package
- * (cf. MATH-1008).
  */
-@Deprecated
 public class LevenbergMarquardtOptimizer
     extends AbstractLeastSquaresOptimizer {
-    /** Twice the "epsilon machine". */
-    private static final double TWO_EPS = 2 * Precision.EPSILON;
     /** Number of solved point. */
     private int solvedCols;
     /** Diagonal elements of the R matrix in the Q.R. decomposition. */
@@ -326,10 +319,10 @@ public class LevenbergMarquardtOptimizer
         // Outer loop.
         lmPar = 0;
         boolean firstIteration = true;
+        int iter = 0;
         final ConvergenceChecker<PointVectorValuePair> checker = getConvergenceChecker();
         while (true) {
-            incrementIterationCount();
-
+            ++iter;
             final PointVectorValuePair previous = current;
 
             // QR decomposition of the jacobian matrix
@@ -491,9 +484,12 @@ public class LevenbergMarquardtOptimizer
                     xNorm = FastMath.sqrt(xNorm);
 
                     // tests for convergence.
-                    if (checker != null && checker.converged(getIterations(), previous, current)) {
-                        setCost(currentCost);
-                        return current;
+                    if (checker != null) {
+                        // we use the vectorial convergence checker
+                        if (checker.converged(iter, previous, current)) {
+                            setCost(currentCost);
+                            return current;
+                        }
                     }
                 } else {
                     // failed iteration, reset the previous values
@@ -522,15 +518,14 @@ public class LevenbergMarquardtOptimizer
                 }
 
                 // tests for termination and stringent tolerances
-                if (FastMath.abs(actRed) <= TWO_EPS &&
-                    preRed <= TWO_EPS &&
-                    ratio <= 2.0) {
+                // (2.2204e-16 is the machine epsilon for IEEE754)
+                if ((FastMath.abs(actRed) <= 2.2204e-16) && (preRed <= 2.2204e-16) && (ratio <= 2.0)) {
                     throw new ConvergenceException(LocalizedFormats.TOO_SMALL_COST_RELATIVE_TOLERANCE,
                                                    costRelativeTolerance);
-                } else if (delta <= TWO_EPS * xNorm) {
+                } else if (delta <= 2.2204e-16 * xNorm) {
                     throw new ConvergenceException(LocalizedFormats.TOO_SMALL_PARAMETERS_RELATIVE_TOLERANCE,
                                                    parRelativeTolerance);
-                } else if (maxCosine <= TWO_EPS) {
+                } else if (maxCosine <= 2.2204e-16)  {
                     throw new ConvergenceException(LocalizedFormats.TOO_SMALL_ORTHOGONALITY_TOLERANCE,
                                                    orthoTolerance);
                 }
@@ -635,7 +630,8 @@ public class LevenbergMarquardtOptimizer
         double gNorm = FastMath.sqrt(sum2);
         double paru = gNorm / delta;
         if (paru == 0) {
-            paru = Precision.SAFE_MIN / FastMath.min(delta, 0.1);
+            // 2.2251e-308 is the smallest positive real for IEE754
+            paru = 2.2251e-308 / FastMath.min(delta, 0.1);
         }
 
         // if the input par lies outside of the interval (parl,paru),
@@ -649,7 +645,7 @@ public class LevenbergMarquardtOptimizer
 
             // evaluate the function at the current value of lmPar
             if (lmPar == 0) {
-                lmPar = FastMath.max(Precision.SAFE_MIN, 0.001 * paru);
+                lmPar = FastMath.max(2.2251e-308, 0.001 * paru);
             }
             double sPar = FastMath.sqrt(lmPar);
             for (int j = 0; j < solvedCols; ++j) {

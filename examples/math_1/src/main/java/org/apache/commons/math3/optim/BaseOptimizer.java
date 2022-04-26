@@ -39,27 +39,16 @@ public abstract class BaseOptimizer<PAIR> {
     /** Iterations counter. */
     protected final Incrementor iterations;
     /** Convergence checker. */
-    private final ConvergenceChecker<PAIR> checker;
+    private ConvergenceChecker<PAIR> checker;
 
     /**
      * @param checker Convergence checker.
      */
     protected BaseOptimizer(ConvergenceChecker<PAIR> checker) {
-        this(checker, 0, Integer.MAX_VALUE);
-    }
-
-    /**
-     * @param checker Convergence checker.
-     * @param maxEval Maximum number of objective function evaluations.
-     * @param maxIter Maximum number of algorithm iterations.
-     */
-    protected BaseOptimizer(ConvergenceChecker<PAIR> checker,
-                            int maxEval,
-                            int maxIter) {
         this.checker = checker;
 
-        evaluations = new Incrementor(maxEval, new MaxEvalCallback());
-        iterations = new Incrementor(maxIter, new MaxIterCallback());
+        evaluations = new Incrementor(0, new MaxEvalCallback());
+        iterations = new Incrementor(0, new MaxIterCallback());
     }
 
     /**
@@ -155,25 +144,6 @@ public abstract class BaseOptimizer<PAIR> {
     }
 
     /**
-     * Performs the optimization.
-     *
-     * @return a point/value pair that satifies the convergence criteria.
-     * @throws TooManyEvaluationsException if the maximal number of
-     * evaluations is exceeded.
-     * @throws TooManyIterationsException if the maximal number of
-     * iterations is exceeded.
-     */
-    public PAIR optimize()
-        throws TooManyEvaluationsException,
-               TooManyIterationsException {
-        // Reset counters.
-        evaluations.resetCount();
-        iterations.resetCount();
-        // Perform optimization.
-        return doOptimize();
-    }
-
-    /**
      * Performs the bulk of the optimization algorithm.
      *
      * @return the point/value pair giving the optimal value of the
@@ -237,7 +207,7 @@ public abstract class BaseOptimizer<PAIR> {
         implements  Incrementor.MaxCountExceededCallback {
         /**
          * {@inheritDoc}
-         * @throws TooManyEvaluationsException
+         * @throws TooManyEvaluationsException.
          */
         public void trigger(int max) {
             throw new TooManyEvaluationsException(max);
@@ -252,7 +222,7 @@ public abstract class BaseOptimizer<PAIR> {
         implements Incrementor.MaxCountExceededCallback {
         /**
          * {@inheritDoc}
-         * @throws TooManyIterationsException
+         * @throws TooManyIterationsException.
          */
         public void trigger(int max) {
             throw new TooManyIterationsException(max);

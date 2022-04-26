@@ -20,7 +20,6 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.util.FastMath;
 import org.apache.commons.math3.util.MathArrays;
 import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 
@@ -66,11 +65,10 @@ public class PolynomialFunctionLagrangeForm implements UnivariateFunction {
      * @param y function values at interpolating points
      * @throws DimensionMismatchException if the array lengths are different.
      * @throws NumberIsTooSmallException if the number of points is less than 2.
-     * @throws NonMonotonicSequenceException
+     * @throws org.apache.commons.math3.exception.NonMonotonicSequenceException
      * if two abscissae have the same value.
      */
-    public PolynomialFunctionLagrangeForm(double x[], double y[])
-        throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException {
+    public PolynomialFunctionLagrangeForm(double x[], double y[]) {
         this.x = new double[x.length];
         this.y = new double[y.length];
         System.arraycopy(x, 0, this.x, 0, x.length);
@@ -165,13 +163,12 @@ public class PolynomialFunctionLagrangeForm implements UnivariateFunction {
      * @return the function value.
      * @throws DimensionMismatchException if {@code x} and {@code y} have
      * different lengths.
-     * @throws NonMonotonicSequenceException
+     * @throws org.apache.commons.math3.exception.NonMonotonicSequenceException
      * if {@code x} is not sorted in strictly increasing order.
      * @throws NumberIsTooSmallException if the size of {@code x} is less
      * than 2.
      */
-    public static double evaluate(double x[], double y[], double z)
-        throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException {
+    public static double evaluate(double x[], double y[], double z) {
         if (verifyInterpolationArray(x, y, false)) {
             return evaluateInternal(x, y, z);
         }
@@ -313,8 +310,7 @@ public class PolynomialFunctionLagrangeForm implements UnivariateFunction {
      * @see #evaluate(double[], double[], double)
      * @see #computeCoefficients()
      */
-    public static boolean verifyInterpolationArray(double x[], double y[], boolean abort)
-        throws DimensionMismatchException, NumberIsTooSmallException, NonMonotonicSequenceException {
+    public static boolean verifyInterpolationArray(double x[], double y[], boolean abort) {
         if (x.length != y.length) {
             throw new DimensionMismatchException(x.length, y.length);
         }

@@ -81,7 +81,7 @@ public class SubLine {
     public List<Segment> getSegments() {
 
         final List<Interval> list = remainingRegion.asList();
-        final List<Segment> segments = new ArrayList<Segment>(list.size());
+        final List<Segment> segments = new ArrayList<Segment>();
 
         for (final Interval interval : list) {
             final Vector3D start = line.toSpace(new Vector1D(interval.getInf()));
@@ -111,9 +111,6 @@ public class SubLine {
 
         // compute the intersection on infinite line
         Vector3D v1D = line.intersection(subLine.line);
-        if (v1D == null) {
-            return null;
-        }
 
         // check location of point with respect to first sub-line
         Location loc1 = remainingRegion.checkPoint(line.toSubSpace(v1D));

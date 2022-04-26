@@ -97,7 +97,7 @@ public class GZoltarFaultLocalizationWithGT implements FaultLocalizationStrategy
 			BufferedOutputStream buff =null;
 			try {
 				String content = ReadGT.proj + "_" + ReadGT.version + "\n";
-				buff = new BufferedOutputStream(new FileOutputStream(ReadGT.errorOutput, true));
+				buff = new BufferedOutputStream(new FileOutputStream(ReadGT.supsLineError, true));
 				buff.write(content.getBytes(StandardCharsets.UTF_8));
 				buff.flush();
 				buff.close();

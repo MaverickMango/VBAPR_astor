@@ -385,8 +385,6 @@ public class CMAESOptimizer
 
         generationLoop:
         for (iterations = 1; iterations <= maxIterations; iterations++) {
-            incrementIterationCount();
-
             // Generate and evaluate lambda offspring
             final RealMatrix arz = randn1(dimension, lambda);
             final RealMatrix arx = zeros(dimension, lambda);
@@ -439,15 +437,19 @@ public class CMAESOptimizer
                 lastResult = optimum;
                 optimum = new PointValuePair(fitfun.repair(bestArx.getColumn(0)),
                                              isMinimize ? bestFitness : -bestFitness);
-                if (getConvergenceChecker() != null && lastResult != null &&
-                    getConvergenceChecker().converged(iterations, optimum, lastResult)) {
-                    break generationLoop;
+                if (getConvergenceChecker() != null &&
+                    lastResult != null) {
+                    if (getConvergenceChecker().converged(iterations, optimum, lastResult)) {
+                        break generationLoop;
+                    }
                 }
             }
             // handle termination criteria
             // Break, if fitness is good enough
-            if (stopFitness != 0 && bestFitness < (isMinimize ? stopFitness : -stopFitness)) {
-                break generationLoop;
+            if (stopFitness != 0) { // only if stopFitness is defined
+                if (bestFitness < (isMinimize ? stopFitness : -stopFitness)) {
+                    break generationLoop;
+                }
             }
             final double[] sqrtDiagC = sqrt(diagC).getColumn(0);
             final double[] pcCol = pc.getColumn(0);

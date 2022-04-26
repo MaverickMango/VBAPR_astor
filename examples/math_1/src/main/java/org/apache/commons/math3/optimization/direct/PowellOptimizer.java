@@ -211,8 +211,10 @@ public class PowellOptimizer
 
             final PointValuePair previous = new PointValuePair(x1, fX);
             final PointValuePair current = new PointValuePair(x, fVal);
-            if (!stop && checker != null) {
-                stop = checker.converged(iter, previous, current);
+            if (!stop) { // User-defined stopping criteria.
+                if (checker != null) {
+                    stop = checker.converged(iter, previous, current);
+                }
             }
             if (stop) {
                 if (goal == GoalType.MINIMIZE) {

@@ -359,7 +359,6 @@ public class ResizableDoubleArray implements DoubleArray, Serializable {
      * {@link #ResizableDoubleArray(int,double,double,ExpansionMode,double[])}
      * instead.
      */
-    @Deprecated
     public ResizableDoubleArray(int initialCapacity, float expansionFactor,
             float contractionCriteria, int expansionMode) throws MathIllegalArgumentException {
         this(initialCapacity,
@@ -532,7 +531,6 @@ public class ResizableDoubleArray implements DoubleArray, Serializable {
      * @deprecated As of 3.1. Please use
      * {@link #checkContractExpand(double,double)} instead.
      */
-    @Deprecated
     protected void checkContractExpand(float contraction, float expansion)
         throws MathIllegalArgumentException {
         checkContractExpand((double) contraction,
@@ -807,7 +805,6 @@ public class ResizableDoubleArray implements DoubleArray, Serializable {
      * @deprecated As of 3.1. Return value to be changed to
      * {@link ExpansionMode} in 4.0.
      */
-    @Deprecated
     public int getExpansionMode() {
         switch (expansionMode) {
         case MULTIPLICATIVE:
@@ -937,15 +934,7 @@ public class ResizableDoubleArray implements DoubleArray, Serializable {
      * @since 3.1
      */
     public double compute(MathArrays.Function f) {
-        final double[] array;
-        final int start;
-        final int num;
-        synchronized(this) {
-            array = internalArray;
-            start = startIndex;
-            num   = numElements;
-        }
-        return f.evaluate(array, start, num);
+        return f.evaluate(internalArray, startIndex, numElements);
     }
 
     /**

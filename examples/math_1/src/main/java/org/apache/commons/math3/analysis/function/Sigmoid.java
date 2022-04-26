@@ -80,8 +80,7 @@ public class Sigmoid implements UnivariateDifferentiableFunction, Differentiable
 
     /**
      * Parametric function where the input array contains the parameters of
-     * the {@link Sigmoid#Sigmoid(double,double) sigmoid function}, ordered
-     * as follows:
+     * the logit function, ordered as follows:
      * <ul>
      *  <li>Lower asymptote</li>
      *  <li>Higher asymptote</li>
@@ -165,8 +164,7 @@ public class Sigmoid implements UnivariateDifferentiableFunction, Differentiable
     /** {@inheritDoc}
      * @since 3.1
      */
-    public DerivativeStructure value(final DerivativeStructure t)
-        throws DimensionMismatchException {
+    public DerivativeStructure value(final DerivativeStructure t) {
 
         double[] f = new double[t.getOrder() + 1];
         final double exp = FastMath.exp(-t.getValue());

@@ -57,3 +57,7 @@ x : makelist(bfloat(i / 64), i, 513, 9024);
 sample(x, "gamma-07.dat");
 
 
+
+
+
+

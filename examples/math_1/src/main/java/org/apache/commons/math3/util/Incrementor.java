@@ -62,7 +62,7 @@ public class Incrementor {
         this(max,
              new MaxCountExceededCallback() {
                  /** {@inheritDoc} */
-                 public void trigger(int max) throws MaxCountExceededException {
+                 public void trigger(int max) {
                      throw new MaxCountExceededException(max);
                  }
              });
@@ -76,8 +76,8 @@ public class Incrementor {
      * @param cb Function to be called when the maximal count has been reached.
      * @throws NullArgumentException if {@code cb} is {@code null}
      */
-    public Incrementor(int max, MaxCountExceededCallback cb)
-        throws NullArgumentException {
+    public Incrementor(int max,
+                       MaxCountExceededCallback cb) {
         if (cb == null){
             throw new NullArgumentException();
         }
@@ -132,7 +132,7 @@ public class Incrementor {
      * @param value Number of increments.
      * @throws MaxCountExceededException at counter exhaustion.
      */
-    public void incrementCount(int value) throws MaxCountExceededException {
+    public void incrementCount(int value) {
         for (int i = 0; i < value; i++) {
             incrementCount();
         }
@@ -151,7 +151,7 @@ public class Incrementor {
      * custom {@link MaxCountExceededCallback callback} has been set at
      * construction.
      */
-    public void incrementCount() throws MaxCountExceededException {
+    public void incrementCount() {
         if (++count > maximalCount) {
             maxCountCallback.trigger(maximalCount);
         }
@@ -173,8 +173,7 @@ public class Incrementor {
          * Function called when the maximal count has been reached.
          *
          * @param maximalCount Maximal count.
-         * @throws MaxCountExceededException at counter exhaustion
          */
-        void trigger(int maximalCount) throws MaxCountExceededException;
+        void trigger(int maximalCount);
     }
 }

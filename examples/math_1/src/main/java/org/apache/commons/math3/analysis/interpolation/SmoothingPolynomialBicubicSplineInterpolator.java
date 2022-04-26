@@ -18,9 +18,7 @@ package org.apache.commons.math3.analysis.interpolation;
 
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NoDataException;
-import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.NotPositiveException;
-import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.util.MathArrays;
 import org.apache.commons.math3.util.Precision;
 import org.apache.commons.math3.optim.nonlinear.vector.jacobian.GaussNewtonOptimizer;
@@ -56,10 +54,8 @@ public class SmoothingPolynomialBicubicSplineInterpolator
 
     /**
      * @param degree Degree of the polynomial fitting functions.
-     * @exception NotPositiveException if degree is not positive
      */
-    public SmoothingPolynomialBicubicSplineInterpolator(int degree)
-        throws NotPositiveException {
+    public SmoothingPolynomialBicubicSplineInterpolator(int degree) {
         this(degree, degree);
     }
 
@@ -68,10 +64,9 @@ public class SmoothingPolynomialBicubicSplineInterpolator
      * x-dimension.
      * @param yDegree Degree of the polynomial fitting functions along the
      * y-dimension.
-     * @exception NotPositiveException if degrees are not positive
      */
-    public SmoothingPolynomialBicubicSplineInterpolator(int xDegree, int yDegree)
-        throws NotPositiveException {
+    public SmoothingPolynomialBicubicSplineInterpolator(int xDegree,
+                                                        int yDegree) {
         if (xDegree < 0) {
             throw new NotPositiveException(xDegree);
         }
@@ -96,8 +91,8 @@ public class SmoothingPolynomialBicubicSplineInterpolator
     public BicubicSplineInterpolatingFunction interpolate(final double[] xval,
                                                           final double[] yval,
                                                           final double[][] fval)
-        throws NoDataException, NullArgumentException,
-               DimensionMismatchException, NonMonotonicSequenceException {
+        throws NoDataException,
+               DimensionMismatchException {
         if (xval.length == 0 || yval.length == 0 || fval.length == 0) {
             throw new NoDataException();
         }

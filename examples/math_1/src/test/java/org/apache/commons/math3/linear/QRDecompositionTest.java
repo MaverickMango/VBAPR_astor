@@ -245,7 +245,8 @@ public class QRDecompositionTest {
     public void testNonInvertible() {
         QRDecomposition qr =
             new QRDecomposition(MatrixUtils.createRealMatrix(testData3x3Singular));
-        qr.getSolver().getInverse();
+
+        final RealMatrix inv = qr.getSolver().getInverse();
     }
 
     private RealMatrix createTestMatrix(final Random r, final int rows, final int columns) {

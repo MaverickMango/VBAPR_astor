@@ -17,8 +17,6 @@
 package org.apache.commons.math3.analysis.solvers;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.apache.commons.math3.exception.MathIllegalArgumentException;
-import org.apache.commons.math3.exception.TooManyEvaluationsException;
 
 
 /**
@@ -99,13 +97,12 @@ public interface BaseUnivariateSolver<FUNC extends UnivariateFunction> {
      * @param min Lower bound for the interval.
      * @param max Upper bound for the interval.
      * @return a value where the function is zero.
-     * @throws MathIllegalArgumentException
+     * @throws org.apache.commons.math3.exception.MathIllegalArgumentException
      * if the arguments do not satisfy the requirements specified by the solver.
-     * @throws TooManyEvaluationsException if
+     * @throws org.apache.commons.math3.exception.TooManyEvaluationsException if
      * the allowed number of evaluations is exceeded.
      */
-    double solve(int maxEval, FUNC f, double min, double max)
-        throws MathIllegalArgumentException, TooManyEvaluationsException;
+    double solve(int maxEval, FUNC f, double min, double max);
 
     /**
      * Solve for a zero in the given interval, start at {@code startValue}.
@@ -119,13 +116,12 @@ public interface BaseUnivariateSolver<FUNC extends UnivariateFunction> {
      * @param max Upper bound for the interval.
      * @param startValue Start value to use.
      * @return a value where the function is zero.
-     * @throws MathIllegalArgumentException
+     * @throws org.apache.commons.math3.exception.MathIllegalArgumentException
      * if the arguments do not satisfy the requirements specified by the solver.
-     * @throws TooManyEvaluationsException if
+     * @throws org.apache.commons.math3.exception.TooManyEvaluationsException if
      * the allowed number of evaluations is exceeded.
      */
-    double solve(int maxEval, FUNC f, double min, double max, double startValue)
-        throws MathIllegalArgumentException, TooManyEvaluationsException;
+    double solve(int maxEval, FUNC f, double min, double max, double startValue);
 
     /**
      * Solve for a zero in the vicinity of {@code startValue}.

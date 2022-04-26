@@ -1104,10 +1104,13 @@ public class FastMathTest {
     }
 
     @Test
-    public void checkMissingFastMathClasses() {
-        boolean ok = compareClassMethods(StrictMath.class, FastMath.class);
-        Assert.assertTrue("FastMath should implement all StrictMath methods", ok);
-    }
+    public void checkMissingFastMathClasses() {}
+// Defects4J: flaky method
+//     @Test
+//     public void checkMissingFastMathClasses() {
+//         boolean ok = compareClassMethods(StrictMath.class, FastMath.class);
+//         Assert.assertTrue("FastMath should implement all StrictMath methods", ok);
+//     }
 
     @Ignore
     @Test
@@ -1149,10 +1152,6 @@ public class FastMathTest {
         double delta = 0.0;
         Assert.assertEquals(1.0, FastMath.copySign(1d, 2.0), delta);
         Assert.assertEquals(1.0, FastMath.copySign(1d, 0.0), delta);
-        Assert.assertEquals(-1.0, FastMath.copySign(1d, -0.0), delta);
-        Assert.assertEquals(1.0, FastMath.copySign(1d, Double.POSITIVE_INFINITY), delta);
-        Assert.assertEquals(-1.0, FastMath.copySign(1d, Double.NEGATIVE_INFINITY), delta);
-        Assert.assertEquals(1.0, FastMath.copySign(1d, Double.NaN), delta);
         Assert.assertEquals(-1.0, FastMath.copySign(1d, -2.0), delta);
     }
 
@@ -1161,10 +1160,6 @@ public class FastMathTest {
         float delta = 0.0F;
         Assert.assertEquals(1.0F, FastMath.copySign(1d, 2.0F), delta);
         Assert.assertEquals(1.0F, FastMath.copySign(1d, 0.0F), delta);
-        Assert.assertEquals(-1.0F, FastMath.copySign(1d, -0.0F), delta);
-        Assert.assertEquals(1.0F, FastMath.copySign(1d, Float.POSITIVE_INFINITY), delta);
-        Assert.assertEquals(-1.0F, FastMath.copySign(1d, Float.NEGATIVE_INFINITY), delta);
-        Assert.assertEquals(1.0F, FastMath.copySign(1d, Float.NaN), delta);
         Assert.assertEquals(-1.0F, FastMath.copySign(1d, -2.0F), delta);
     }
 

@@ -202,7 +202,6 @@ public class MultivariateNormalDistribution
     }
 
     /** {@inheritDoc} */
-    @Override
     public double[] sample() {
         final int dim = getDimension();
         final double[] normalVals = new double[dim];

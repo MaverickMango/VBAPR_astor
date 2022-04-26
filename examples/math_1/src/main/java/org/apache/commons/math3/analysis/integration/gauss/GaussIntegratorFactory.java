@@ -18,8 +18,6 @@ package org.apache.commons.math3.analysis.integration.gauss;
 
 import java.math.BigDecimal;
 
-import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.exception.NotStrictlyPositiveException;
 import org.apache.commons.math3.util.Pair;
 
 /**
@@ -34,12 +32,9 @@ public class GaussIntegratorFactory {
     private final BaseRuleFactory<Double> legendre = new LegendreRuleFactory();
     /** Generator of Gauss-Legendre integrators. */
     private final BaseRuleFactory<BigDecimal> legendreHighPrecision = new LegendreHighPrecisionRuleFactory();
-    /** Generator of Gauss-Hermite integrators. */
-    private final BaseRuleFactory<Double> hermite = new HermiteRuleFactory();
 
     /**
-     * Creates a Gauss-Legendre integrator of the given order.
-     * The call to the
+     * Creates an integrator of the given order, and whose call to the
      * {@link GaussIntegrator#integrate(org.apache.commons.math3.analysis.UnivariateFunction)
      * integrate} method will perform an integration on the natural interval
      * {@code [-1 , 1]}.
@@ -52,8 +47,7 @@ public class GaussIntegratorFactory {
     }
 
     /**
-     * Creates a Gauss-Legendre integrator of the given order.
-     * The call to the
+     * Creates an integrator of the given order, and whose call to the
      * {@link GaussIntegrator#integrate(org.apache.commons.math3.analysis.UnivariateFunction)
      * integrate} method will perform an integration on the given interval.
      *
@@ -61,29 +55,24 @@ public class GaussIntegratorFactory {
      * @param lowerBound Lower bound of the integration interval.
      * @param upperBound Upper bound of the integration interval.
      * @return a Gauss-Legendre integrator.
-     * @throws NotStrictlyPositiveException if number of points is not positive
      */
     public GaussIntegrator legendre(int numberOfPoints,
                                     double lowerBound,
-                                    double upperBound)
-        throws NotStrictlyPositiveException {
+                                    double upperBound) {
         return new GaussIntegrator(transform(getRule(legendre, numberOfPoints),
                                              lowerBound, upperBound));
     }
 
     /**
-     * Creates a Gauss-Legendre integrator of the given order.
-     * The call to the
+     * Creates an integrator of the given order, and whose call to the
      * {@link GaussIntegrator#integrate(org.apache.commons.math3.analysis.UnivariateFunction)
      * integrate} method will perform an integration on the natural interval
      * {@code [-1 , 1]}.
      *
      * @param numberOfPoints Order of the integration rule.
      * @return a Gauss-Legendre integrator.
-     * @throws NotStrictlyPositiveException if number of points is not positive
      */
-    public GaussIntegrator legendreHighPrecision(int numberOfPoints)
-        throws NotStrictlyPositiveException {
+    public GaussIntegrator legendreHighPrecision(int numberOfPoints) {
         return new GaussIntegrator(getRule(legendreHighPrecision, numberOfPoints));
     }
 
@@ -96,47 +85,21 @@ public class GaussIntegratorFactory {
      * @param lowerBound Lower bound of the integration interval.
      * @param upperBound Upper bound of the integration interval.
      * @return a Gauss-Legendre integrator.
-     * @throws NotStrictlyPositiveException if number of points is not positive
      */
     public GaussIntegrator legendreHighPrecision(int numberOfPoints,
                                                  double lowerBound,
-                                                 double upperBound)
-        throws NotStrictlyPositiveException {
+                                                 double upperBound) {
         return new GaussIntegrator(transform(getRule(legendreHighPrecision, numberOfPoints),
                                              lowerBound, upperBound));
-    }
-
-    /**
-     * Creates a Gauss-Hermite integrator of the given order.
-     * The call to the
-     * {@link SymmetricGaussIntegrator#integrate(org.apache.commons.math3.analysis.UnivariateFunction)
-     * integrate} method will perform a weighted integration on the interval
-     * {@code [-&inf;, +&inf;]}: the computed value is the improper integral of
-     * <code>
-     *  e<sup>-x<sup>2</sup></sup> f(x)
-     * </code>
-     * where {@code f(x)} is the function passed to the
-     * {@link SymmetricGaussIntegrator#integrate(org.apache.commons.math3.analysis.UnivariateFunction)
-     * integrate} method.
-     *
-     * @param numberOfPoints Order of the integration rule.
-     * @return a Gauss-Hermite integrator.
-     */
-    public SymmetricGaussIntegrator hermite(int numberOfPoints) {
-        return new SymmetricGaussIntegrator(getRule(hermite, numberOfPoints));
     }
 
     /**
      * @param factory Integration rule factory.
      * @param numberOfPoints Order of the integration rule.
      * @return the integration nodes and weights.
-     * @throws NotStrictlyPositiveException if number of points is not positive
-     * @throws DimensionMismatchException if the elements of the rule pair do not
-     * have the same length.
      */
     private static Pair<double[], double[]> getRule(BaseRuleFactory<? extends Number> factory,
-                                                    int numberOfPoints)
-        throws NotStrictlyPositiveException, DimensionMismatchException {
+                                                    int numberOfPoints) {
         return factory.getRule(numberOfPoints);
     }
 

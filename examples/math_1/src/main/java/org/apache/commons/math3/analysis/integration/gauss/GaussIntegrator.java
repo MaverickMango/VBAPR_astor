@@ -45,11 +45,10 @@ public class GaussIntegrator {
      * @param weights Weights of the corresponding integration nodes.
      * @throws NonMonotonicSequenceException if the {@code points} are not
      * sorted in increasing order.
-     * @throws DimensionMismatchException if points and weights don't have the same length
      */
     public GaussIntegrator(double[] points,
                            double[] weights)
-        throws NonMonotonicSequenceException, DimensionMismatchException {
+        throws NonMonotonicSequenceException {
         if (points.length != weights.length) {
             throw new DimensionMismatchException(points.length,
                                                  weights.length);
@@ -106,25 +105,5 @@ public class GaussIntegrator {
      */
     public int getNumberOfPoints() {
         return points.length;
-    }
-
-    /**
-     * Gets the integration point at the given index.
-     * The index must be in the valid range but no check is performed.
-     * @param index index of the integration point
-     * @return the integration point.
-     */
-    public double getPoint(int index) {
-        return points[index];
-    }
-
-    /**
-     * Gets the weight of the integration point at the given index.
-     * The index must be in the valid range but no check is performed.
-     * @param index index of the integration point
-     * @return the weight.
-     */
-    public double getWeight(int index) {
-        return weights[index];
     }
 }

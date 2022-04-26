@@ -32,7 +32,6 @@ public class UniformCrossoverTest {
     private static final List<Integer> p1 = new ArrayList<Integer>(LEN);
     private static final List<Integer> p2 = new ArrayList<Integer>(LEN);
 
-    @SuppressWarnings("boxing")
     @BeforeClass
     public static void setUpBeforeClass() {
         for (int i = 0; i < LEN; i++) {
@@ -84,8 +83,8 @@ public class UniformCrossoverTest {
                 }
             }
 
-            Assert.assertEquals(1.0 - ratio, (double) from1 / LEN, 0.1);
-            Assert.assertEquals(ratio, (double) from2 / LEN, 0.1);
+            Assert.assertEquals(1.0 - ratio, Double.valueOf((double) from1 / LEN), 0.1);
+            Assert.assertEquals(ratio, Double.valueOf((double) from2 / LEN), 0.1);
 
             from1 = 0;
             from2 = 0;
@@ -99,16 +98,14 @@ public class UniformCrossoverTest {
                 }
             }
 
-            Assert.assertEquals(ratio, (double) from1 / LEN, 0.1);
-            Assert.assertEquals(1.0 - ratio, (double) from2 / LEN, 0.1);
+            Assert.assertEquals(ratio, Double.valueOf((double) from1 / LEN), 0.1);
+            Assert.assertEquals(1.0 - ratio, Double.valueOf((double) from2 / LEN), 0.1);
         }
     }
     
     @Test(expected = DimensionMismatchException.class)
     public void testCrossoverDimensionMismatchException(){
-        @SuppressWarnings("boxing")
         final Integer[] p1 = new Integer[] {1,0,1,0,0,1,0,1,1};
-        @SuppressWarnings("boxing")
         final Integer[] p2 = new Integer[] {0,1,1,0,1};
 
         final BinaryChromosome p1c = new DummyBinaryChromosome(p1);
@@ -120,7 +117,6 @@ public class UniformCrossoverTest {
     
     @Test(expected = MathIllegalArgumentException.class)
     public void testCrossoverInvalidFixedLengthChromosomeFirst() {
-        @SuppressWarnings("boxing")
         final Integer[] p1 = new Integer[] {1,0,1,0,0,1,0,1,1};
         final BinaryChromosome p1c = new DummyBinaryChromosome(p1);
         final Chromosome p2c = new Chromosome() {
@@ -136,7 +132,6 @@ public class UniformCrossoverTest {
     
     @Test(expected = MathIllegalArgumentException.class)
     public void testCrossoverInvalidFixedLengthChromosomeSecond() {
-        @SuppressWarnings("boxing")
         final Integer[] p1 = new Integer[] {1,0,1,0,0,1,0,1,1};
         final BinaryChromosome p2c = new DummyBinaryChromosome(p1);
         final Chromosome p1c = new Chromosome() {

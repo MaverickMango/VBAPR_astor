@@ -162,8 +162,7 @@ public class HarmonicOscillator implements UnivariateDifferentiableFunction, Dif
     /** {@inheritDoc}
      * @since 3.1
      */
-    public DerivativeStructure value(final DerivativeStructure t)
-        throws DimensionMismatchException {
+    public DerivativeStructure value(final DerivativeStructure t) {
         final double x = t.getValue();
         double[] f = new double[t.getOrder() + 1];
 

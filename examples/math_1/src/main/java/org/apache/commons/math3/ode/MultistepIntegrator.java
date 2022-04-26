@@ -228,31 +228,10 @@ public abstract class MultistepIntegrator extends AdaptiveStepsizeIntegrator {
 
         // start integration, expecting a InitializationCompletedMarkerException
         try {
-
-            if (starter instanceof AbstractIntegrator) {
-                ((AbstractIntegrator) starter).integrate(getExpandable(), t);
-            } else {
-                starter.integrate(new FirstOrderDifferentialEquations() {
-
-                    /** {@inheritDoc} */
-                    public int getDimension() {
-                        return getExpandable().getTotalDimension();
-                    }
-
-                    /** {@inheritDoc} */
-                    public void computeDerivatives(double t, double[] y, double[] yDot) {
-                        getExpandable().computeDerivatives(t, y, yDot);
-                    }
-
-                }, t0, y0, t, new double[y0.length]);
-            }
-
+            starter.integrate(new CountingDifferentialEquations(y0.length),
+                              t0, y0, t, new double[y0.length]);
         } catch (InitializationCompletedMarkerException icme) { // NOPMD
             // this is the expected nominal interruption of the start integrator
-
-            // count the evaluations used by the starter
-            getEvaluationsCounter().incrementCount(starter.getEvaluations());
-
         }
 
         // remove the specific step handler
@@ -374,33 +353,20 @@ public abstract class MultistepIntegrator extends AdaptiveStepsizeIntegrator {
                 // first step, we need to store also the beginning of the step
                 interpolator.setInterpolatedTime(prev);
                 t[0] = prev;
-                final ExpandableStatefulODE expandable = getExpandable();
-                final EquationsMapper primary = expandable.getPrimaryMapper();
-                primary.insertEquationData(interpolator.getInterpolatedState(), y[count]);
-                primary.insertEquationData(interpolator.getInterpolatedDerivatives(), yDot[count]);
-                int index = 0;
-                for (final EquationsMapper secondary : expandable.getSecondaryMappers()) {
-                    secondary.insertEquationData(interpolator.getInterpolatedSecondaryState(index), y[count]);
-                    secondary.insertEquationData(interpolator.getInterpolatedSecondaryDerivatives(index), yDot[count]);
-                    ++index;
-                }
+                System.arraycopy(interpolator.getInterpolatedState(), 0,
+                                 y[0],    0, y[0].length);
+                System.arraycopy(interpolator.getInterpolatedDerivatives(), 0,
+                                 yDot[0], 0, yDot[0].length);
             }
 
             // store the end of the step
             ++count;
             interpolator.setInterpolatedTime(curr);
             t[count] = curr;
-
-            final ExpandableStatefulODE expandable = getExpandable();
-            final EquationsMapper primary = expandable.getPrimaryMapper();
-            primary.insertEquationData(interpolator.getInterpolatedState(), y[count]);
-            primary.insertEquationData(interpolator.getInterpolatedDerivatives(), yDot[count]);
-            int index = 0;
-            for (final EquationsMapper secondary : expandable.getSecondaryMappers()) {
-                secondary.insertEquationData(interpolator.getInterpolatedSecondaryState(index), y[count]);
-                secondary.insertEquationData(interpolator.getInterpolatedSecondaryDerivatives(index), yDot[count]);
-                ++index;
-            }
+            System.arraycopy(interpolator.getInterpolatedState(), 0,
+                             y[count],    0, y[count].length);
+            System.arraycopy(interpolator.getInterpolatedDerivatives(), 0,
+                             yDot[count], 0, yDot[count].length);
 
             if (count == t.length - 1) {
 
@@ -441,6 +407,32 @@ public abstract class MultistepIntegrator extends AdaptiveStepsizeIntegrator {
         /** Simple constructor. */
         public InitializationCompletedMarkerException() {
             super((Throwable) null);
+        }
+
+    }
+
+    /** Wrapper for differential equations, ensuring start evaluations are counted. */
+    private class CountingDifferentialEquations implements FirstOrderDifferentialEquations {
+
+        /** Dimension of the problem. */
+        private final int dimension;
+
+        /** Simple constructor.
+         * @param dimension dimension of the problem
+         */
+        public CountingDifferentialEquations(final int dimension) {
+            this.dimension = dimension;
+        }
+
+        /** {@inheritDoc} */
+        public void computeDerivatives(double t, double[] y, double[] dot)
+            throws MaxCountExceededException, DimensionMismatchException {
+            MultistepIntegrator.this.computeDerivatives(t, y, dot);
+        }
+
+        /** {@inheritDoc} */
+        public int getDimension() {
+            return dimension;
         }
 
     }

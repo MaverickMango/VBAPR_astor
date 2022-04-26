@@ -63,7 +63,8 @@ public abstract class AbstractDifferentiableUnivariateSolver
      *
      * @param point Point at which the objective function must be evaluated.
      * @return the objective function value at specified point.
-     * @throws TooManyEvaluationsException if the maximal number of evaluations is exceeded.
+     * @throws org.apache.commons.math3.exception.TooManyEvaluationsException
+     * if the maximal number of evaluations is exceeded.
      */
     protected double computeDerivativeObjectiveValue(double point)
         throws TooManyEvaluationsException {

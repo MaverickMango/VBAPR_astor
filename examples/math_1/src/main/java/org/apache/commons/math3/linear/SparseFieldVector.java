@@ -27,7 +27,6 @@ import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
 import org.apache.commons.math3.util.MathArrays;
-import org.apache.commons.math3.util.MathUtils;
 import org.apache.commons.math3.util.OpenIntToFieldHashMap;
 
 /**
@@ -110,10 +109,8 @@ public class SparseFieldVector<T extends FieldElement<T>> implements FieldVector
      *
      * @param field Field to which the elements belong.
      * @param values Set of values to create from.
-     * @exception NullArgumentException if values is null
      */
-    public SparseFieldVector(Field<T> field, T[] values) throws NullArgumentException {
-        MathUtils.checkNotNull(values);
+    public SparseFieldVector(Field<T> field, T[] values) {
         this.field = field;
         virtualSize = values.length;
         entries = new OpenIntToFieldHashMap<T>(field);
@@ -200,11 +197,8 @@ public class SparseFieldVector<T extends FieldElement<T>> implements FieldVector
         }
     }
 
-    /** {@inheritDoc}
-     * @exception NullArgumentException if d is null
-     */
-    public FieldVector<T> append(T d) throws NullArgumentException {
-        MathUtils.checkNotNull(d);
+    /** {@inheritDoc} */
+    public FieldVector<T> append(T d) {
         FieldVector<T> res = new SparseFieldVector<T>(this, 1);
         res.setEntry(virtualSize, d);
         return res;
@@ -415,21 +409,15 @@ public class SparseFieldVector<T extends FieldElement<T>> implements FieldVector
         return v.mapMultiply(dotProduct(v).divide(v.dotProduct(v)));
     }
 
-    /** {@inheritDoc}
-     * @exception NullArgumentException if value is null
-     */
+    /** {@inheritDoc} */
     public void set(T value) {
-        MathUtils.checkNotNull(value);
         for (int i = 0; i < virtualSize; i++) {
             setEntry(i, value);
         }
     }
 
-    /** {@inheritDoc}
-     * @exception NullArgumentException if value is null
-     */
-    public void setEntry(int index, T value) throws NullArgumentException, OutOfRangeException {
-        MathUtils.checkNotNull(value);
+    /** {@inheritDoc} */
+    public void setEntry(int index, T value) throws OutOfRangeException {
         checkIndex(index);
         entries.put(index, value);
     }

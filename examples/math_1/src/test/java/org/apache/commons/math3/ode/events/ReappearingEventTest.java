@@ -16,7 +16,7 @@
  */
 package org.apache.commons.math3.ode.events;
 
-import org.junit.Assert;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 
@@ -38,7 +38,7 @@ public class ReappearingEventTest {
         throws DimensionMismatchException, NumberIsTooSmallException,
                MaxCountExceededException, NoBracketingException {
         double tEnd = test(1);
-        Assert.assertEquals(10.0, tEnd, 1e-7);
+        assertEquals(10.0, tEnd, 1e-7);
     }
 
     @Test
@@ -46,7 +46,7 @@ public class ReappearingEventTest {
         throws DimensionMismatchException, NumberIsTooSmallException,
                MaxCountExceededException, NoBracketingException {
         double tEnd = test(2);
-        Assert.assertEquals(10.0, tEnd, 1e-7);
+        assertEquals(10.0, tEnd, 1e-7);
     }
 
     public double test(int integratorType)

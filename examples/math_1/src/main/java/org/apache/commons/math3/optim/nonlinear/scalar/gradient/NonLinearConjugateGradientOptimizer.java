@@ -211,16 +211,19 @@ public class NonLinearConjugateGradientOptimizer
         }
 
         PointValuePair current = null;
+        int iter = 0;
         int maxEval = getMaxEvaluations();
         while (true) {
-            incrementIterationCount();
+            ++iter;
 
             final double objective = computeObjectiveValue(point);
             PointValuePair previous = current;
             current = new PointValuePair(point, objective);
-            if (previous != null && checker.converged(getIterations(), previous, current)) {
-                // We have found an optimum.
-                return current;
+            if (previous != null) {
+                if (checker.converged(iter, previous, current)) {
+                    // We have found an optimum.
+                    return current;
+                }
             }
 
             // Find the optimal step in the search direction.
@@ -271,7 +274,7 @@ public class NonLinearConjugateGradientOptimizer
             steepestDescent = newSteepestDescent;
 
             // Compute conjugate search direction.
-            if (getIterations() % n == 0 ||
+            if (iter % n == 0 ||
                 beta < 0) {
                 // Break conjugation: reset search direction.
                 searchDirection = steepestDescent.clone();

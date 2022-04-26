@@ -25,14 +25,10 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.math3.Field;
-import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.Well19937c;
-import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.exception.MathInternalError;
-import org.apache.commons.math3.exception.NoDataException;
 import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.NotPositiveException;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
@@ -78,37 +74,6 @@ public class MathArrays {
     }
 
     /**
-     * Create a copy of an array scaled by a value.
-     *
-     * @param arr Array to scale.
-     * @param val Scalar.
-     * @return scaled copy of array with each entry multiplied by val.
-     * @since 3.2
-     */
-    public static double[] scale(double val, final double[] arr) {
-        double[] newArr = new double[arr.length];
-        for (int i = 0; i < arr.length; i++) {
-            newArr[i] = arr[i] * val;
-        }
-        return newArr;
-    }
-
-    /**
-     * <p>Multiply each element of an array by a value.</p>
-     *
-     * <p>The array is modified in place (no copy is created).</p>
-     *
-     * @param arr Array to scale
-     * @param val Scalar
-     * @since 3.2
-     */
-    public static void scaleInPlace(double val, final double[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            arr[i] *= val;
-        }
-    }
-
-    /**
      * Creates an array whose contents will be the element-by-element
      * addition of the arguments.
      *
@@ -118,8 +83,8 @@ public class MathArrays {
      * @throws DimensionMismatchException if the array lengths differ.
      * @since 3.1
      */
-    public static double[] ebeAdd(double[] a, double[] b)
-        throws DimensionMismatchException {
+    public static double[] ebeAdd(double[] a,
+                                  double[] b) {
         if (a.length != b.length) {
             throw new DimensionMismatchException(a.length, b.length);
         }
@@ -140,8 +105,8 @@ public class MathArrays {
      * @throws DimensionMismatchException if the array lengths differ.
      * @since 3.1
      */
-    public static double[] ebeSubtract(double[] a, double[] b)
-        throws DimensionMismatchException {
+    public static double[] ebeSubtract(double[] a,
+                                       double[] b) {
         if (a.length != b.length) {
             throw new DimensionMismatchException(a.length, b.length);
         }
@@ -162,8 +127,8 @@ public class MathArrays {
      * @throws DimensionMismatchException if the array lengths differ.
      * @since 3.1
      */
-    public static double[] ebeMultiply(double[] a, double[] b)
-        throws DimensionMismatchException {
+    public static double[] ebeMultiply(double[] a,
+                                       double[] b) {
         if (a.length != b.length) {
             throw new DimensionMismatchException(a.length, b.length);
         }
@@ -184,8 +149,8 @@ public class MathArrays {
      * @throws DimensionMismatchException if the array lengths differ.
      * @since 3.1
      */
-    public static double[] ebeDivide(double[] a, double[] b)
-        throws DimensionMismatchException {
+    public static double[] ebeDivide(double[] a,
+                                     double[] b) {
         if (a.length != b.length) {
             throw new DimensionMismatchException(a.length, b.length);
         }
@@ -358,7 +323,9 @@ public class MathArrays {
      * @param strict Whether the order should be strict.
      * @return {@code true} if sorted, {@code false} otherwise.
      */
-    public static boolean isMonotonic(double[] val, OrderDirection dir, boolean strict) {
+    public static boolean isMonotonic(double[] val,
+                                      OrderDirection dir,
+                                      boolean strict) {
         return checkOrder(val, dir, strict, false);
     }
 
@@ -678,71 +645,59 @@ public class MathArrays {
     public static void sortInPlace(double[] x,
                                    final OrderDirection dir,
                                    double[] ... yList)
-        throws NullArgumentException,
-               DimensionMismatchException {
-
-        // Consistency checks.
+        throws NullArgumentException, DimensionMismatchException {
         if (x == null) {
             throw new NullArgumentException();
         }
 
-        final int yListLen = yList.length;
         final int len = x.length;
+        final List<Pair<Double, double[]>> list
+            = new ArrayList<Pair<Double, double[]>>(len);
 
-        for (int j = 0; j < yListLen; j++) {
-            final double[] y = yList[j];
-            if (y == null) {
-                throw new NullArgumentException();
-            }
-            if (y.length != len) {
-                throw new DimensionMismatchException(y.length, len);
-            }
-        }
-
-        // Associate each abscissa "x[i]" with its index "i".
-        final List<Pair<Double, Integer>> list
-            = new ArrayList<Pair<Double, Integer>>(len);
+        final int yListLen = yList.length;
         for (int i = 0; i < len; i++) {
-            list.add(new Pair<Double, Integer>(x[i], i));
+            final double[] yValues = new double[yListLen];
+            for (int j = 0; j < yListLen; j++) {
+                double[] y = yList[j];
+                if (y == null) {
+                    throw new NullArgumentException();
+                }
+                if (y.length != len) {
+                    throw new DimensionMismatchException(y.length, len);
+                }
+                yValues[j] = y[i];
+            }
+            list.add(new Pair<Double, double[]>(x[i], yValues));
         }
 
-        // Create comparators for increasing and decreasing orders.
-        final Comparator<Pair<Double, Integer>> comp
-            = dir == MathArrays.OrderDirection.INCREASING ?
-            new Comparator<Pair<Double, Integer>>() {
-            public int compare(Pair<Double, Integer> o1,
-                               Pair<Double, Integer> o2) {
-                return o1.getKey().compareTo(o2.getKey());
-            }
-        } : new Comparator<Pair<Double,Integer>>() {
-            public int compare(Pair<Double, Integer> o1,
-                               Pair<Double, Integer> o2) {
-                return o2.getKey().compareTo(o1.getKey());
+        final Comparator<Pair<Double, double[]>> comp
+            = new Comparator<Pair<Double, double[]>>() {
+            public int compare(Pair<Double, double[]> o1,
+                               Pair<Double, double[]> o2) {
+                int val;
+                switch (dir) {
+                case INCREASING:
+                    val = o1.getKey().compareTo(o2.getKey());
+                break;
+                case DECREASING:
+                    val = o2.getKey().compareTo(o1.getKey());
+                break;
+                default:
+                    // Should never happen.
+                    throw new MathInternalError();
+                }
+                return val;
             }
         };
 
-        // Sort.
         Collections.sort(list, comp);
 
-        // Modify the original array so that its elements are in
-        // the prescribed order.
-        // Retrieve indices of original locations.
-        final int[] indices = new int[len];
         for (int i = 0; i < len; i++) {
-            final Pair<Double, Integer> e = list.get(i);
+            final Pair<Double, double[]> e = list.get(i);
             x[i] = e.getKey();
-            indices[i] = e.getValue();
-        }
-
-        // In each of the associated arrays, move the
-        // elements to their new location.
-        for (int j = 0; j < yListLen; j++) {
-            // Input array will be modified in place.
-            final double[] yInPlace = yList[j];
-            final double[] yOrig = yInPlace.clone();
-
-            for (int i = 0; i < len; i++) {
-                yInPlace[i] = yOrig[indices[i]];
+            final double[] yValues = e.getValue();
+            for (int j = 0; j < yListLen; j++) {
+                yList[j][i] = yValues[j];
             }
         }
     }
@@ -819,11 +774,6 @@ public class MathArrays {
         final int len = a.length;
         if (len != b.length) {
             throw new DimensionMismatchException(len, b.length);
-        }
-
-        if (len == 1) {
-            // Revert to scalar multiplication.
-            return a[0] * b[0];
         }
 
         final double[] prodHigh = new double[len];
@@ -1334,7 +1284,6 @@ public class MathArrays {
       * @param field field to which array elements belong
       * @param length of the array
       * @return a new array
-      * @since 3.2
       */
      public static <T> T[] buildArray(final Field<T> field, final int length) {
          @SuppressWarnings("unchecked") // OK because field must be correct class
@@ -1350,10 +1299,9 @@ public class MathArrays {
       * @param <T> the type of the field elements
       * @param field field to which array elements belong
       * @param rows number of rows in the array
-      * @param columns number of columns (may be negative to build partial
-      * arrays in the same way <code>new Field[rows][]</code> works)
+     * @param columns number of columns (may be negative to build partial
+     * arrays in the same way <code>new Field[rows][]</code> works)
       * @return a new array
-      * @since 3.2
       */
      @SuppressWarnings("unchecked")
     public static <T> T[][] buildArray(final Field<T> field, final int rows, final int columns) {
@@ -1373,164 +1321,4 @@ public class MathArrays {
          return array;
      }
 
-     /**
-      * Calculates the <a href="http://en.wikipedia.org/wiki/Convolution">
-      * convolution</a> between two sequences.
-      * The solution is obtained via straightforward computation of the
-      * convolution sum (and not via FFT).
-      * Whenever the computation needs an element that would be located
-      * at an index outside the input arrays, the value is assumed to be
-      * zero.
-      *
-      * @param x First sequence.
-      * Typically, this sequence will represent an input signal to a system.
-      * @param h Second sequence.
-      * Typically, this sequence will represent the impulse response of the
-      * system.
-      * @return the convolution of {@code x} and {@code h}.
-      * This array's length will be {@code x.length + h.length - 1}.
-      * @throws NullArgumentException if either {@code x} or {@code h} is
-      * {@code null}.
-      * @throws NoDataException if either {@code x} or {@code h} is empty.
-      *
-      * @since 3.3
-      */
-     public static double[] convolve(double[] x, double[] h)
-         throws NullArgumentException,
-                NoDataException {
-         MathUtils.checkNotNull(x);
-         MathUtils.checkNotNull(h);
-
-         final int xLen = x.length;
-         final int hLen = h.length;
-
-         if (xLen == 0 || hLen == 0) {
-             throw new NoDataException();
-         }
-
-         // initialize the output array
-         final int totalLength = xLen + hLen - 1;
-         final double[] y = new double[totalLength];
-
-         // straightforward implementation of the convolution sum
-         for (int n = 0; n < totalLength; n++) {
-             double yn = 0;
-             int k = FastMath.max(0, n + 1 - xLen);
-             int j = n - k;
-             while (k < hLen && j >= 0) {
-                 yn += x[j--] * h[k++];
-             }
-             y[n] = yn;
-         }
-
-         return y;
-     }
-
-    /**
-     * Specification for indicating that some operation applies
-     * before or after a given index.
-     */
-    public static enum Position {
-        /** Designates the beginning of the array (near index 0). */
-        HEAD,
-        /** Designates the end of the array. */
-        TAIL
-    }
-
-    /**
-     * Shuffle the entries of the given array.
-     * The {@code start} and {@code pos} parameters select which portion
-     * of the array is randomized and which is left untouched.
-     *
-     * @see #shuffle(int[],int,Position,RandomGenerator)
-     *
-     * @param list Array whose entries will be shuffled (in-place).
-     * @param start Index at which shuffling begins.
-     * @param pos Shuffling is performed for index positions between
-     * {@code start} and either the end (if {@link Position#TAIL})
-     * or the beginning (if {@link Position#HEAD}) of the array.
-     */
-    public static void shuffle(int[] list,
-                               int start,
-                               Position pos) {
-        shuffle(list, start, pos, new Well19937c());
-    }
-
-    /**
-     * Shuffle the entries of the given array, using the
-     * <a href="http://en.wikipedia.org/wiki/Fisher–Yates_shuffle#The_modern_algorithm">
-     * Fisher–Yates</a> algorithm.
-     * The {@code start} and {@code pos} parameters select which portion
-     * of the array is randomized and which is left untouched.
-     *
-     * @param list Array whose entries will be shuffled (in-place).
-     * @param start Index at which shuffling begins.
-     * @param pos Shuffling is performed for index positions between
-     * {@code start} and either the end (if {@link Position#TAIL})
-     * or the beginning (if {@link Position#HEAD}) of the array.
-     * @param rng Random number generator.
-     */
-    public static void shuffle(int[] list,
-                               int start,
-                               Position pos,
-                               RandomGenerator rng) {
-        switch (pos) {
-        case TAIL: {
-            for (int i = list.length - 1; i >= start; i--) {
-                final int target;
-                if (i == start) {
-                    target = start;
-                } else {
-                    // NumberIsTooLargeException cannot occur.
-                    target = new UniformIntegerDistribution(rng, start, i).sample();
-                }
-                final int temp = list[target];
-                list[target] = list[i];
-                list[i] = temp;
-            }
-        }
-            break;
-        case HEAD: {
-            for (int i = 0; i <= start; i++) {
-                final int target;
-                if (i == start) {
-                    target = start;
-                } else {
-                    // NumberIsTooLargeException cannot occur.
-                    target = new UniformIntegerDistribution(rng, i, start).sample();
-                }
-                final int temp = list[target];
-                list[target] = list[i];
-                list[i] = temp;
-            }
-        }
-            break;
-        default:
-            throw new MathInternalError(); // Should never happen.
-        }
-    }
-
-    /**
-     * Shuffle the entries of the given array.
-     *
-     * @see #shuffle(int[],int,Position,RandomGenerator)
-     *
-     * @param list Array whose entries will be shuffled (in-place).
-     * @param rng Random number generator.
-     */
-    public static void shuffle(int[] list,
-                               RandomGenerator rng) {
-        shuffle(list, 0, Position.TAIL, rng);
-    }
-
-    /**
-     * Shuffle the entries of the given array.
-     *
-     * @see #shuffle(int[],int,Position,RandomGenerator)
-     *
-     * @param list Array whose entries will be shuffled (in-place).
-     */
-    public static void shuffle(int[] list) {
-        shuffle(list, new Well19937c());
-    }
 }

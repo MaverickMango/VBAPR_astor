@@ -29,7 +29,6 @@ import org.apache.commons.math3.optimization.PointValuePair;
 import org.apache.commons.math3.optimization.InitialGuess;
 import org.apache.commons.math3.optimization.SimpleBounds;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -241,9 +240,7 @@ public class BOBYQAOptimizerTest {
     }
 
     // See MATH-728
-    // TODO: this test is temporarily disabled for 3.2 release as a bug in Cobertura
-    //       makes it run for several hours before completing
-    @Ignore @Test
+    @Test
     public void testConstrainedRosenWithMoreInterpolationPoints() {
         final double[] startPoint = point(DIM, 0.1);
         final double[][] boundaries = boundaries(DIM, -1, 2);

@@ -307,12 +307,6 @@ public class FastMath {
     /** Mask used to clear low order 30 bits */
     private static final long MASK_30BITS = -1L - (HEX_40000000 -1); // 0xFFFFFFFFC0000000L;
 
-    /** Mask used to clear the non-sign part of an int. */
-    private static final int MASK_NON_SIGN_INT = 0x7fffffff;
-
-    /** Mask used to clear the non-sign part of a long. */
-    private static final long MASK_NON_SIGN_LONG = 0x7fffffffffffffffl;
-
     /** 2^52 - double numbers this large must be integral (no fraction) or NaN or Infinite */
     private static final double TWO_POWER_52 = 4503599627370496.0;
     /** 2^53 - double numbers this large must be even. */
@@ -371,7 +365,7 @@ public class FastMath {
         if (d > -Precision.SAFE_MIN && d < Precision.SAFE_MIN){
             return d; // These are un-normalised - don't try to convert
         }
-        long xl = Double.doubleToRawLongBits(d); // can take raw bits because just gonna convert it back
+        long xl = Double.doubleToLongBits(d);
         xl = xl & MASK_30BITS; // Drop low order bits
         return Double.longBitsToDouble(xl);
     }
@@ -1136,15 +1130,17 @@ public class FastMath {
         if (x==0) { // Handle special case of +0/-0
             return Double.NEGATIVE_INFINITY;
         }
-        long bits = Double.doubleToRawLongBits(x);
+        long bits = Double.doubleToLongBits(x);
 
         /* Handle special cases of negative input, and NaN */
-        if (((bits & 0x8000000000000000L) != 0 || x != x) && x != 0.0) {
-            if (hiPrec != null) {
-                hiPrec[0] = Double.NaN;
-            }
+        if ((bits & 0x8000000000000000L) != 0 || x != x) {
+            if (x != 0.0) {
+                if (hiPrec != null) {
+                    hiPrec[0] = Double.NaN;
+                }
 
-            return Double.NaN;
+                return Double.NaN;
+            }
         }
 
         /* Handle special cases of Positive infinity. */
@@ -1179,24 +1175,43 @@ public class FastMath {
         }
 
 
-        if ((exp == -1 || exp == 0) && x < 1.01 && x > 0.99 && hiPrec == null) {
-            /* The normal method doesn't work well in the range [0.99, 1.01], so call do a straight
+        if (exp == -1 || exp == 0) {
+            if (x < 1.01 && x > 0.99 && hiPrec == null) {
+                /* The normal method doesn't work well in the range [0.99, 1.01], so call do a straight
            polynomial expansion in higer precision. */
 
-            /* Compute x - 1.0 and split it */
-            double xa = x - 1.0;
-            double xb = xa - x + 1.0;
-            double tmp = xa * HEX_40000000;
-            double aa = xa + tmp - tmp;
-            double ab = xa - aa;
-            xa = aa;
-            xb = ab;
+               /* Compute x - 1.0 and split it */
+                double xa = x - 1.0;
+                double xb = xa - x + 1.0;
+                double tmp = xa * HEX_40000000;
+                double aa = xa + tmp - tmp;
+                double ab = xa - aa;
+                xa = aa;
+                xb = ab;
 
-            final double[] lnCoef_last = LN_QUICK_COEF[LN_QUICK_COEF.length - 1];
-            double ya = lnCoef_last[0];
-            double yb = lnCoef_last[1];
+                final double[] lnCoef_last = LN_QUICK_COEF[LN_QUICK_COEF.length - 1];
+                double ya = lnCoef_last[0];
+                double yb = lnCoef_last[1];
 
-            for (int i = LN_QUICK_COEF.length - 2; i >= 0; i--) {
+                for (int i = LN_QUICK_COEF.length - 2; i >= 0; i--) {
+                    /* Multiply a = y * x */
+                    aa = ya * xa;
+                    ab = ya * xb + yb * xa + yb * xb;
+                    /* split, so now y = a */
+                    tmp = aa * HEX_40000000;
+                    ya = aa + tmp - tmp;
+                    yb = aa - ya + ab;
+
+                    /* Add  a = y + lnQuickCoef */
+                    final double[] lnCoef_i = LN_QUICK_COEF[i];
+                    aa = ya + lnCoef_i[0];
+                    ab = yb + lnCoef_i[1];
+                    /* Split y = a */
+                    tmp = aa * HEX_40000000;
+                    ya = aa + tmp - tmp;
+                    yb = aa - ya + ab;
+                }
+
                 /* Multiply a = y * x */
                 aa = ya * xa;
                 ab = ya * xb + yb * xa + yb * xb;
@@ -1205,25 +1220,8 @@ public class FastMath {
                 ya = aa + tmp - tmp;
                 yb = aa - ya + ab;
 
-                /* Add  a = y + lnQuickCoef */
-                final double[] lnCoef_i = LN_QUICK_COEF[i];
-                aa = ya + lnCoef_i[0];
-                ab = yb + lnCoef_i[1];
-                /* Split y = a */
-                tmp = aa * HEX_40000000;
-                ya = aa + tmp - tmp;
-                yb = aa - ya + ab;
+                return ya + yb;
             }
-
-            /* Multiply a = y * x */
-            aa = ya * xa;
-            ab = ya * xb + yb * xa + yb * xb;
-            /* split, so now y = a */
-            tmp = aa * HEX_40000000;
-            ya = aa + tmp - tmp;
-            yb = aa - ya + ab;
-
-            return ya + yb;
         }
 
         // lnm is a log of a number in the range of 1.0 - 2.0, so 0 <= lnm < ln(2)
@@ -1454,7 +1452,7 @@ public class FastMath {
 
 
         if (x == 0) {
-            long bits = Double.doubleToRawLongBits(x);
+            long bits = Double.doubleToLongBits(x);
             if ((bits & 0x8000000000000000L) != 0) {
                 // -zero
                 long yi = (long) y;
@@ -2009,7 +2007,7 @@ public class FastMath {
     private static void reducePayneHanek(double x, double result[])
     {
         /* Convert input double to bits */
-        long inbits = Double.doubleToRawLongBits(x);
+        long inbits = Double.doubleToLongBits(x);
         int exponent = (int) ((inbits >> 52) & 0x7ff) - 1023;
 
         /* Convert to fixed point representation */
@@ -2239,7 +2237,7 @@ public class FastMath {
 
         /* Check for zero and negative zero */
         if (xa == 0.0) {
-            long bits = Double.doubleToRawLongBits(x);
+            long bits = Double.doubleToLongBits(x);
             if (bits < 0) {
                 return -0.0;
             }
@@ -2358,7 +2356,7 @@ public class FastMath {
 
         /* Check for zero and negative zero */
         if (xa == 0.0) {
-            long bits = Double.doubleToRawLongBits(x);
+            long bits = Double.doubleToLongBits(x);
             if (bits < 0) {
                 return -0.0;
             }
@@ -2549,10 +2547,10 @@ public class FastMath {
         za = temp;
 
         double result = za + zb;
+        double resultb = -(result - za - zb);
 
         if (leftPlane) {
             // Result is in the left plane
-            final double resultb = -(result - za - zb);
             final double pia = 1.5707963267948966 * 2;
             final double pib = 6.123233995736766E-17 * 2;
 
@@ -2561,6 +2559,7 @@ public class FastMath {
             zb += pib - resultb;
 
             result = za + zb;
+            resultb = -(result - za - zb);
         }
 
 
@@ -2858,7 +2857,7 @@ public class FastMath {
      */
     public static double cbrt(double x) {
       /* Convert input double to bits */
-      long inbits = Double.doubleToRawLongBits(x);
+      long inbits = Double.doubleToLongBits(x);
       int exponent = (int) ((inbits >> 52) & 0x7ff) - 1023;
       boolean subnormal = false;
 
@@ -2870,7 +2869,7 @@ public class FastMath {
           /* Subnormal, so normalize */
           subnormal = true;
           x *= 1.8014398509481984E16;  // 2^54
-          inbits = Double.doubleToRawLongBits(x);
+          inbits = Double.doubleToLongBits(x);
           exponent = (int) ((inbits >> 52) & 0x7ff) - 1023;
       }
 
@@ -2988,8 +2987,7 @@ public class FastMath {
      * @return abs(x)
      */
     public static int abs(final int x) {
-        final int i = x >>> 31;
-        return (x ^ (~i + 1)) + i;
+        return (x < 0) ? -x : x;
     }
 
     /**
@@ -2998,12 +2996,7 @@ public class FastMath {
      * @return abs(x)
      */
     public static long abs(final long x) {
-        final long l = x >>> 63;
-        // l is one if x negative zero else
-        // ~l+1 is zero if x is positive, -1 if x is negative
-        // x^(~l+1) is x is x is positive, ~x if x is negative
-        // add around
-        return (x ^ (~l + 1)) + l;
+        return (x < 0l) ? -x : x;
     }
 
     /**
@@ -3012,7 +3005,7 @@ public class FastMath {
      * @return abs(x)
      */
     public static float abs(final float x) {
-        return Float.intBitsToFloat(MASK_NON_SIGN_INT & Float.floatToRawIntBits(x));
+        return (x < 0.0f) ? -x : (x == 0.0f) ? 0.0f : x; // -0.0 => +0.0
     }
 
     /**
@@ -3021,7 +3014,7 @@ public class FastMath {
      * @return abs(x)
      */
     public static double abs(double x) {
-        return Double.longBitsToDouble(MASK_NON_SIGN_LONG & Double.doubleToRawLongBits(x));
+        return (x < 0.0) ? -x : (x == 0.0) ? 0.0 : x; // -0.0 => +0.0
     }
 
     /**
@@ -3033,7 +3026,7 @@ public class FastMath {
         if (Double.isInfinite(x)) {
             return Double.POSITIVE_INFINITY;
         }
-        return abs(x - Double.longBitsToDouble(Double.doubleToRawLongBits(x) ^ 1));
+        return abs(x - Double.longBitsToDouble(Double.doubleToLongBits(x) ^ 1));
     }
 
     /**
@@ -3073,7 +3066,7 @@ public class FastMath {
         }
 
         // decompose d
-        final long bits = Double.doubleToRawLongBits(d);
+        final long bits = Double.doubleToLongBits(d);
         final long sign = bits & 0x8000000000000000L;
         int  exponent   = ((int) (bits >>> 52)) & 0x7ff;
         long mantissa   = bits & 0x000fffffffffffffL;
@@ -3261,8 +3254,8 @@ public class FastMath {
         }
         // special cases MAX_VALUE to infinity and  MIN_VALUE to 0
         // are handled just as normal numbers
-        // can use raw bits since already dealt with infinity and NaN
-        final long bits = Double.doubleToRawLongBits(d);
+
+        final long bits = Double.doubleToLongBits(d);
         final long sign = bits & 0x8000000000000000L;
         if ((direction < d) ^ (sign == 0L)) {
             return Double.longBitsToDouble(sign | ((bits & 0x7fffffffffffffffL) + 1));
@@ -3637,13 +3630,9 @@ public class FastMath {
      * @return the magnitude with the same sign as the {@code sign} argument
      */
     public static double copySign(double magnitude, double sign){
-        // The highest order bit is going to be zero if the
-        // highest order bit of m and s is the same and one otherwise.
-        // So (m^s) will be positive if both m and s have the same sign
-        // and negative otherwise.
-        final long m = Double.doubleToRawLongBits(magnitude); // don't care about NaN
-        final long s = Double.doubleToRawLongBits(sign);
-        if ((m^s) >= 0) {
+        long m = Double.doubleToLongBits(magnitude);
+        long s = Double.doubleToLongBits(sign);
+        if ((m >= 0 && s >= 0) || (m < 0 && s < 0)) { // Sign is currently OK
             return magnitude;
         }
         return -magnitude; // flip sign
@@ -3658,13 +3647,9 @@ public class FastMath {
      * @return the magnitude with the same sign as the {@code sign} argument
      */
     public static float copySign(float magnitude, float sign){
-        // The highest order bit is going to be zero if the
-        // highest order bit of m and s is the same and one otherwise.
-        // So (m^s) will be positive if both m and s have the same sign
-        // and negative otherwise.
-        final int m = Float.floatToRawIntBits(magnitude);
-        final int s = Float.floatToRawIntBits(sign);
-        if ((m^s) >= 0) {
+        int m = Float.floatToIntBits(magnitude);
+        int s = Float.floatToIntBits(sign);
+        if ((m >= 0 && s >= 0) || (m < 0 && s < 0)) { // Sign is currently OK
             return magnitude;
         }
         return -magnitude; // flip sign
@@ -3680,8 +3665,7 @@ public class FastMath {
      * @return exponent for d in IEEE754 representation, without bias
      */
     public static int getExponent(final double d) {
-        // NaN and Infinite will return 1024 anywho so can use raw bits
-        return (int) ((Double.doubleToRawLongBits(d) >>> 52) & 0x7ff) - 1023;
+        return (int) ((Double.doubleToLongBits(d) >>> 52) & 0x7ff) - 1023;
     }
 
     /**
@@ -3694,8 +3678,7 @@ public class FastMath {
      * @return exponent for d in IEEE754 representation, without bias
      */
     public static int getExponent(final float f) {
-        // NaN and Infinite will return the same exponent anywho so can use raw bits
-        return ((Float.floatToRawIntBits(f) >>> 23) & 0xff) - 127;
+        return ((Float.floatToIntBits(f) >>> 23) & 0xff) - 127;
     }
 
     /**

@@ -63,7 +63,6 @@ import org.apache.commons.math3.util.Precision;
  * @deprecated As of 3.1 (to be removed in 4.0).
  * @since 2.0
  */
-@Deprecated
 class SimplexTableau implements Serializable {
 
     /** Column label for negative vars. */
@@ -249,7 +248,7 @@ class SimplexTableau implements Serializable {
      * @return new versions of the constraints
      */
     public List<LinearConstraint> normalizeConstraints(Collection<LinearConstraint> originalConstraints) {
-        List<LinearConstraint> normalized = new ArrayList<LinearConstraint>(originalConstraints.size());
+        List<LinearConstraint> normalized = new ArrayList<LinearConstraint>();
         for (LinearConstraint constraint : originalConstraints) {
             normalized.add(normalize(constraint));
         }

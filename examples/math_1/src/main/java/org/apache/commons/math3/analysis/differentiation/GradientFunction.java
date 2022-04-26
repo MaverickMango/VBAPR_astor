@@ -39,7 +39,8 @@ public class GradientFunction implements MultivariateVectorFunction {
     }
 
     /** {@inheritDoc} */
-    public double[] value(double[] point) {
+    public double[] value(double[] point)
+        throws IllegalArgumentException {
 
         // set up parameters
         final DerivativeStructure[] dsX = new DerivativeStructure[point.length];

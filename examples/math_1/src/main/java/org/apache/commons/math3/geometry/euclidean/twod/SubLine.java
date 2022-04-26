@@ -81,7 +81,7 @@ public class SubLine extends AbstractSubHyperplane<Euclidean2D, Euclidean1D> {
 
         final Line line = (Line) getHyperplane();
         final List<Interval> list = ((IntervalsSet) getRemainingRegion()).asList();
-        final List<Segment> segments = new ArrayList<Segment>(list.size());
+        final List<Segment> segments = new ArrayList<Segment>();
 
         for (final Interval interval : list) {
             final Vector2D start = line.toSpace(new Vector1D(interval.getInf()));
@@ -115,9 +115,6 @@ public class SubLine extends AbstractSubHyperplane<Euclidean2D, Euclidean1D> {
 
         // compute the intersection on infinite line
         Vector2D v2D = line1.intersection(line2);
-        if (v2D == null) {
-            return null;
-        }
 
         // check location of point with respect to first sub-line
         Location loc1 = getRemainingRegion().checkPoint(line1.toSubSpace(v2D));

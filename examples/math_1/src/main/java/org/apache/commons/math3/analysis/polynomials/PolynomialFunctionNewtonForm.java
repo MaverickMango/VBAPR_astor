@@ -20,9 +20,7 @@ import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NoDataException;
-import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
-import org.apache.commons.math3.util.MathUtils;
 
 /**
  * Implements the representation of a real polynomial function in
@@ -71,13 +69,13 @@ public class PolynomialFunctionNewtonForm implements UnivariateDifferentiableFun
      *
      * @param a Coefficients in Newton form formula.
      * @param c Centers.
-     * @throws NullArgumentException if any argument is {@code null}.
+     * @throws org.apache.commons.math3.exception.NullArgumentException if
+     * any argument is {@code null}.
      * @throws NoDataException if any array has zero length.
      * @throws DimensionMismatchException if the size difference between
      * {@code a} and {@code c} is not equal to 1.
      */
-    public PolynomialFunctionNewtonForm(double a[], double c[])
-        throws NullArgumentException, NoDataException, DimensionMismatchException {
+    public PolynomialFunctionNewtonForm(double a[], double c[]) {
 
         verifyInputArray(a, c);
         this.a = new double[a.length];
@@ -174,13 +172,13 @@ public class PolynomialFunctionNewtonForm implements UnivariateDifferentiableFun
      * @param c Centers.
      * @param z Point at which the function value is to be computed.
      * @return the function value.
-     * @throws NullArgumentException if any argument is {@code null}.
+     * @throws org.apache.commons.math3.exception.NullArgumentException if
+     * any argument is {@code null}.
      * @throws NoDataException if any array has zero length.
      * @throws DimensionMismatchException if the size difference between
      * {@code a} and {@code c} is not equal to 1.
      */
-    public static double evaluate(double a[], double c[], double z)
-        throws NullArgumentException, DimensionMismatchException, NoDataException {
+    public static double evaluate(double a[], double c[], double z) {
         verifyInputArray(a, c);
 
         final int n = c.length;
@@ -223,18 +221,17 @@ public class PolynomialFunctionNewtonForm implements UnivariateDifferentiableFun
      *
      * @param a the coefficients in Newton form formula
      * @param c the centers
-     * @throws NullArgumentException if any argument is {@code null}.
+     * @throws org.apache.commons.math3.exception.NullArgumentException if
+     * any argument is {@code null}.
      * @throws NoDataException if any array has zero length.
      * @throws DimensionMismatchException if the size difference between
      * {@code a} and {@code c} is not equal to 1.
      * @see org.apache.commons.math3.analysis.interpolation.DividedDifferenceInterpolator#computeDividedDifference(double[],
      * double[])
      */
-    protected static void verifyInputArray(double a[], double c[])
-        throws NullArgumentException, NoDataException, DimensionMismatchException {
-        MathUtils.checkNotNull(a);
-        MathUtils.checkNotNull(c);
-        if (a.length == 0 || c.length == 0) {
+    protected static void verifyInputArray(double a[], double c[]) {
+        if (a.length == 0 ||
+            c.length == 0) {
             throw new NoDataException(LocalizedFormats.EMPTY_POLYNOMIALS_COEFFICIENTS_ARRAY);
         }
         if (a.length != c.length + 1) {

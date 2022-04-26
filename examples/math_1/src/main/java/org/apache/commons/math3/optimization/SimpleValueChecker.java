@@ -123,8 +123,10 @@ public class SimpleValueChecker
     public boolean converged(final int iteration,
                              final PointValuePair previous,
                              final PointValuePair current) {
-        if (maxIterationCount != ITERATION_CHECK_DISABLED && iteration >= maxIterationCount) {
-            return true;
+        if (maxIterationCount != ITERATION_CHECK_DISABLED) {
+            if (iteration >= maxIterationCount) {
+                return true;
+            }
         }
 
         final double p = previous.getValue();

@@ -530,8 +530,10 @@ public class OpenMapRealVector extends SparseRealVector
         while (iter.hasNext()) {
             iter.advance();
             int key = iter.key();
-            if (!entries.containsKey(key) && iter.value() > max) {
-                max = iter.value();
+            if (!entries.containsKey(key)) {
+                if (iter.value() > max) {
+                    max = iter.value();
+                }
             }
         }
         return max;

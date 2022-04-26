@@ -1,12 +1,16 @@
 package fr.inria.main.evolution;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import fr.inria.astor.util.CodeLineCollector;
+import fr.inria.astor.util.ReadGT;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
@@ -172,12 +176,22 @@ public class AstorMain extends AbstractMain {
 		core.startEvolution();
 
         //filter the solutions.
-		core.filterSolutions();
+//		core.filterSolutions();
 
 		core.atEnd();
 
 		long endT = System.currentTimeMillis();
 		log.info("Time Total(s): " + (endT - startT) / 1000d);
+		BufferedOutputStream buff =null;
+		try {
+			String content = ReadGT.proj + "_" + ReadGT.version + ":" + ReadGT.compileButFail + "," + ((endT - startT) / 1000d) + ";\n";
+			buff = new BufferedOutputStream(new FileOutputStream(ReadGT.timeOutput, true));
+			buff.write(content.getBytes(StandardCharsets.UTF_8));
+			buff.flush();
+			buff.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**

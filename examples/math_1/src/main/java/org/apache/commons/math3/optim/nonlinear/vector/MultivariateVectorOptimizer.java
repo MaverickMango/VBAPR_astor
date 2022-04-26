@@ -80,7 +80,6 @@ public abstract class MultivariateVectorOptimizer
      * @throws DimensionMismatchException if the initial guess, target, and weight
      * arguments have inconsistent dimensions.
      */
-    @Override
     public PointVectorValuePair optimize(OptimizationData... optData)
         throws TooManyEvaluationsException,
                DimensionMismatchException {

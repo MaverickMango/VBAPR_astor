@@ -17,9 +17,16 @@
 
 package org.apache.commons.math3.optim.nonlinear.scalar.gradient;
 
+import java.io.Serializable;
+
+import org.apache.commons.math3.analysis.DifferentiableMultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math3.analysis.differentiation.MultivariateDifferentiableFunction;
 import org.apache.commons.math3.analysis.solvers.BrentSolver;
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.MathIllegalArgumentException;
 import org.apache.commons.math3.exception.MathUnsupportedOperationException;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.BlockRealMatrix;
@@ -129,9 +136,6 @@ public class NonLinearConjugateGradientOptimizerTest {
                                  new InitialGuess(new double[] { 0 }));
         Assert.assertEquals(1.5, optimum.getPoint()[0], 1.0e-10);
         Assert.assertEquals(0.0, optimum.getValue(), 1.0e-10);
-
-        // Check that the number of iterations is updated (MATH-949).
-        Assert.assertTrue(optimizer.getIterations() > 0);
     }
 
     @Test

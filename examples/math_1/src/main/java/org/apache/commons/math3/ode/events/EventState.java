@@ -25,8 +25,6 @@ import org.apache.commons.math3.analysis.solvers.UnivariateSolver;
 import org.apache.commons.math3.analysis.solvers.UnivariateSolverUtils;
 import org.apache.commons.math3.exception.MaxCountExceededException;
 import org.apache.commons.math3.exception.NoBracketingException;
-import org.apache.commons.math3.ode.EquationsMapper;
-import org.apache.commons.math3.ode.ExpandableStatefulODE;
 import org.apache.commons.math3.ode.sampling.StepInterpolator;
 import org.apache.commons.math3.util.FastMath;
 
@@ -56,9 +54,6 @@ public class EventState {
 
     /** Upper limit in the iteration count for event localization. */
     private final int maxIterationCount;
-
-    /** Equation being integrated. */
-    private ExpandableStatefulODE expandable;
 
     /** Time at the beginning of the step. */
     private double t0;
@@ -112,7 +107,6 @@ public class EventState {
         this.solver            = solver;
 
         // some dummy values ...
-        expandable        = null;
         t0                = Double.NaN;
         g0                = Double.NaN;
         g0Positive        = true;
@@ -129,13 +123,6 @@ public class EventState {
      */
     public EventHandler getEventHandler() {
         return handler;
-    }
-
-    /** Set the equation.
-     * @param expandable equation being integrated
-     */
-    public void setExpandable(final ExpandableStatefulODE expandable) {
-        this.expandable = expandable;
     }
 
     /** Get the maximal time interval between events handler checks.
@@ -169,7 +156,7 @@ public class EventState {
 
         t0 = interpolator.getPreviousTime();
         interpolator.setInterpolatedTime(t0);
-        g0 = handler.g(t0, getCompleteState(interpolator));
+        g0 = handler.g(t0, interpolator.getInterpolatedState());
         if (g0 == 0) {
             // excerpt from MATH-421 issue:
             // If an ODE solver is setup with an EventHandler that return STOP
@@ -188,29 +175,9 @@ public class EventState {
                                                 FastMath.abs(solver.getRelativeAccuracy() * t0));
             final double tStart = t0 + 0.5 * epsilon;
             interpolator.setInterpolatedTime(tStart);
-            g0 = handler.g(tStart, getCompleteState(interpolator));
+            g0 = handler.g(tStart, interpolator.getInterpolatedState());
         }
         g0Positive = g0 >= 0;
-
-    }
-
-    /** Get the complete state (primary and secondary).
-     * @param interpolator interpolator to use
-     * @return complete state
-     */
-    private double[] getCompleteState(final StepInterpolator interpolator) {
-
-        final double[] complete = new double[expandable.getTotalDimension()];
-
-        expandable.getPrimaryMapper().insertEquationData(interpolator.getInterpolatedState(),
-                                                         complete);
-        int index = 0;
-        for (EquationsMapper secondary : expandable.getSecondaryMappers()) {
-            secondary.insertEquationData(interpolator.getInterpolatedSecondaryState(index++),
-                                         complete);
-        }
-
-        return complete;
 
     }
 
@@ -240,7 +207,7 @@ public class EventState {
                 public double value(final double t) throws LocalMaxCountExceededException {
                     try {
                         interpolator.setInterpolatedTime(t);
-                        return handler.g(t, getCompleteState(interpolator));
+                        return handler.g(t, interpolator.getInterpolatedState());
                     } catch (MaxCountExceededException mcee) {
                         throw new LocalMaxCountExceededException(mcee);
                     }
@@ -254,7 +221,7 @@ public class EventState {
                 // evaluate handler value at the end of the substep
                 final double tb = t0 + (i + 1) * h;
                 interpolator.setInterpolatedTime(tb);
-                final double gb = handler.g(tb, getCompleteState(interpolator));
+                final double gb = handler.g(tb, interpolator.getInterpolatedState());
 
                 // check events occurrence
                 if (g0Positive ^ (gb >= 0)) {

@@ -17,11 +17,13 @@
 package org.apache.commons.math3.optim.nonlinear.vector.jacobian;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -102,30 +104,6 @@ import org.junit.Test;
 public abstract class AbstractLeastSquaresOptimizerAbstractTest {
 
     public abstract AbstractLeastSquaresOptimizer createOptimizer();
-
-    @Test
-    public void testGetIterations() {
-        AbstractLeastSquaresOptimizer optim = createOptimizer();
-        optim.optimize(new MaxEval(100), new Target(new double[] { 1 }),
-                       new Weight(new double[] { 1 }),
-                       new InitialGuess(new double[] { 3 }),
-                       new ModelFunction(new MultivariateVectorFunction() {
-                               public double[] value(double[] point) {
-                                   return new double[] {
-                                       FastMath.pow(point[0], 4)
-                                   };
-                               }
-                           }),
-                       new ModelFunctionJacobian(new MultivariateMatrixFunction() {
-                               public double[][] value(double[] point) {
-                                   return new double[][] {
-                                       { 0.25 * FastMath.pow(point[0], 3) }
-                                   };
-                               }
-                           }));
-
-        Assert.assertTrue(optim.getIterations() > 0);
-    }
 
     @Test
     public void testTrivial() {

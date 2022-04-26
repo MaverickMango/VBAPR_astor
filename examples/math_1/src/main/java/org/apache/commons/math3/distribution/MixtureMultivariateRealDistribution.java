@@ -105,7 +105,6 @@ public class MixtureMultivariateRealDistribution<T extends MultivariateRealDistr
     }
 
     /** {@inheritDoc} */
-    @Override
     public double[] sample() {
         // Sampled values.
         double[] vals = null;
@@ -134,7 +133,6 @@ public class MixtureMultivariateRealDistribution<T extends MultivariateRealDistr
     }
 
     /** {@inheritDoc} */
-    @Override
     public void reseedRandomGenerator(long seed) {
         // Seed needs to be propagated to underlying components
         // in order to maintain consistency between runs.
@@ -153,7 +151,7 @@ public class MixtureMultivariateRealDistribution<T extends MultivariateRealDistr
      * @return the component distributions and associated weights.
      */
     public List<Pair<Double, T>> getComponents() {
-        final List<Pair<Double, T>> list = new ArrayList<Pair<Double, T>>(weight.length);
+        final List<Pair<Double, T>> list = new ArrayList<Pair<Double, T>>();
 
         for (int i = 0; i < weight.length; i++) {
             list.add(new Pair<Double, T>(weight[i], distribution.get(i)));

@@ -209,8 +209,7 @@ public class Gaussian implements UnivariateDifferentiableFunction, Differentiabl
     /** {@inheritDoc}
      * @since 3.1
      */
-    public DerivativeStructure value(final DerivativeStructure t)
-        throws DimensionMismatchException {
+    public DerivativeStructure value(final DerivativeStructure t) {
 
         final double u = is * (t.getValue() - mean);
         double[] f = new double[t.getOrder() + 1];

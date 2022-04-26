@@ -6,13 +6,12 @@ import fr.inria.astor.approaches.jgenprog.LocalVariableProcessor;
 import fr.inria.astor.approaches.jgenprog.VariableReferenceProcessor;
 import fr.inria.astor.approaches.jgenprog.extension.ExpressionFilter;
 import fr.inria.astor.approaches.jgenprog.extension.StatementFilter;
+import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
-import org.json.simple.JSONObject;
 import spoon.SpoonModelBuilder;
 import spoon.compiler.SpoonResourceHelper;
 import spoon.processing.ProcessingManager;
 import spoon.reflect.code.CtStatement;
-import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
@@ -30,9 +29,10 @@ import java.util.stream.Collectors;
 public class ReadGT {
     private static final String buggyFileDir = "/home/liu/Desktop/groundtruth/buggyfiles/";
     private static final String fileBase = "/home/liu/Desktop/groundtruth/groundtruth/";
-    public static String outputSrc = "/home/liu/Desktop/VBAPRResult/filtered";
-    public static String errorOutput = "/home/liu/Desktop/VBAPRResult/NoSuspiciousLine";
-    public static String timeOutput = "/home/liu/Desktop/VBAPRResult/NoSuspiciousLine";
+    public static String outputSrc = "/home/liu/Desktop/jGenProgResult/filtered";//VBAPRResult
+    public static String supsLineError = "/home/liu/Desktop/jGenProgResult/NoSuspiciousLine";
+    public static String timeOutput = "/home/liu/Desktop/jGenProgResult/BugStatus";
+    public static String loadError = "/home/liu/Desktop/jGenProgResult/LoadError";
     public static int compileButFail = 0;
     public static List<GroundTruth> GTs = null;
     public static String proj = "", version = "";
@@ -472,12 +472,13 @@ public class ReadGT {
         filter.set_name(name);
         List<CtElement> list = new ArrayList<>();
         for (CtStatement stmt :stmts) {
-            list.addAll(stmt.getElements(filter));
+            List<CtElement> t = stmt.getElements(filter);
+            list.addAll(t);
         }
         return list;
     }
 
-    public static boolean setGTElements(Factory factory) throws FileNotFoundException {
+    public static boolean setGTElements() throws FileNotFoundException {
         String lowerP = proj.toLowerCase();
         String buggyFileDir = ReadGT.buggyFileDir + lowerP + "/" + lowerP + "_" + version + "_buggy";
         List<String> buggyFilePath = getFilePaths(buggyFileDir, ".java");
@@ -486,6 +487,7 @@ public class ReadGT {
             return false;
         }
         for (String str :buggyFilePath) {
+            Factory factory = MutationSupporter.createFactory();
             SpoonModelBuilder compiler = new JDTBasedSpoonCompiler(factory);
 //            compiler.getFactory().getEnvironment().setLevel("OFF");
             compiler.addInputSource(SpoonResourceHelper.createResource(new File(str)));

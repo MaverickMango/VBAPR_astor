@@ -38,7 +38,7 @@ public class VBAPR  extends JGenProg {
     public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
         ReadGT.getGTs(ReadGT.getInfos());
-        ReadGT.setGTElements(MutationSupporter.getFactory());
+        ReadGT.setGTElements();
     }
 
     @Override

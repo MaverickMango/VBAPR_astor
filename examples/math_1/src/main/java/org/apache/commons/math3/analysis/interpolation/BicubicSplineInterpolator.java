@@ -21,7 +21,6 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NoDataException;
 import org.apache.commons.math3.exception.NonMonotonicSequenceException;
-import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.util.MathArrays;
 
 /**
@@ -38,8 +37,9 @@ public class BicubicSplineInterpolator
     public BicubicSplineInterpolatingFunction interpolate(final double[] xval,
                                                           final double[] yval,
                                                           final double[][] fval)
-        throws NoDataException, DimensionMismatchException,
-               NonMonotonicSequenceException, NumberIsTooSmallException {
+        throws NoDataException,
+               DimensionMismatchException,
+               NonMonotonicSequenceException {
         if (xval.length == 0 || yval.length == 0 || fval.length == 0) {
             throw new NoDataException();
         }

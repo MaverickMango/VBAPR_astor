@@ -23,7 +23,6 @@ import org.apache.commons.math3.analysis.DifferentiableUnivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
-import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.DimensionMismatchException;
@@ -96,12 +95,11 @@ public class PolynomialSplineFunction implements UnivariateDifferentiableFunctio
      * @throws NullArgumentException if either of the input arrays is {@code null}.
      * @throws NumberIsTooSmallException if knots has length less than 2.
      * @throws DimensionMismatchException if {@code polynomials.length != knots.length - 1}.
-     * @throws NonMonotonicSequenceException if the {@code knots} array is not strictly increasing.
+     * @throws org.apache.commons.math3.exception.NonMonotonicSequenceException if
+     * the {@code knots} array is not strictly increasing.
      *
      */
-    public PolynomialSplineFunction(double knots[], PolynomialFunction polynomials[])
-        throws NullArgumentException, NumberIsTooSmallException,
-               DimensionMismatchException, NonMonotonicSequenceException{
+    public PolynomialSplineFunction(double knots[], PolynomialFunction polynomials[]) {
         if (knots == null ||
             polynomials == null) {
             throw new NullArgumentException();
@@ -228,20 +226,5 @@ public class PolynomialSplineFunction implements UnivariateDifferentiableFunctio
         double out[] = new double[n + 1];
         System.arraycopy(knots, 0, out, 0, n + 1);
         return out;
-    }
-
-    /**
-     * Indicates whether a point is within the interpolation range.
-     *
-     * @param x Point.
-     * @return {@code true} if {@code x} is a valid point.
-     */
-    public boolean isValidPoint(double x) {
-        if (x < knots[0] ||
-            x > knots[n]) {
-            return false;
-        } else {
-            return true;
-        }
     }
 }

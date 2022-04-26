@@ -18,19 +18,14 @@ package org.apache.commons.math3.stat;
 
 import java.io.Serializable;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TreeMap;
 
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
-import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.exception.util.LocalizedFormats;
-import org.apache.commons.math3.util.MathUtils;
 
 /**
  * Maintains a frequency distribution.
@@ -47,12 +42,6 @@ import org.apache.commons.math3.util.MathUtils;
  * As such, these values are not comparable to integral values, so attempts
  * to combine integral types with chars in a frequency distribution will fail.
  * </p>
- * <p>
- * Float is not coerced to Double.
- * Since they are not Comparable with each other the user must do any necessary coercion.
- * Float.NaN and Double.NaN are not treated specially; they may occur in input and will
- * occur in output if appropriate.
- * </b>
  * <p>
  * The values are ordered using the default (natural order), unless a
  * <code>Comparator</code> is supplied in the constructor.</p>
@@ -241,7 +230,7 @@ public class Frequency implements Serializable {
     }
 
     /**
-     * Returns the number of values equal to v.
+     * Returns the number of values = v.
      * Returns 0 if the value is not comparable.
      *
      * @param v the value to lookup.
@@ -264,7 +253,7 @@ public class Frequency implements Serializable {
     }
 
     /**
-     * Returns the number of values equal to v.
+     * Returns the number of values = v.
      *
      * @param v the value to lookup.
      * @return the frequency of v.
@@ -274,7 +263,7 @@ public class Frequency implements Serializable {
     }
 
     /**
-     * Returns the number of values equal to v.
+     * Returns the number of values = v.
      *
      * @param v the value to lookup.
      * @return the frequency of v.
@@ -284,7 +273,7 @@ public class Frequency implements Serializable {
     }
 
     /**
-     * Returns the number of values equal to v.
+     * Returns the number of values = v.
      *
      * @param v the value to lookup.
      * @return the frequency of v.
@@ -307,9 +296,7 @@ public class Frequency implements Serializable {
      * Returns the percentage of values that are equal to v
      * (as a proportion between 0 and 1).
      * <p>
-     * Returns <code>Double.NaN</code> if no values have been added.
-     * Returns 0 if at least one value has been added, but v is not comparable
-     * to the values set.</p>
+     * Returns <code>Double.NaN</code> if no values have been added.</p>
      *
      * @param v the value to lookup
      * @return the proportion of values equal to v
@@ -504,33 +491,6 @@ public class Frequency implements Serializable {
         return getCumPct(Character.valueOf(v));
     }
 
-    /**
-     * Returns the mode value(s) in comparator order.
-     *
-     * @return a list containing the value(s) which appear most often.
-     * @since 3.3
-     */
-    public List<Comparable<?>> getMode() {
-        long mostPopular = 0; // frequencies are always positive
-
-        // Get the max count first, so we avoid having to recreate the List each time
-        for(Long l : freqTable.values()) {
-            long frequency = l.longValue();
-            if (frequency > mostPopular) {
-                mostPopular = frequency;
-            }
-        }
-
-        List<Comparable<?>> modeList = new ArrayList<Comparable<?>>();
-        for (Entry<Comparable<?>, Long> ent : freqTable.entrySet()) {
-            long frequency = ent.getValue().longValue();
-            if (frequency == mostPopular) {
-               modeList.add(ent.getKey());
-            }
-        }
-        return modeList;
-    }
-
     //----------------------------------------------------------------------------------------------
 
     /**
@@ -539,16 +499,12 @@ public class Frequency implements Serializable {
      * by the counts represented by other.
      *
      * @param other the other {@link Frequency} object to be merged
-     * @throws NullArgumentException if {@code other} is null
      * @since 3.1
      */
-    public void merge(final Frequency other) throws NullArgumentException {
-        MathUtils.checkNotNull(other, LocalizedFormats.NULL_NOT_ALLOWED);
-
-        final Iterator<Map.Entry<Comparable<?>, Long>> iter = other.entrySetIterator();
-        while (iter.hasNext()) {
-            final Map.Entry<Comparable<?>, Long> entry = iter.next();
-            incrementValue(entry.getKey(), entry.getValue().longValue());
+    public void merge(Frequency other) {
+        for (Iterator<Map.Entry<Comparable<?>, Long>> iter = other.entrySetIterator(); iter.hasNext();) {
+            Map.Entry<Comparable<?>, Long> entry = iter.next();
+            incrementValue(entry.getKey(), entry.getValue());
         }
     }
 
@@ -558,14 +514,11 @@ public class Frequency implements Serializable {
      * by the counts represented by each of the others.
      *
      * @param others the other {@link Frequency} objects to be merged
-     * @throws NullArgumentException if the collection is null
      * @since 3.1
      */
-    public void merge(final Collection<Frequency> others) throws NullArgumentException {
-        MathUtils.checkNotNull(others, LocalizedFormats.NULL_NOT_ALLOWED);
-
-        for (final Frequency freq : others) {
-            merge(freq);
+    public void merge(Collection<Frequency> others) {
+        for (Iterator<Frequency> iter = others.iterator(); iter.hasNext();) {
+            merge(iter.next());
         }
     }
 

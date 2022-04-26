@@ -24,6 +24,8 @@ import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.exception.NumberIsTooLargeException;
 import org.apache.commons.math3.exception.NumberIsTooSmallException;
 import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.exception.MathUnsupportedOperationException;
+import org.apache.commons.math3.exception.MathIllegalStateException;
 import org.apache.commons.math3.exception.NotPositiveException;
 import org.apache.commons.math3.exception.OutOfRangeException;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -33,8 +35,10 @@ import org.apache.commons.math3.optim.SimpleBounds;
 import org.apache.commons.math3.optim.nonlinear.scalar.ObjectiveFunction;
 import org.apache.commons.math3.optim.MaxEval;
 import org.apache.commons.math3.random.MersenneTwister;
+import org.apache.commons.math3.util.FastMath;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Ignore;
 import org.junit.runner.RunWith;
 
 /**
@@ -45,7 +49,7 @@ public class CMAESOptimizerTest {
 
     static final int DIM = 13;
     static final int LAMBDA = 4 + (int)(3.*Math.log(DIM));
-
+   
     @Test(expected = NumberIsTooLargeException.class)
     public void testInitOutofbounds1() {
         double[] startPoint = point(DIM,3);
@@ -506,8 +510,6 @@ public class CMAESOptimizerTest {
         for (int i = 0; i < dim; i++) {
             Assert.assertEquals(expected.getPoint()[i], result.getPoint()[i], pointTol);
         }
-
-        Assert.assertTrue(optim.getIterations() > 0);
     }
 
     private static double[] point(int n, double value) {

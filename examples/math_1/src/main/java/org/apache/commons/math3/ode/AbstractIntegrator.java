@@ -141,7 +141,7 @@ public abstract class AbstractIntegrator implements FirstOrderIntegrator {
 
     /** {@inheritDoc} */
     public Collection<EventHandler> getEventHandlers() {
-        final List<EventHandler> list = new ArrayList<EventHandler>(eventsStates.size());
+        final List<EventHandler> list = new ArrayList<EventHandler>();
         for (EventState state : eventsStates) {
             list.add(state.getEventHandler());
         }
@@ -188,7 +188,6 @@ public abstract class AbstractIntegrator implements FirstOrderIntegrator {
         evaluations.resetCount();
 
         for (final EventState state : eventsStates) {
-            state.setExpandable(expandable);
             state.getEventHandler().init(t0, y0, t);
         }
 
@@ -205,22 +204,6 @@ public abstract class AbstractIntegrator implements FirstOrderIntegrator {
      */
     protected void setEquations(final ExpandableStatefulODE equations) {
         this.expandable = equations;
-    }
-
-    /** Get the differential equations to integrate.
-     * @return differential equations to integrate
-     * @since 3.2
-     */
-    protected ExpandableStatefulODE getExpandable() {
-        return expandable;
-    }
-
-    /** Get the evaluations counter.
-     * @return evaluations counter
-     * @since 3.2
-     */
-    protected Incrementor getEvaluationsCounter() {
-        return evaluations;
     }
 
     /** {@inheritDoc} */
@@ -327,7 +310,7 @@ public abstract class AbstractIntegrator implements FirstOrderIntegrator {
 
             // search for next events that may occur during the step
             final int orderingSign = interpolator.isForward() ? +1 : -1;
-            SortedSet<EventState> occurringEvents = new TreeSet<EventState>(new Comparator<EventState>() {
+            SortedSet<EventState> occuringEvents = new TreeSet<EventState>(new Comparator<EventState>() {
 
                 /** {@inheritDoc} */
                 public int compare(EventState es0, EventState es1) {
@@ -339,14 +322,14 @@ public abstract class AbstractIntegrator implements FirstOrderIntegrator {
             for (final EventState state : eventsStates) {
                 if (state.evaluateStep(interpolator)) {
                     // the event occurs during the current step
-                    occurringEvents.add(state);
+                    occuringEvents.add(state);
                 }
             }
 
-            while (!occurringEvents.isEmpty()) {
+            while (!occuringEvents.isEmpty()) {
 
                 // handle the chronologically first event
-                final Iterator<EventState> iterator = occurringEvents.iterator();
+                final Iterator<EventState> iterator = occuringEvents.iterator();
                 final EventState currentEvent = iterator.next();
                 iterator.remove();
 
@@ -355,22 +338,11 @@ public abstract class AbstractIntegrator implements FirstOrderIntegrator {
                 interpolator.setSoftPreviousTime(previousT);
                 interpolator.setSoftCurrentTime(eventT);
 
-                // get state at event time
+                // trigger the event
                 interpolator.setInterpolatedTime(eventT);
-                final double[] eventYComplete = new double[y.length];
-                expandable.getPrimaryMapper().insertEquationData(interpolator.getInterpolatedState(),
-                                                                 eventYComplete);
-                int index = 0;
-                for (EquationsMapper secondary : expandable.getSecondaryMappers()) {
-                    secondary.insertEquationData(interpolator.getInterpolatedSecondaryState(index++),
-                                                 eventYComplete);
-                }
-
-                // advance all event states to current time
-                for (final EventState state : eventsStates) {
-                    state.stepAccepted(eventT, eventYComplete);
-                    isLastStep = isLastStep || state.stop();
-                }
+                final double[] eventY = interpolator.getInterpolatedState().clone();
+                currentEvent.stepAccepted(eventT, eventY);
+                isLastStep = currentEvent.stop();
 
                 // handle the first part of the step, up to the event
                 for (final StepHandler handler : stepHandlers) {
@@ -379,21 +351,22 @@ public abstract class AbstractIntegrator implements FirstOrderIntegrator {
 
                 if (isLastStep) {
                     // the event asked to stop integration
-                    System.arraycopy(eventYComplete, 0, y, 0, y.length);
+                    System.arraycopy(eventY, 0, y, 0, y.length);
+                    for (final EventState remaining : occuringEvents) {
+                        remaining.stepAccepted(eventT, eventY);
+                    }
                     return eventT;
                 }
 
-                boolean needReset = false;
-                for (final EventState state : eventsStates) {
-                    needReset =  needReset || state.reset(eventT, eventYComplete);
-                }
-                if (needReset) {
+                if (currentEvent.reset(eventT, eventY)) {
                     // some event handler has triggered changes that
                     // invalidate the derivatives, we need to recompute them
-                    interpolator.setInterpolatedTime(eventT);
-                    System.arraycopy(eventYComplete, 0, y, 0, y.length);
+                    System.arraycopy(eventY, 0, y, 0, y.length);
                     computeDerivatives(eventT, y, yDot);
                     resetOccurred = true;
+                    for (final EventState remaining : occuringEvents) {
+                        remaining.stepAccepted(eventT, eventY);
+                    }
                     return eventT;
                 }
 
@@ -405,21 +378,13 @@ public abstract class AbstractIntegrator implements FirstOrderIntegrator {
                 // check if the same event occurs again in the remaining part of the step
                 if (currentEvent.evaluateStep(interpolator)) {
                     // the event occurs during the current step
-                    occurringEvents.add(currentEvent);
+                    occuringEvents.add(currentEvent);
                 }
 
             }
 
-            // last part of the step, after the last event
             interpolator.setInterpolatedTime(currentT);
-            final double[] currentY = new double[y.length];
-            expandable.getPrimaryMapper().insertEquationData(interpolator.getInterpolatedState(),
-                                                             currentY);
-            int index = 0;
-            for (EquationsMapper secondary : expandable.getSecondaryMappers()) {
-                secondary.insertEquationData(interpolator.getInterpolatedSecondaryState(index++),
-                                             currentY);
-            }
+            final double[] currentY = interpolator.getInterpolatedState();
             for (final EventState state : eventsStates) {
                 state.stepAccepted(currentT, currentY);
                 isLastStep = isLastStep || state.stop();

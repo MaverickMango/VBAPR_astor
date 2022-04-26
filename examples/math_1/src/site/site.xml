@@ -27,8 +27,6 @@
       <item name="Overview" href="/index.html"/>
       <item name="Downloads" href="http://commons.apache.org/math/download_math.cgi"/>
       <item name="Latest API docs (development)" href="apidocs/index.html"/>
-      <item name="Javadoc (3.2 release)"
-         href="http://commons.apache.org/math/javadocs/api-3.2/index.html"/>
       <item name="Javadoc (3.1.1 release)"
          href="http://commons.apache.org/math/javadocs/api-3.1.1/index.html"/>
       <item name="Javadoc (3.1 release)"
@@ -64,13 +62,7 @@
       <item name="Ordinary Differential Equations" href="/userguide/ode.html"/>
       <item name="Genetic Algorithms"      href="/userguide/genetics.html"/>
       <item name="Filters"                 href="/userguide/filter.html"/>
-      <item name="Fitting"                 href="/userguide/fitting.html"/>
     </menu>
-    
-    <head>
-      <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-      </script>
-    </head>
 
   </body>
 </project>

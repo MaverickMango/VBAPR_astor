@@ -233,7 +233,6 @@ public class CMAESOptimizer
      * passed with the call to {@link #optimize(int,MultivariateFunction,GoalType,OptimizationData[])
      * optimize} (whereas in the current code it is set to an undocumented value).
      */
-    @Deprecated
     public CMAESOptimizer() {
         this(0);
     }
@@ -244,7 +243,6 @@ public class CMAESOptimizer
      * passed with the call to {@link #optimize(int,MultivariateFunction,GoalType,OptimizationData[])
      * optimize} (whereas in the current code it is set to an undocumented value)..
      */
-    @Deprecated
     public CMAESOptimizer(int lambda) {
         this(lambda, null, DEFAULT_MAXITERATIONS, DEFAULT_STOPFITNESS,
              DEFAULT_ISACTIVECMA, DEFAULT_DIAGONALONLY,
@@ -567,15 +565,19 @@ public class CMAESOptimizer
                 lastResult = optimum;
                 optimum = new PointValuePair(fitfun.repair(bestArx.getColumn(0)),
                                              isMinimize ? bestFitness : -bestFitness);
-                if (getConvergenceChecker() != null && lastResult != null &&
-                    getConvergenceChecker().converged(iterations, optimum, lastResult)) {
-                    break generationLoop;
+                if (getConvergenceChecker() != null &&
+                    lastResult != null) {
+                    if (getConvergenceChecker().converged(iterations, optimum, lastResult)) {
+                        break generationLoop;
+                    }
                 }
             }
             // handle termination criteria
             // Break, if fitness is good enough
-            if (stopFitness != 0 && bestFitness < (isMinimize ? stopFitness : -stopFitness)) {
-                break generationLoop;
+            if (stopFitness != 0) { // only if stopFitness is defined
+                if (bestFitness < (isMinimize ? stopFitness : -stopFitness)) {
+                    break generationLoop;
+                }
             }
             final double[] sqrtDiagC = sqrt(diagC).getColumn(0);
             final double[] pcCol = pc.getColumn(0);

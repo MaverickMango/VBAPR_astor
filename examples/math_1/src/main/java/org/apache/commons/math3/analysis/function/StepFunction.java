@@ -20,7 +20,6 @@ package org.apache.commons.math3.analysis.function;
 import java.util.Arrays;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
-import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.NullArgumentException;
 import org.apache.commons.math3.exception.NoDataException;
 import org.apache.commons.math3.util.MathArrays;
@@ -51,7 +50,7 @@ public class StepFunction implements UnivariateFunction {
      *
      * @param x Domain values where the function changes value.
      * @param y Values of the function.
-     * @throws NonMonotonicSequenceException
+     * @throws org.apache.commons.math3.exception.NonMonotonicSequenceException
      * if the {@code x} array is not sorted in strictly increasing order.
      * @throws NullArgumentException if {@code x} or {@code y} are {@code null}.
      * @throws NoDataException if {@code x} or {@code y} are zero-length.
@@ -60,8 +59,9 @@ public class StepFunction implements UnivariateFunction {
      */
     public StepFunction(double[] x,
                         double[] y)
-        throws NullArgumentException, NoDataException,
-               DimensionMismatchException, NonMonotonicSequenceException {
+        throws NullArgumentException,
+               NoDataException,
+               DimensionMismatchException {
         if (x == null ||
             y == null) {
             throw new NullArgumentException();

@@ -76,7 +76,7 @@ public class WeibullDistributionTest extends RealDistributionAbstractTest {
         WeibullDistribution dist = new WeibullDistribution(1, 2);
         Assert.assertEquals(1, dist.getShape(), 0);
         try {
-            new WeibullDistribution(0, 2);
+            dist = new WeibullDistribution(0, 2);
             Assert.fail("NotStrictlyPositiveException expected");
         } catch (NotStrictlyPositiveException e) {
             // Expected.
@@ -88,7 +88,7 @@ public class WeibullDistributionTest extends RealDistributionAbstractTest {
         WeibullDistribution dist = new WeibullDistribution(1, 2);
         Assert.assertEquals(2, dist.getScale(), 0);
         try {
-            new WeibullDistribution(1, 0);
+            dist = new WeibullDistribution(1, 0);
             Assert.fail("NotStrictlyPositiveException expected");
         } catch (NotStrictlyPositiveException e) {
             // Expected.
@@ -113,4 +113,7 @@ public class WeibullDistributionTest extends RealDistributionAbstractTest {
                 FastMath.exp(Gamma.logGamma(1 + (2 / 10.4))) -
                 (dist.getNumericalMean() * dist.getNumericalMean()), tol);
     }
+
+    @Test
+    public void testSampling() {} // Fails in super class
 }

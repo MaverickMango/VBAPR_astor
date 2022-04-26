@@ -105,7 +105,6 @@ public class ValueServer {
      * @since 3.0
      * @deprecated use {@link #ValueServer(RandomGenerator)}
      */
-    @Deprecated
     public ValueServer(RandomDataImpl randomData) {
         this.randomData = randomData;
     }
@@ -421,7 +420,7 @@ public class ValueServer {
                                                     valuesFileURL);
             }
         }
-        return Double.parseDouble(str);
+        return Double.valueOf(str).doubleValue();
     }
 
     /**

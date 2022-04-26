@@ -114,8 +114,10 @@ public class SimpleUnivariateValueChecker
     public boolean converged(final int iteration,
                              final UnivariatePointValuePair previous,
                              final UnivariatePointValuePair current) {
-        if (maxIterationCount != ITERATION_CHECK_DISABLED && iteration >= maxIterationCount) {
-            return true;
+        if (maxIterationCount != ITERATION_CHECK_DISABLED) {
+            if (iteration >= maxIterationCount) {
+                return true;
+            }
         }
 
         final double p = previous.getValue();

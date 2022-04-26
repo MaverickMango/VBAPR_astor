@@ -14,13 +14,11 @@
 package org.apache.commons.math3.util;
 
 import java.util.Arrays;
-import java.util.Iterator;
 
 import org.apache.commons.math3.TestUtils;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.MathArithmeticException;
 import org.apache.commons.math3.exception.MathIllegalArgumentException;
-import org.apache.commons.math3.exception.NoDataException;
 import org.apache.commons.math3.exception.NonMonotonicSequenceException;
 import org.apache.commons.math3.exception.NotPositiveException;
 import org.apache.commons.math3.exception.NotStrictlyPositiveException;
@@ -35,38 +33,6 @@ import org.junit.Test;
  * @version $Id$
  */
 public class MathArraysTest {
-    
-    @Test
-    public void testScale() {
-        final double[] test = new double[] { -2.5, -1, 0, 1, 2.5 };
-        final double[] correctTest = MathArrays.copyOf(test);
-        final double[] correctScaled = new double[]{5.25, 2.1, 0, -2.1, -5.25};
-        
-        final double[] scaled = MathArrays.scale(-2.1, test);
-
-        // Make sure test has not changed
-        for (int i = 0; i < test.length; i++) {
-            Assert.assertEquals(correctTest[i], test[i], 0);
-        }
-
-        // Test scaled values
-        for (int i = 0; i < scaled.length; i++) {
-            Assert.assertEquals(correctScaled[i], scaled[i], 0);
-        }
-    }
-    
-    @Test
-    public void testScaleInPlace() {
-        final double[] test = new double[] { -2.5, -1, 0, 1, 2.5 };
-        final double[] correctScaled = new double[]{5.25, 2.1, 0, -2.1, -5.25};
-        MathArrays.scaleInPlace(-2.1, test);
-
-        // Make sure test has changed
-        for (int i = 0; i < test.length; i++) {
-            Assert.assertEquals(correctScaled[i], test[i], 0);
-        }
-    }
-    
     @Test(expected=DimensionMismatchException.class)
     public void testEbeAddPrecondition() {
         MathArrays.ebeAdd(new double[3], new double[4]);
@@ -407,37 +373,6 @@ public class MathArraysTest {
         Assert.assertEquals(25,  x2[4], Math.ulp(1d));
         Assert.assertEquals(125, x3[4], Math.ulp(1d));
     }
-
-    @Test
-    public void testSortInPlaceDecresasingOrder() {
-        final double[] x1 = {2,   5,  -3, 1,  4};
-        final double[] x2 = {4,  25,   9, 1, 16};
-        final double[] x3 = {8, 125, -27, 1, 64};
-
-        MathArrays.sortInPlace(x1,
-                               MathArrays.OrderDirection.DECREASING,
-                               x2, x3);
-
-        Assert.assertEquals(-3,  x1[4], Math.ulp(1d));
-        Assert.assertEquals(9,   x2[4], Math.ulp(1d));
-        Assert.assertEquals(-27, x3[4], Math.ulp(1d));
-
-        Assert.assertEquals(1, x1[3], Math.ulp(1d));
-        Assert.assertEquals(1, x2[3], Math.ulp(1d));
-        Assert.assertEquals(1, x3[3], Math.ulp(1d));
-
-        Assert.assertEquals(2, x1[2], Math.ulp(1d));
-        Assert.assertEquals(4, x2[2], Math.ulp(1d));
-        Assert.assertEquals(8, x3[2], Math.ulp(1d));
-
-        Assert.assertEquals(4,  x1[1], Math.ulp(1d));
-        Assert.assertEquals(16, x2[1], Math.ulp(1d));
-        Assert.assertEquals(64, x3[1], Math.ulp(1d));
-
-        Assert.assertEquals(5,   x1[0], Math.ulp(1d));
-        Assert.assertEquals(25,  x2[0], Math.ulp(1d));
-        Assert.assertEquals(125, x3[0], Math.ulp(1d));
-    }
     
     @Test
     /** Example in javadoc */
@@ -581,15 +516,6 @@ public class MathArraysTest {
         for (int i = source.length; i < source.length + offset; i++) {
             Assert.assertEquals(0, dest[i], 0);
         }
-    }
-
-    // MATH-1005
-    @Test
-    public void testLinearCombinationWithSingleElementArray() {
-        final double[] a = { 1.23456789 };
-        final double[] b = { 98765432.1 };
-
-        Assert.assertEquals(a[0] * b[0], MathArrays.linearCombination(a, b), 0d);
     }
 
     @Test
@@ -874,109 +800,5 @@ public class MathArraysTest {
             MathArrays.normalizeArray(testValues1, Double.NaN);
             Assert.fail("expecting MathIllegalArgumentException");
         } catch (MathIllegalArgumentException ex) {}
-    }
-    
-    @Test
-    public void testConvolve() {
-        /* Test Case (obtained via SciPy)
-         * x=[1.2,-1.8,1.4]
-         * h=[1,0.8,0.5,0.3]
-         * convolve(x,h) -> array([ 1.2 , -0.84,  0.56,  0.58,  0.16,  0.42])
-         */
-        double[] x1 = { 1.2, -1.8, 1.4 };
-        double[] h1 = { 1, 0.8, 0.5, 0.3 };
-        double[] y1 = { 1.2, -0.84, 0.56, 0.58, 0.16, 0.42 };
-        double tolerance = 1e-13;
-
-        double[] yActual = MathArrays.convolve(x1, h1);
-        Assert.assertArrayEquals(y1, yActual, tolerance);
-
-        double[] x2 = { 1, 2, 3 };
-        double[] h2 = { 0, 1, 0.5 };
-        double[] y2 = { 0, 1, 2.5, 4, 1.5 };
-        
-        yActual = MathArrays.convolve(x2, h2);
-        Assert.assertArrayEquals(y2, yActual, tolerance);
-                
-        try {
-            MathArrays.convolve(new double[]{1, 2}, null);
-            Assert.fail("an exception should have been thrown");
-        } catch (NullArgumentException e) {
-            // expected behavior
-        }
-
-        try {
-            MathArrays.convolve(null, new double[]{1, 2});
-            Assert.fail("an exception should have been thrown");
-        } catch (NullArgumentException e) {
-            // expected behavior
-        }
-
-        try {
-            MathArrays.convolve(new double[]{1, 2}, new double[]{});
-            Assert.fail("an exception should have been thrown");
-        } catch (NoDataException e) {
-            // expected behavior
-        }
-
-        try {
-            MathArrays.convolve(new double[]{}, new double[]{1, 2});
-            Assert.fail("an exception should have been thrown");
-        } catch (NoDataException e) {
-            // expected behavior
-        }
-
-        try {
-            MathArrays.convolve(new double[]{}, new double[]{});
-            Assert.fail("an exception should have been thrown");
-        } catch (NoDataException e) {
-            // expected behavior
-        }
-    }
-
-    @Test
-    public void testShuffleTail() {
-        final int[] orig = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        final int[] list = orig.clone();
-        final int start = 4;
-        MathArrays.shuffle(list, start, MathArrays.Position.TAIL, new Well1024a(7654321L));
-
-        // Ensure that all entries below index "start" did not move.
-        for (int i = 0; i < start; i++) {
-            Assert.assertEquals(orig[i], list[i]);
-        }
-
-        // Ensure that at least one entry has moved.
-        boolean ok = false;
-        for (int i = start; i < orig.length - 1; i++) {
-            if (orig[i] != list[i]) {
-                ok = true;
-                break;
-            }
-        }
-        Assert.assertTrue(ok);
-    }
-
-    @Test
-    public void testShuffleHead() {
-        final int[] orig = new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-        final int[] list = orig.clone();
-        final int start = 4;
-        MathArrays.shuffle(list, start, MathArrays.Position.HEAD, new Well1024a(1234567L));
-
-        // Ensure that all entries above index "start" did not move.
-        for (int i = start + 1; i < orig.length; i++) {
-            Assert.assertEquals(orig[i], list[i]);
-        }
-
-        // Ensure that at least one entry has moved.
-        boolean ok = false;
-        for (int i = 0; i <= start; i++) {
-            if (orig[i] != list[i]) {
-                ok = true;
-                break;
-            }
-        }
-        Assert.assertTrue(ok);
     }
 }

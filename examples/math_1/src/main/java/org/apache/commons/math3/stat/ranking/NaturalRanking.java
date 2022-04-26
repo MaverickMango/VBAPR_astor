@@ -24,7 +24,8 @@ import java.util.List;
 
 import org.apache.commons.math3.exception.MathInternalError;
 import org.apache.commons.math3.exception.NotANumberException;
-import org.apache.commons.math3.random.RandomDataGenerator;
+import org.apache.commons.math3.random.RandomData;
+import org.apache.commons.math3.random.RandomDataImpl;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 
@@ -83,7 +84,7 @@ public class NaturalRanking implements RankingAlgorithm {
     private final TiesStrategy tiesStrategy;
 
     /** Source of random data - used only when ties strategy is RANDOM */
-    private final RandomDataGenerator randomData;
+    private final RandomData randomData;
 
     /**
      * Create a NaturalRanking with default strategies for handling ties and NaNs.
@@ -104,7 +105,7 @@ public class NaturalRanking implements RankingAlgorithm {
         super();
         this.tiesStrategy = tiesStrategy;
         nanStrategy = DEFAULT_NAN_STRATEGY;
-        randomData = new RandomDataGenerator();
+        randomData = new RandomDataImpl();
     }
 
     /**
@@ -129,7 +130,7 @@ public class NaturalRanking implements RankingAlgorithm {
         super();
         this.nanStrategy = nanStrategy;
         this.tiesStrategy = tiesStrategy;
-        randomData = new RandomDataGenerator();
+        randomData = new RandomDataImpl();
     }
 
     /**
@@ -142,7 +143,7 @@ public class NaturalRanking implements RankingAlgorithm {
         super();
         this.tiesStrategy = TiesStrategy.RANDOM;
         nanStrategy = DEFAULT_NAN_STRATEGY;
-        randomData = new RandomDataGenerator(randomGenerator);
+        randomData = new RandomDataImpl(randomGenerator);
     }
 
 
@@ -158,7 +159,7 @@ public class NaturalRanking implements RankingAlgorithm {
         super();
         this.nanStrategy = nanStrategy;
         this.tiesStrategy = TiesStrategy.RANDOM;
-        randomData = new RandomDataGenerator(randomGenerator);
+        randomData = new RandomDataImpl(randomGenerator);
     }
 
     /**

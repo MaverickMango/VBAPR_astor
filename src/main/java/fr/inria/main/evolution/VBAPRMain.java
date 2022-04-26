@@ -23,6 +23,7 @@ import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 
 import java.io.BufferedOutputStream;
@@ -135,6 +136,16 @@ public class VBAPRMain extends AbstractMain {
  					.newInstance(mutSupporter, projectFacade);
 		} catch (Exception e) {
 			log.error("Loading custom engine: " + customEngineValue + " --" + e);
+			BufferedOutputStream buff =null;
+			try {
+				String content = ReadGT.proj + "_" + ReadGT.version + "\n";
+				buff = new BufferedOutputStream(new FileOutputStream(ReadGT.loadError, true));
+				buff.write(content.getBytes(StandardCharsets.UTF_8));
+				buff.flush();
+				buff.close();
+			} catch (IOException ec) {
+				e.printStackTrace();
+			}
 			throw new Exception("Error Loading Engine: " + e);
 		}
 		if (object instanceof AstorCoreEngine)

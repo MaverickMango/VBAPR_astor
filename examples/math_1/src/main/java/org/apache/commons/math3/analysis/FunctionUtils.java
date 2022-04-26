@@ -105,7 +105,6 @@ public class FunctionUtils {
      * @return the composite function.
      * @deprecated as of 3.1 replaced by {@link #compose(UnivariateDifferentiableFunction...)}
      */
-    @Deprecated
     public static DifferentiableUnivariateFunction compose(final DifferentiableUnivariateFunction ... f) {
         return new DifferentiableUnivariateFunction() {
             /** {@inheritDoc} */
@@ -173,11 +172,8 @@ public class FunctionUtils {
                 return r;
             }
 
-            /** {@inheritDoc}
-             * @throws DimensionMismatchException if functions are not consistent with each other
-             */
-            public DerivativeStructure value(final DerivativeStructure t)
-                throws DimensionMismatchException {
+            /** {@inheritDoc} */
+            public DerivativeStructure value(final DerivativeStructure t) {
                 DerivativeStructure r = f[0].value(t);
                 for (int i = 1; i < f.length; i++) {
                     r = r.add(f[i].value(t));
@@ -280,7 +276,6 @@ public class FunctionUtils {
      * @return a function that computes the product of the functions.
      * @deprecated as of 3.1 replaced by {@link #multiply(UnivariateDifferentiableFunction...)}
      */
-    @Deprecated
     public static DifferentiableUnivariateFunction multiply(final DifferentiableUnivariateFunction ... f) {
         return new DifferentiableUnivariateFunction() {
             /** {@inheritDoc} */
@@ -423,8 +418,8 @@ public class FunctionUtils {
      * @throws NotStrictlyPositiveException if the number of sample points
      * {@code n} is negative.
      */
-    public static double[] sample(UnivariateFunction f, double min, double max, int n)
-       throws NumberIsTooLargeException, NotStrictlyPositiveException {
+    public static double[] sample(UnivariateFunction f,
+                                  double min, double max, int n) {
 
         if (n <= 0) {
             throw new NotStrictlyPositiveException(
@@ -614,8 +609,8 @@ public class FunctionUtils {
             }
 
             /** {@inheritDoc}
-             * @exception NumberIsTooLargeException if derivation order is higher than 1
-             * @exception DimensionMismatchException if numbers of free parameters are inconsistent
+             * @exception DimensionMismatchException if number of parameters or derivation
+             * order are higher than 1
              */
             public DerivativeStructure value(final DerivativeStructure[] t)
                 throws DimensionMismatchException, NumberIsTooLargeException {
@@ -737,8 +732,8 @@ public class FunctionUtils {
             }
 
             /** {@inheritDoc}
-             * @exception NumberIsTooLargeException if derivation order is higher than 1
-             * @exception DimensionMismatchException if numbers of free parameters are inconsistent
+             * @exception DimensionMismatchException if number of parameters or derivation
+             * order are higher than 1
              */
             public DerivativeStructure[] value(final DerivativeStructure[] t)
                 throws DimensionMismatchException, NumberIsTooLargeException {

@@ -67,14 +67,14 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
             return this.getNextOperator("ReplaceInvocationOp");
         } else if (element instanceof CtTypeReference) {
             return this.getNextOperator("ReplaceTypeInLocalVariableOp");
-        } else if (element instanceof CtStatement) {
-            return this.getNextOperator(1);
         } else if (element instanceof CtVariableAccess || element instanceof CtVariableReference) {
             return this.getNextOperator("ReplaceVarOp");
         } else if (element instanceof CtLiteralImpl){
             return this.getNextOperator("ReplaceLiteralOp");
         } else if (element instanceof CtExpression) {
             return this.getNextOperator(2);
+        } else if (element instanceof CtStatement) {
+            return this.getNextOperator(1);
         }
         return null;
     }

@@ -23,7 +23,7 @@ import org.apache.commons.math3.util.MathArrays;
 import org.junit.Assert;
 import org.junit.Test;
 
-public abstract class ExtendedFieldElementAbstractTest<T extends RealFieldElement<T>> {
+public abstract class ExtendedFieldElementAbstractTest<T extends ExtendedFieldElement<T>> {
 
     protected abstract T build(double x);
 
@@ -312,14 +312,12 @@ public abstract class ExtendedFieldElementAbstractTest<T extends RealFieldElemen
         }
     }
 
-//  TODO: add this test in 4.0, as it is not possible to do it in 3.2
-//  due to incompatibility of the return type in the Dfp class
-//    @Test
-//    public void testLog10() {
-//        for (double x = -0.9; x < 0.9; x += 0.05) {
-//            checkRelative(FastMath.log10(x), build(x).log10());
-//        }
-//    }
+    @Test
+    public void testLog10() {
+        for (double x = -0.9; x < 0.9; x += 0.05) {
+            checkRelative(FastMath.log10(x), build(x).log10());
+        }
+    }
 
     @Test
     public void testAbs() {

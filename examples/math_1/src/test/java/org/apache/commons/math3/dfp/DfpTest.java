@@ -27,7 +27,6 @@ import org.junit.Test;
 
 public class DfpTest extends ExtendedFieldElementAbstractTest<Dfp> {
 
-    @Override
     protected Dfp build(final double x) {
         return field.newDfp(x);
     }
@@ -1231,7 +1230,6 @@ public class DfpTest extends ExtendedFieldElementAbstractTest<Dfp> {
         Assert.assertEquals("toString #9", "0.00001234", field.newDfp("0.00001234").toString());
     }
 
-    @Override
     @Test
     public void testRound()
     {
@@ -1351,7 +1349,6 @@ public class DfpTest extends ExtendedFieldElementAbstractTest<Dfp> {
         field.setRoundingMode(DfpField.RoundingMode.ROUND_HALF_EVEN);  // reset
     }
 
-    @Override
     @Test
     public void testCeil()
     {
@@ -1360,7 +1357,6 @@ public class DfpTest extends ExtendedFieldElementAbstractTest<Dfp> {
              DfpField.FLAG_INEXACT, "Ceil #1");
     }
 
-    @Override
     @Test
     public void testFloor()
     {
@@ -1369,7 +1365,6 @@ public class DfpTest extends ExtendedFieldElementAbstractTest<Dfp> {
              DfpField.FLAG_INEXACT, "Floor #1");
     }
 
-    @Override
     @Test
     public void testRint()
     {
@@ -1508,7 +1503,6 @@ public class DfpTest extends ExtendedFieldElementAbstractTest<Dfp> {
              0, "Remainder #3");
     }
 
-    @Override
     @Test
     public void testSqrt()
     {

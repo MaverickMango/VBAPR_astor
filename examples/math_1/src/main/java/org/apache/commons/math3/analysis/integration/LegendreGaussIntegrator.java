@@ -128,7 +128,6 @@ public class LegendreGaussIntegrator extends BaseAbstractUnivariateIntegrator {
      * @param absoluteAccuracy absolute accuracy of the result
      * @param minimalIterationCount minimum number of iterations
      * @param maximalIterationCount maximum number of iterations
-     * @exception MathIllegalArgumentException if number of points is out of [2; 5]
      * @exception NotStrictlyPositiveException if minimal number of iterations
      * is not strictly positive
      * @exception NumberIsTooSmallException if maximal number of iterations
@@ -139,7 +138,7 @@ public class LegendreGaussIntegrator extends BaseAbstractUnivariateIntegrator {
                                    final double absoluteAccuracy,
                                    final int minimalIterationCount,
                                    final int maximalIterationCount)
-        throws MathIllegalArgumentException, NotStrictlyPositiveException, NumberIsTooSmallException {
+        throws NotStrictlyPositiveException, NumberIsTooSmallException {
         super(relativeAccuracy, absoluteAccuracy, minimalIterationCount, maximalIterationCount);
         switch(n) {
         case 2 :
@@ -171,12 +170,10 @@ public class LegendreGaussIntegrator extends BaseAbstractUnivariateIntegrator {
      * @param n number of points desired (must be between 2 and 5 inclusive)
      * @param relativeAccuracy relative accuracy of the result
      * @param absoluteAccuracy absolute accuracy of the result
-     * @exception MathIllegalArgumentException if number of points is out of [2; 5]
      */
     public LegendreGaussIntegrator(final int n,
                                    final double relativeAccuracy,
-                                   final double absoluteAccuracy)
-        throws MathIllegalArgumentException {
+                                   final double absoluteAccuracy) {
         this(n, relativeAccuracy, absoluteAccuracy,
              DEFAULT_MIN_ITERATIONS_COUNT, DEFAULT_MAX_ITERATIONS_COUNT);
     }
@@ -186,7 +183,6 @@ public class LegendreGaussIntegrator extends BaseAbstractUnivariateIntegrator {
      * @param n number of points desired (must be between 2 and 5 inclusive)
      * @param minimalIterationCount minimum number of iterations
      * @param maximalIterationCount maximum number of iterations
-     * @exception MathIllegalArgumentException if number of points is out of [2; 5]
      * @exception NotStrictlyPositiveException if minimal number of iterations
      * is not strictly positive
      * @exception NumberIsTooSmallException if maximal number of iterations
@@ -194,8 +190,7 @@ public class LegendreGaussIntegrator extends BaseAbstractUnivariateIntegrator {
      */
     public LegendreGaussIntegrator(final int n,
                                    final int minimalIterationCount,
-                                   final int maximalIterationCount)
-        throws MathIllegalArgumentException {
+                                   final int maximalIterationCount) {
         this(n, DEFAULT_RELATIVE_ACCURACY, DEFAULT_ABSOLUTE_ACCURACY,
              minimalIterationCount, maximalIterationCount);
     }
@@ -203,7 +198,7 @@ public class LegendreGaussIntegrator extends BaseAbstractUnivariateIntegrator {
     /** {@inheritDoc} */
     @Override
     protected double doIntegrate()
-        throws MathIllegalArgumentException, TooManyEvaluationsException, MaxCountExceededException {
+        throws TooManyEvaluationsException, MaxCountExceededException {
 
         // compute first estimate with a single step
         double oldt = stage(1);

@@ -405,8 +405,7 @@ public class PolynomialFunction implements UnivariateDifferentiableFunction, Dif
         }
 
         /** {@inheritDoc} */
-        public double value(final double x, final double ... parameters)
-            throws NoDataException {
+        public double value(final double x, final double ... parameters) {
             return PolynomialFunction.evaluate(parameters, x);
         }
     }

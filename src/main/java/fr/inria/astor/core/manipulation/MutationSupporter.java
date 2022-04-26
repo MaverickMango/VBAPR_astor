@@ -176,7 +176,7 @@ public class MutationSupporter {
 		return cloned;
 	}
 
-	private static Factory createFactory() {
+	public static Factory createFactory() {
 		Environment env = getEnvironment();
 		Factory factory = new FactoryImpl(new DefaultCoreFactory(), env);
 

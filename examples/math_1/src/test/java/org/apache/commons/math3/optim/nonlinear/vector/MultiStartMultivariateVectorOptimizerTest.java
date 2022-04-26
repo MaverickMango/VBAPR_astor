@@ -18,6 +18,7 @@ package org.apache.commons.math3.optim.nonlinear.vector;
 
 import org.apache.commons.math3.analysis.MultivariateMatrixFunction;
 import org.apache.commons.math3.analysis.MultivariateVectorFunction;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -151,7 +152,6 @@ public class MultiStartMultivariateVectorOptimizerTest {
         LinearProblem problem = new LinearProblem(new double[][] { { 2 } }, new double[] { 3 });
         JacobianMultivariateVectorOptimizer underlyingOptimizer =
                 new GaussNewtonOptimizer(true, new SimpleVectorValueChecker(1e-6, 1e-6)) {
-            @Override
             public PointVectorValuePair optimize(OptimizationData... optData) {
                 // filter out simple bounds, as they are not supported
                 // by the underlying optimizer, and we don't really care for this test
