@@ -1,7 +1,5 @@
 package fr.inria.astor.approaches.jgenprog.extension;
 
-import fr.inria.astor.util.GroundTruth;
-import fr.inria.astor.util.ReadGT;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.*;
 

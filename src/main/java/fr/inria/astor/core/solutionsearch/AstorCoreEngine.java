@@ -8,10 +8,8 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import fr.inria.astor.approaches.jgenprog.LocalVariableProcessor;
-import fr.inria.astor.approaches.jgenprog.VariableReferenceProcessor;
 import fr.inria.astor.core.manipulation.filters.*;
-import fr.inria.astor.util.ReadGT;
+import fr.inria.astor.util.ReadFileUtil;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -76,16 +74,9 @@ import fr.inria.astor.util.TimeUtil;
 import fr.inria.main.AstorOutputStatus;
 import fr.inria.main.evolution.ExtensionPoints;
 import fr.inria.main.evolution.PlugInLoader;
-import spoon.processing.ProcessingManager;
-import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
-import spoon.support.QueueProcessingManager;
-import spoon.support.reflect.code.CtAssignmentImpl;
-import spoon.support.reflect.code.CtBlockImpl;
-import spoon.support.reflect.code.CtIfImpl;
 
 /**
  * 
@@ -173,8 +164,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	public abstract void startEvolution() throws Exception;
 
 	public void filterSolutions() {
-		String[] info = ReadGT.getInfos();
-		ReadGT.getGTs(info);
+		String[] info = ReadFileUtil.getInfos();
+		ReadFileUtil.getGTs(info);
 	}
 
 	public void atEnd() {
@@ -558,7 +549,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 				return true;
 			} else {
-				ReadGT.compileButFail ++ ;
+				ReadFileUtil.compileButFail ++ ;
 			}
 		} else {
 			log.debug("-The child does NOT compile: " + programVariant.getId() + ", errors: "

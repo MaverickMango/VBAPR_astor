@@ -734,7 +734,7 @@ public class VariableResolver {
 				&& !(parent instanceof CtPackage)/*
 													 * && !CtPackage. TOP_LEVEL_PACKAGE_NAME. equals(parent.toString())
 													 */) {
-			if (parent.equals(rootElement))
+			if (parent.equals(rootElement))//question why should they be same?
 				return true;
 			parent = parent.getParent();
 		}

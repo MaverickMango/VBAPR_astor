@@ -2,6 +2,9 @@ package fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch;
 
 import java.util.List;
 
+import fr.inria.astor.approaches.jgenprog.extension.ReplaceExpressionOp;
+import fr.inria.astor.approaches.jgenprog.extension.ReplaceTypeOp;
+import fr.inria.astor.approaches.jgenprog.operators.InsertStatementOp;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.approaches.jgenprog.operators.ReplaceOp;
@@ -118,7 +121,7 @@ public class SimpleRandomSelectionIngredientStrategy extends IngredientSearchStr
 	public List<Ingredient> geIngredientsFromSpace(ModificationPoint modificationPoint, AstorOperator operationType) {
 
 		String type = null;
-		if (operationType instanceof ReplaceOp) {
+		if (operationType instanceof ReplaceTypeOp) {
 			type = modificationPoint.getCodeElement().getClass().getSimpleName();
 		}
 

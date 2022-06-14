@@ -1,7 +1,7 @@
 package fr.inria.astor.approaches.jgenprog;
 
 import fr.inria.astor.util.GroundTruth;
-import fr.inria.astor.util.ReadGT;
+import fr.inria.astor.util.ReadFileUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLocalVariable;
 
@@ -17,7 +17,7 @@ public class LocalVariableProcessor extends AbstractProcessor<CtLocalVariable> {
 
     @Override
     public void process(CtLocalVariable ctLocalVariable) {
-        for (GroundTruth gt :ReadGT.GTs) {
+        for (GroundTruth gt : ReadFileUtil.GTs) {
             if (!gt.getLocation().endsWith(location))
                 continue;
             String var = gt.getName();

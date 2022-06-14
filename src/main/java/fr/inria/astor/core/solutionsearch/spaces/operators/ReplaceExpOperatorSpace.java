@@ -2,14 +2,17 @@ package fr.inria.astor.core.solutionsearch.spaces.operators;
 
 import fr.inria.astor.core.entities.SuspiciousModificationPoint;
 import fr.inria.astor.core.setup.RandomManager;
+import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
+import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSelectionStrategy;
+import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSpace;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
-    public GTBRepairOperatorSpace(OperatorSpace space) {
+public class ReplaceExpOperatorSpace extends OperatorSelectionStrategy {
+    public ReplaceExpOperatorSpace(OperatorSpace space) {
         super(space);
     }
 
@@ -28,27 +31,7 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
         List<AstorOperator> operators = new ArrayList<>();
         switch (type) {
             case 1:
-                operators.add(getNextOperator("InsertAfterOp"));
-                operators.add(getNextOperator("InsertBeforeOp"));
-                break;
-            case 2:
                 operators.add(getNextOperator("ReplaceExpressionOp"));
-                operators.add(getNextOperator("BinaryExpressionMutOp"));
-                break;
-            case 3:
-                operators.add(getNextOperator("InsertAfterOp"));
-                operators.add(getNextOperator("InsertBeforeOp"));
-                operators.add(getNextOperator("RemoveOp"));
-                break;
-            case 4:
-                operators.add(getNextOperator("InsertAfterOp"));
-                operators.add(getNextOperator("InsertBeforeOp"));
-                operators.add(getNextOperator("ReplaceTypeOp"));
-                break;
-            case 5:
-                operators.add(getNextOperator("InsertBeforeOp"));
-                operators.add(getNextOperator("ReplaceExpressionOp"));
-                break;
             default:break;
         }
         return operators.get(RandomManager.nextInt(operators.size()));
@@ -74,14 +57,6 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
     public AstorOperator getNextOperator(SuspiciousModificationPoint modificationPoint) {
         CtElement element = modificationPoint.getCodeElement();
         if (element instanceof CtExpression && !(element instanceof CtAssignment)) {//CtAssignment CtInvocation are both exp and stmt
-            return this.getNextOperator(2);
-        } else if (element instanceof CtIf || element instanceof CtWhile || element instanceof CtInvocation) {
-            return this.getNextOperator(3);
-        } else if (element instanceof CtLocalVariable) {
-            return this.getNextOperator(4);
-        } else if (element instanceof CtBreak) {
-            return this.getNextOperator(5);
-        } else if (element instanceof CtStatement) {
             return this.getNextOperator(1);
         }
         return null;

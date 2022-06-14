@@ -13,6 +13,8 @@ public class GroundTruth {
     private boolean onlyOneLine = false;
     private int linenumber;
     private boolean isExp = false;
+    private String clazz = "";
+    private String method = "";
 
     public GroundTruth(String location) {
         this.location = location;
@@ -30,6 +32,22 @@ public class GroundTruth {
         this.name = name;
         this.linenumber = linenumber;
         setExp(name);
+    }
+
+    public String getClazz() {
+        return clazz;
+    }
+
+    public void setClazz(String clazz) {
+        this.clazz = clazz;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
     }
 
     public List<CtElement> getNodes() {

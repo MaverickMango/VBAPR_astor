@@ -9,8 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import fr.inria.astor.util.CodeLineCollector;
-import fr.inria.astor.util.ReadGT;
+import fr.inria.astor.util.ReadFileUtil;
 import org.apache.commons.cli.ParseException;
 import org.apache.log4j.Logger;
 
@@ -184,8 +183,8 @@ public class AstorMain extends AbstractMain {
 		log.info("Time Total(s): " + (endT - startT) / 1000d);
 		BufferedOutputStream buff =null;
 		try {
-			String content = ReadGT.proj + "_" + ReadGT.version + ":" + ReadGT.compileButFail + "," + ((endT - startT) / 1000d) + ";\n";
-			buff = new BufferedOutputStream(new FileOutputStream(ReadGT.timeOutput, true));
+			String content = ReadFileUtil.proj + "_" + ReadFileUtil.version + ":" + ReadFileUtil.compileButFail + "," + ((endT - startT) / 1000d) + ";\n";
+			buff = new BufferedOutputStream(new FileOutputStream(ReadFileUtil.timeOutput, true));
 			buff.write(content.getBytes(StandardCharsets.UTF_8));
 			buff.flush();
 			buff.close();

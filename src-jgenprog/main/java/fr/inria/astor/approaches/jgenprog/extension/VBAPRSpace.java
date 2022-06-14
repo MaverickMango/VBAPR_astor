@@ -7,14 +7,15 @@ import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSpace;
 
 public class VBAPRSpace extends OperatorSpace {
 
-    public VBAPRSpace(){
+    public VBAPRSpace() {
         super.register(new BinaryExpressionMutOp());
-        super.register(new ReplaceVarOp());
+        super.register(new ReplaceExpressionOp());
         super.register(new InsertAfterOp());
         super.register(new InsertBeforeOp());
-        super.register(new ReplaceLiteralOp());
-        super.register(new ReplaceInvocationOp());
-        super.register(new ReplaceTypeInLocalVariableOp());
-//        super.register(new RemoveOp());
+        super.register(new ReplaceTypeOp());
+        super.register(new RemoveOp());
+//        super.register(new ReplaceVarOp());
+//        super.register(new ReplaceLiteralOp());
+//        super.register(new ReplaceInvocationOp());
     }
 }

@@ -28,9 +28,9 @@ public class SingleStatementFixSpaceProcessor extends TargetElementProcessor<CtS
 	public void process(CtStatement element) {
 		if (!(element instanceof CtBlock || element instanceof CtClass || element instanceof CtMethod
 				|| element instanceof CtTry || element instanceof CtCatch) && 
-				(element.getParent() instanceof CtBlock) && 
-				(!(element.toString().startsWith("super"))
-						|| ConfigurationProperties.getPropertyBool("manipulatesuper"))) {
+
+				(!(element.toString().startsWith("super"))//(element.getParent() instanceof CtBlock) &&
+				|| ConfigurationProperties.getPropertyBool("manipulatesuper"))) {
 			add(element);
 		}
 	}

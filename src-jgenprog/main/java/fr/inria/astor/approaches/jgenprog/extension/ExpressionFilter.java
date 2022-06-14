@@ -1,11 +1,12 @@
 package fr.inria.astor.approaches.jgenprog.extension;
 
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtSuperAccess;
-import spoon.reflect.code.CtThisAccess;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtType;
+import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.filter.AbstractFilter;
+import spoon.support.reflect.code.CtVariableReadImpl;
 
 public class ExpressionFilter extends AbstractFilter<CtElement> {
     private String _name;
@@ -27,15 +28,17 @@ public class ExpressionFilter extends AbstractFilter<CtElement> {
 
     boolean compare(String str) {
         String name = _name;
+        String comp = compactStr(str);
+        if (name.equals(comp)){
+            return true;
+        }
         if (name.startsWith("(") && name.endsWith(")"))
             name = name.substring(1, name.length() - 1);
-        String comp = compactStr(str);
+        if (name.equals(comp)){
+            return true;
+        }
         if (comp.startsWith("(") && comp.endsWith(")"))
             comp = comp.substring(1, comp.length() - 1);
-//        if (name.equals(comp)){
-//            return true;
-//        }
-//        return _name.equals(compactStr(str));
         return name.equals(comp);
     }
 
@@ -47,16 +50,22 @@ public class ExpressionFilter extends AbstractFilter<CtElement> {
 
     @Override
     public boolean matches(CtElement element) {
-        if (element instanceof CtExpression || element instanceof CtVariableReference) {
-            if (element instanceof CtThisAccess || element instanceof CtSuperAccess
-            )//|| element instanceof CtTypeAccess
+        if (element instanceof CtExpression || element instanceof CtVariable) {
+            if (element instanceof CtSuperAccess
+            )//|| element instanceof CtTypeAccess element instanceof CtThisAccess ||
                 return false;
             String str = "";
-            try {
-                str = element.getOriginalSourceFragment().getSourceCode();
-            } catch (Exception e) {
-                str = element.toString();
+            if (element instanceof CtLocalVariable)
+                str = ((CtLocalVariable<?>) element).getSimpleName();
+            else if(element instanceof CtVariableRead) {
+                str = ((CtVariableRead) element).getVariable().getSimpleName();
+            } else {
+                try {
+                    str = element.getOriginalSourceFragment().getSourceCode();
+                } catch (Exception e) {
+                    str = element.toString();
 //                System.err.println(str);
+                }
             }
             return compare(str);
         }

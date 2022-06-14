@@ -11,7 +11,7 @@ import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.FinderTestCases;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.util.CodeLineCollector;
-import fr.inria.astor.util.ReadGT;
+import fr.inria.astor.util.ReadFileUtil;
 import org.apache.log4j.Logger;
 import spoon.reflect.declaration.CtClass;
 
@@ -96,8 +96,8 @@ public class GZoltarFaultLocalizationWithGT implements FaultLocalizationStrategy
 				&& !ConfigurationProperties.getPropertyBool("canhavezerosusp")) {
 			BufferedOutputStream buff =null;
 			try {
-				String content = ReadGT.proj + "_" + ReadGT.version + "\n";
-				buff = new BufferedOutputStream(new FileOutputStream(ReadGT.supsLineError, true));
+				String content = ReadFileUtil.proj + "_" + ReadFileUtil.version + "\n";
+				buff = new BufferedOutputStream(new FileOutputStream(ReadFileUtil.supsLineError, true));
 				buff.write(content.getBytes(StandardCharsets.UTF_8));
 				buff.flush();
 				buff.close();

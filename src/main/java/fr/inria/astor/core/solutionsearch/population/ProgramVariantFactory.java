@@ -5,7 +5,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import fr.inria.astor.util.ReadGT;
+import fr.inria.astor.core.entities.OperatorInstance;
+import fr.inria.astor.core.setup.FinderTestCases;
+import fr.inria.astor.util.GroundTruth;
+import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.StringUtil;
 import org.apache.log4j.Logger;
 
 import com.martiansoftware.jsap.JSAPException;
@@ -21,8 +25,7 @@ import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.CodeParserLauncher;
-import spoon.reflect.code.CtStatement;
-import spoon.reflect.cu.SourcePosition;
+import spoon.reflect.code.*;
 import spoon.reflect.cu.position.NoSourcePosition;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
@@ -94,6 +97,23 @@ public class ProgramVariantFactory {
 		return variants;
 	}
 
+//	private boolean modifyInitialVariant(ProgramVariant variant, int pointID) throws Exception {
+//
+//		boolean oneOperationCreated = false;
+//		int genMutated = 0, notmut = 0, notapplied = 0;
+//		int nroGen = 0;
+//
+//		log.info("modifyInitialVariant at modificationPonit: " + pointID);
+//
+//		ModificationPoint modificationPoint = variant.getModificationPoints().get(pointID);
+//
+//		modificationPoint.setProgramVariant(variant);
+//		OperatorInstance modificationInstance = createOperatorInstanceForPoint(modificationPoint);
+//
+//		return oneOperationCreated;
+//	}
+
+
 	public CtClass getCtClassFromCtElement(CtElement element) {
 
 		if (element == null)
@@ -137,10 +157,18 @@ public class ProgramVariantFactory {
 			log.info("Total suspicious from FL: " + suspiciousList.size() + ",  "
 					+ progInstance.getModificationPoints().size());
 		} else {
-			// We do not have suspicious, so, we create modification for each
-			// statement
+//			 //We do not have suspicious, so, we create modification for each
+//			 //statement
+//			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance);
+//			progInstance.getModificationPoints().addAll(pointsFromAllStatements);
 
-			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance);
+			//if skipfaultlocalization, we use gt variable to extract.
+			//set testcases
+			List<String> regressionTestForFaultLocalization = FinderTestCases.findJUnit4XTestCasesForRegression(projectFacade);
+			projectFacade.getProperties().setRegressionCases(regressionTestForFaultLocalization);
+
+			log.info("Test retrieved from classes: " + regressionTestForFaultLocalization.size());
+			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance, ReadFileUtil.GTs);
 			progInstance.getModificationPoints().addAll(pointsFromAllStatements);
 		}
 		log.info("Total ModPoint created: " + progInstance.getModificationPoints().size());
@@ -151,6 +179,26 @@ public class ProgramVariantFactory {
 			mp.identified = i;
 		}
 		return progInstance;
+	}
+
+	private List<SuspiciousModificationPoint> createModificationPoints(ProgramVariant progInstance, List<GroundTruth> gts) {
+
+		List<SuspiciousModificationPoint> suspGen = new ArrayList<>();
+		List<Integer> lines = new ArrayList<>();
+		for (GroundTruth gt :gts) {
+			List<CtElement> nodes = gt.getNodes();
+			for (CtElement element :nodes) {
+				SuspiciousCode sus = new SuspiciousCode(gt.getClazz(), gt.getMethod(), 1.0);
+				int line = element.getPosition().getLine();
+				if (lines.contains(line))
+					continue;
+				lines.add(line);
+				sus.setLineNumber(line);
+				List<SuspiciousModificationPoint> temp = this.createModificationPoints(sus, progInstance);
+				suspGen.addAll(temp);
+			}
+		}
+		return suspGen;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -266,8 +314,16 @@ public class ProgramVariantFactory {
 				.collect(Collectors.toList());
 		// For each filtered element, we create a ModificationPoint.
 		for (CtElement ctElement : filteredTypeByLine) {
-			if (!(ctElement instanceof CtStatement) && !ReadGT.hasThisElement(ctElement))
-				continue;
+//			if ((ctElement instanceof CtInvocation || ctElement instanceof CtAssignment)
+//					&& !ReadFileUtil.hasThisElement(ctElement))
+//				continue;
+			if (!ReadFileUtil.hasThisElement(ctElement)) {//!(ctElement instanceof CtStatement) &&
+				if (!ReadFileUtil.hasThisElement(ctElement.getParent(CtLocalVariable.class))
+						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class))
+						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtOperatorAssignment.class))) {
+					continue;
+				}
+			}
 			SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
 			modifPoint.setSuspicious(suspiciousCode);
 			modifPoint.setCtClass(ctclasspointed);

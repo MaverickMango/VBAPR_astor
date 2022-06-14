@@ -2,7 +2,6 @@ package fr.inria.astor.approaches.jgenprog.extension;
 
 import com.martiansoftware.jsap.JSAPException;
 import fr.inria.astor.approaches.jgenprog.JGenProg;
-import fr.inria.astor.approaches.jgenprog.jGenProgSpace;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.entities.OperatorInstance;
@@ -14,15 +13,11 @@ import fr.inria.astor.core.manipulation.filters.SingleStatementFixSpaceProcessor
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
-import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
 import fr.inria.astor.core.solutionsearch.population.ProgramVariantFactory;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.IngredientBasedOperator;
-import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSelectionStrategy;
-import fr.inria.astor.core.solutionsearch.spaces.operators.OperatorSpace;
-import fr.inria.astor.util.ReadGT;
+import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.main.evolution.ExtensionPoints;
-import fr.inria.main.evolution.PlugInLoader;
 import org.apache.log4j.Logger;
 import spoon.processing.AbstractProcessor;
 
@@ -37,8 +32,8 @@ public class VBAPR  extends JGenProg {
 
     public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
-        ReadGT.getGTs(ReadGT.getInfos());
-        ReadGT.setGTElements();
+        ReadFileUtil.getGTs(ReadFileUtil.getInfos());
+        ReadFileUtil.setGTElements();
     }
 
     @Override
