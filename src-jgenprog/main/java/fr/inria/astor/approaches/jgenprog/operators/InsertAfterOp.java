@@ -64,6 +64,6 @@ public class InsertAfterOp extends InsertStatementOp {
 		}
 
 		// Otherwise, accept the element
-		return true;
+		return point.getCodeElement().getParent() instanceof CtBlock;
 	}
 }

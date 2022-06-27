@@ -1,4 +1,4 @@
-package fr.inria.astor.test.repair.approaches.VBAPR;
+package fr.inria.main.test;
 
 import fr.inria.astor.util.ReadFileUtil;
 import org.junit.runner.Description;
@@ -14,13 +14,10 @@ public class TestExecutionListener extends RunListener {
     MethodInfo methodInfo;
     List<MethodInfo> list;
 
-    public TestExecutionListener() {
-        this.list = new ArrayList<>();
-    }
-
     public void testRunStarted(Description description) throws Exception {
         System.out.println("--------- START ----------");
         recorder = new TestResultRecorder();
+        list = new ArrayList<>();
     }
 
     public void testRunFinished(Result result) throws Exception {

@@ -98,8 +98,8 @@ public class RemoveOp extends StatatementIngredientOperator implements Statement
 			return false;
 		}
 
-		// Otherwise, accept the element
-		return true;
+		// Otherwise, accept the element// add parent block check! invocation in stmt dame!
+		return point.getCodeElement().getParent() instanceof CtBlock;
 	}
 
 	@Override

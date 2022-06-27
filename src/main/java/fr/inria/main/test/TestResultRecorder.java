@@ -1,4 +1,4 @@
-package fr.inria.astor.test.repair.approaches.VBAPR;
+package fr.inria.main.test;
 
 import java.util.List;
 

@@ -236,7 +236,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 //                    continue;
 //                exps.add(in);
 //            } else
-                if (parent instanceof CtIf || parent instanceof CtReturn) {
+            if (parent instanceof CtIf || parent instanceof CtReturn) {
                 exps.add(in);
             }
 
@@ -339,7 +339,10 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             log.debug(String.format("Attempts Base Ingredients  %d total %d", attemptsBaseIngredients,
                     elementsFromFixSpace));
 
-            Ingredient baseIngredient = getRandomFromSpace(baseElements);//todo
+            Ingredient baseIngredient = getRandomFromSpace(baseElements);
+
+            if (modificationPoint.getCodeElement().toString().equals(baseIngredient.getCode().toString()))
+                continue;
 
             String newingredientkey = getKey(modificationPoint, operationType);
 
@@ -360,5 +363,14 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 + StringUtil.trunc(modificationPoint.getCodeElement().getShortRepresentation())
                 + ", search space size: " + elementsFromFixSpace);
         return null;
+    }
+
+
+    public String getKey(ModificationPoint modPoint, AstorOperator operator) {
+        String lockey = modPoint.getCodeElement().getPosition().toString() + "-"
+                + modPoint.getCodeElement() + "-"
+                + modPoint.getCodeElement().getParent() + "-"
+                + operator.toString();
+        return lockey;
     }
 }

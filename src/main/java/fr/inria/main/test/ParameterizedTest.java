@@ -1,16 +1,18 @@
-package fr.inria.astor.test.repair.approaches.VBAPR;
+package fr.inria.main.test;
 
 import fr.inria.astor.core.entities.ProgramVariant;
-import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
-import fr.inria.astor.test.repair.core.BaseEvolutionaryTest;
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.main.evolution.VBAPRMain;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import spoon.support.StandardEnvironment;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -19,17 +21,16 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class ParameterizedTest extends BaseEvolutionaryTest {
+public class ParameterizedTest{
 
-    File out;
-    VBAPRMain main;
-    TestArgsUtil argsUtil;
+    public static Logger log = Logger.getLogger(Thread.currentThread().getName());
+    static VBAPRMain main;
+    static TestArgsUtil argsUtil;
+    static String fileName;
     private String proj;
     private String version;
 
     public ParameterizedTest(String proj, String version) {
-//        out = new File(ConfigurationProperties.getProperty("workingDirectory"));
-        out = new File(ReadFileUtil.outputSrc + proj);
         this.proj = proj;
         this.version = version;
     }
@@ -37,22 +38,29 @@ public class ParameterizedTest extends BaseEvolutionaryTest {
     @Parameterized.Parameters
     public static Collection<String[]> data() {
         String[][] data = {
-                {"Math", "98"}
+                {"Lang", "6"}
         };
         return Arrays.asList(data);
 //        String fileName = ReadFileUtil.outputSrc + "part2.txt";
 //        return readPVInfos(fileName);
     }
 
+
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
+        MutationSupporter.cleanFactory();
+        Logger.getLogger(StandardEnvironment.class).setLevel(Level.ERROR);
+    }
+
+    @BeforeClass
+    public static void setUpBeforeClass() {
         main = new VBAPRMain();
         argsUtil = new TestArgsUtil();
     }
 
     @Test
     public void testSoulutionFound() throws Exception {
-        org.apache.log4j.LogManager.getRootLogger().setLevel(Level.OFF);
+//        org.apache.log4j.LogManager.getRootLogger().setLevel(Level.OFF);
         main.execute(argsUtil.getArgs(proj, version));
         AstorCoreEngine engine = main.getEngine();
         List<ProgramVariant> solutions = engine.getSolutions();
@@ -77,6 +85,7 @@ public class ParameterizedTest extends BaseEvolutionaryTest {
                     list.add(new String[]{proj, id});
                     stringBuilder.append(counter++).append(",");
                     stringBuilder.append(proj).append(",").append(id);
+                    stringBuilder.append("\n");
                 }
             }
             writeInfo(stringBuilder.toString(), ReadFileUtil.mapping);

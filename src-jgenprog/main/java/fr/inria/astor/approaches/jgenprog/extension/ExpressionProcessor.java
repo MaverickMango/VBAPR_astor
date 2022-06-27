@@ -11,7 +11,7 @@ public class ExpressionProcessor extends AbstractProcessor<CtExpression> {
 
     @Override
     public void process(CtExpression ctExpression) {
-        if (ctExpression instanceof CtArrayAccess || ctExpression instanceof CtNewArray
+        if (ctExpression instanceof CtNewArray
                 || ctExpression instanceof CtTypeAccess || ctExpression instanceof CtThisAccess
                 || ctExpression instanceof CtVariableAccess || ctExpression instanceof CtLiteral) {
             return;

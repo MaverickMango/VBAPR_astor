@@ -1,10 +1,14 @@
-package fr.inria.astor.test.repair.approaches.VBAPR;
+package fr.inria.main.test;
 
+import fr.inria.astor.util.ReadFileUtil;
 import org.junit.runner.JUnitCore;
 
 public class ExecutionMain {
 
+    static String filename = ReadFileUtil.outputSrc;
+
     public static void main(String[] args) {
+        ParameterizedTest.fileName = filename + args[0];
         run(ParameterizedTest.class);
     }
 

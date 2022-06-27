@@ -73,10 +73,11 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
     @Override
     public AstorOperator getNextOperator(SuspiciousModificationPoint modificationPoint) {
         CtElement element = modificationPoint.getCodeElement();
-        if (element instanceof CtExpression && !(element instanceof CtAssignment)) {//CtAssignment CtInvocation are both exp and stmt
-            return this.getNextOperator(2);
-        } else if (element instanceof CtIf || element instanceof CtWhile || element instanceof CtInvocation) {
+        if ((element instanceof CtInvocation && element.getParent() instanceof CtBlock)
+                || element instanceof CtIf || element instanceof CtWhile) {
             return this.getNextOperator(3);
+        } else if (element instanceof CtExpression && !(element instanceof CtAssignment)) {//CtAssignment CtInvocation are both exp and stmt
+            return this.getNextOperator(2);
         } else if (element instanceof CtLocalVariable) {
             return this.getNextOperator(4);
         } else if (element instanceof CtBreak) {

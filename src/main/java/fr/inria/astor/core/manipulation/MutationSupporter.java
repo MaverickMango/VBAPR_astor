@@ -1,11 +1,16 @@
 package fr.inria.astor.core.manipulation;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import fr.inria.astor.util.ReadFileUtil;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.core.entities.OperatorInstance;
@@ -255,6 +260,16 @@ public class MutationSupporter {
 			} catch (Exception e2) {
 				e2.printStackTrace();
 				logger.error("Error compiling: " + e2.getMessage());
+					BufferedOutputStream buff =null;
+					try {
+						String content = ReadFileUtil.proj + "_" + ReadFileUtil.version + "\n";
+						buff = new BufferedOutputStream(new FileOutputStream(ReadFileUtil.buildError, true));
+						buff.write(content.getBytes(StandardCharsets.UTF_8));
+						buff.flush();
+						buff.close();
+					} catch (IOException ioe) {
+						ioe.printStackTrace();
+					}
 				if (!ConfigurationProperties.getPropertyBool("continuewhenmodelfail")) {
 					logger.error("Astor does not continue when model build fails");
 					throw e2;

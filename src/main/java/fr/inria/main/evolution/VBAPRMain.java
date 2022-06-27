@@ -171,12 +171,11 @@ public class VBAPRMain extends AbstractMain {
 				}
 			}
 
-			if (core == null) {
-				System.err.println("Unknown mode of execution: '" + mode + "',  modes are: "
-						+ Arrays.toString(ExecutionMode.values()));
-				return;
-			}
-
+		}
+		if (core == null) {
+			System.err.println("Unknown mode of execution: '" + mode + "',  modes are: "
+					+ Arrays.toString(ExecutionMode.values()));
+			return;
 		}
 
 		ConfigurationProperties.print();

@@ -1,9 +1,8 @@
 package fr.inria.astor.core.solutionsearch;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -179,8 +178,9 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		currentStat.getGeneralStats().put(GeneralStatEnum.OUTPUT_STATUS, this.getOutputStatus());
 		currentStat.getGeneralStats().put(GeneralStatEnum.EXECUTION_IDENTIFIER,
 				ConfigurationProperties.getProperty("projectIdentifier"));
-
-		currentStat.getGeneralStats().put(GeneralStatEnum.FAULT_LOCALIZATION,
+		//
+		if (!ConfigurationProperties.getPropertyBool("skipfaultlocalization"))
+			currentStat.getGeneralStats().put(GeneralStatEnum.FAULT_LOCALIZATION,
 				ConfigurationProperties.getProperty("faultlocalization").toString());
 
 		this.printFinalStatus();
@@ -537,9 +537,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 			log.debug("-The child compiles: id " + programVariant.getId());
 			currentStat.increment(GeneralStatEnum.NR_RIGHT_COMPILATIONS);
 
-			VariantValidationResult validationResult = validateInstance(programVariant);
-			double fitness = this.fitnessFunction.calculateFitnessValue(validationResult);
-			programVariant.setFitness(fitness);
+			VariantValidationResult validationResult = setFitnessForVariant(programVariant);
 
 			log.debug("-Valid?: " + validationResult + ", fitness " + programVariant.getFitness());
 			if (validationResult != null && validationResult.isSuccessful()) {
@@ -549,7 +547,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 				return true;
 			} else {
-				ReadFileUtil.compileButFail ++ ;
+				ReadFileUtil.compileButFail ++ ;//problem
 			}
 		} else {
 			log.debug("-The child does NOT compile: " + programVariant.getId() + ", errors: "
@@ -562,6 +560,13 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		Stats.currentStat.getIngredientsStats().storeIngCounterFromFailingPatch(programVariant.getId());
 		return false;
 
+	}
+
+	public VariantValidationResult setFitnessForVariant(ProgramVariant programVariant) {
+		VariantValidationResult validationResult = validateInstance(programVariant);
+		double fitness = this.fitnessFunction.calculateFitnessValue(validationResult);
+		programVariant.setFitness(fitness);
+		return validationResult;
 	}
 
 	protected void saveStaticSucessful(int variant_id, int generation) {
@@ -870,7 +875,6 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 				return;
 			}
 		}
-
 		this.mutatorSupporter.buildSpoonModel(this.projectFacade);
 
 		log.info("Number of CtTypes created: " + mutatorSupporter.getFactory().Type().getAll().size());

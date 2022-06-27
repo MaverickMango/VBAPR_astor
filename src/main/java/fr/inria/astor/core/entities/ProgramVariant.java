@@ -69,6 +69,7 @@ public class ProgramVariant {
 	 * Parent Variant
 	 */
 	protected ProgramVariant parent = null;
+
 	/**
 	 * Id of the generation this variant born
 	 */
@@ -155,6 +156,23 @@ public class ProgramVariant {
 		return operations;
 	}
 
+	public int getOperationsSize() {
+		if (operations.isEmpty())
+			return 0;
+		int res = 0;
+		List<Integer> emptyKeys = new ArrayList<>();
+		for (Integer key : operations.keySet()) {
+			if (operations.get(key).isEmpty()) {
+				emptyKeys.add(key);
+			}
+			res += operations.get(key).size();
+		}
+//		for (Integer key :emptyKeys) {
+//			operations.remove(key);
+//		}
+		return res;
+	}
+
 	public List<OperatorInstance> getAllOperations() {
 		List<OperatorInstance> allops = new ArrayList<>();
 		for (List<OperatorInstance> ops : this.operations.values()) {
@@ -164,8 +182,9 @@ public class ProgramVariant {
 	}
 
 	public List<OperatorInstance> getOperations(int generation) {
-		if (!operations.containsKey(generation))
+		if (!operations.containsKey(generation)) {
 			operations.put(generation, new ArrayList<>());
+		}
 		return operations.get(generation);
 	}
 

@@ -50,7 +50,11 @@ public class ReplaceExpressionOp extends ExpressionIngredientOperator implements
         ExpressionOperatorInstance expop = (ExpressionOperatorInstance) operation;
         CtElement ori = expop.getOriginal();
         CtElement fix = expop.getModified();
-        fix.replace(ori);
+        try {
+            fix.replace(ori);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 

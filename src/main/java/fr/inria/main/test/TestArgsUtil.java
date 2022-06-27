@@ -1,4 +1,4 @@
-package fr.inria.astor.test.repair.approaches.VBAPR;
+package fr.inria.main.test;
 
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.main.CommandSummary;
@@ -12,18 +12,20 @@ public class TestArgsUtil {
     private String srcPathDir = ReadFileUtil.baseDir + "src_path/";//proj/version.txt
     private String ftsDir = ReadFileUtil.baseDir + "failed_tests/";//proj/version.txt
     private String locationDir = ReadFileUtil.outputSrc + "Defects4jProjs/";//proj_version/  //must be absolute path
+    private String outputDir = ReadFileUtil.outputSrc;
 
     public TestArgsUtil() {
         this.cs = new CommandSummary();
         cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR");
         cs.command.put("-maxgen", "500");
-        cs.command.put("-population", "2");
+        cs.command.put("-population", "5");
 //        cs.command.put("-scope", "file");
         cs.command.put("-skipfaultlocalization", "true");
-        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
+        cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");
+//        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
         cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
         cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
-        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");
+        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.ReplaceExpOperatorSpace");//GTBRepairOperatorSpace
         cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
     }
 
@@ -41,6 +43,7 @@ public class TestArgsUtil {
             stringBuilder.append(args.get(i)).append(":");
         }
         cs.command.put("-failing", stringBuilder.toString().substring(0, stringBuilder.length() - 1));
+        cs.command.put("-out", outputDir + proj + "/");
         return cs.flat();
     }
 

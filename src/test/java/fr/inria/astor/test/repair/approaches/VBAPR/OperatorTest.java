@@ -164,4 +164,32 @@ public class OperatorTest extends BaseEvolutionaryTest {
         assertTrue(variants.size() > 0);
     }
 
+    @Test
+    public void testVBAPRmath50() throws Exception {
+//        org.apache.log4j.LogManager.getRootLogger().setLevel(Level.DEBUG);
+        VBAPRMain main1 = new VBAPRMain();
+        CommandSummary cs = new CommandSummary();
+        cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR");
+        cs.command.put("-srcjavafolder", "/src/main/java/");
+        cs.command.put("-srctestfolder", "/src/test/");
+        cs.command.put("-binjavafolder", "/target/classes/");
+        cs.command.put("-bintestfolder", "/target/test-classes/");
+        cs.command.put("-location", "/home/liu/Desktop/astor/examples/math_50/");
+        cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");
+        cs.command.put("-maxgen", "100");
+        cs.command.put("-scope", "file");
+        cs.command.put("-population", "5");
+        cs.command.put("-skipfaultlocalization", "true");
+        cs.command.put("-failing", "org.apache.commons.math.analysis.solvers.RegulaFalsiSolverTest");
+        cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
+        cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
+        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.RemoveOpSpace");
+        cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
+
+        main1.execute(cs.flat());
+        AstorCoreEngine engine = main1.getEngine();
+        List<ProgramVariant> variants = engine.getVariants();
+        assertTrue(variants.size() > 0);
+    }
+
 }

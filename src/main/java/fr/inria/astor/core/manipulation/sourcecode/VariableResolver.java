@@ -22,20 +22,7 @@ import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.NGramManager;
-import spoon.reflect.code.CtBlock;
-import spoon.reflect.code.CtFieldAccess;
-import spoon.reflect.code.CtFieldRead;
-import spoon.reflect.code.CtFieldWrite;
-import spoon.reflect.code.CtFor;
-import spoon.reflect.code.CtForEach;
-import spoon.reflect.code.CtIf;
-import spoon.reflect.code.CtLiteral;
-import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtTypeAccess;
-import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.code.CtVariableRead;
-import spoon.reflect.code.CtVariableWrite;
-import spoon.reflect.code.CtWhile;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
@@ -889,10 +876,17 @@ public class VariableResolver {
 	protected static List<CtLocalVariable> retrieveLocalVariables(int positionEl, CtBlock pb) {
 		List stmt = pb.getStatements();
 		List<CtLocalVariable> variables = new ArrayList<CtLocalVariable>();
-		for (int i = 0; i < positionEl; i++) {
+		for (int i = 0; i <= positionEl; i++) {
 			CtElement ct = (CtElement) stmt.get(i);
 			if (ct instanceof CtLocalVariable) {
 				variables.add((CtLocalVariable) ct);
+			}
+			if (ct instanceof CtFor) {
+				if (!((CtFor)ct).getForInit().isEmpty()) {
+					for (CtStatement init :((CtFor)ct).getForInit()) {
+						variables.add((CtLocalVariable) init);
+					}
+				}
 			}
 		}
 		CtElement beforei = pb;

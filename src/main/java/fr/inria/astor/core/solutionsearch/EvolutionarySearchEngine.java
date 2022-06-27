@@ -134,7 +134,7 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean processGenerations(int generation) throws Exception {
+	public boolean processGenerations(int generation) throws Exception {
 
 		log.debug("\n***** Generation " + generation + " : " + this.nrGenerationWithoutModificatedVariant);
 		boolean foundSolution = false, foundOneVariant = false;
@@ -257,7 +257,7 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 	 * @return
 	 * @throws Exception
 	 */
-	private boolean modifyProgramVariant(ProgramVariant variant, int generation) throws Exception {
+	public boolean modifyProgramVariant(ProgramVariant variant, int generation) throws Exception {
 
 		log.debug("--Creating new operations for variant " + variant);
 		boolean oneOperationCreated = false;
@@ -331,7 +331,7 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 	 * @param generation
 	 * @return
 	 */
-	private boolean alreadyModified(ModificationPoint genProgInstance, Map<Integer, List<OperatorInstance>> map,
+	public boolean alreadyModified(ModificationPoint genProgInstance, Map<Integer, List<OperatorInstance>> map,
 			int generation) {
 
 		for (int i = 1; i < generation; i++) {

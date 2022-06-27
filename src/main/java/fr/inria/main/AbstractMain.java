@@ -463,12 +463,30 @@ public abstract class AbstractMain {
 
 		if (cmd.hasOption("flthreshold")) {
 			try {
-				ConfigurationProperties.properties.setProperty("flthreshold", cmd.getOptionValue("flthreshold"));
+				String value = cmd.getOptionValue("flthreshold");
+				if (Double.parseDouble(value) > 0.5)
+					ConfigurationProperties.properties.setProperty("flthreshold", value);
+				else throw new Exception();
 			} catch (Exception e) {
-				log.error("Error: threshold not valid");
+				log.error("Error: threshold not valid, should be double type and greater than 0.5");
 				help();
 				return false;
 			}
+		}
+
+
+		if (cmd.hasOption("crossoverProb")) {
+			try {
+				ConfigurationProperties.properties.setProperty("crossoverProb", cmd.getOptionValue("crossoverProb"));
+			} catch (Exception e) {
+				log.error("Error: crossoverProb not valid");
+				help();
+				return false;
+			}
+		}
+
+		if (cmd.hasOption("reserveParentInCrossover")) {
+			ConfigurationProperties.properties.setProperty("reserveParentInCrossover", cmd.getOptionValue("reserveParentInCrossover"));
 		}
 
 		if (cmd.hasOption("reintroduce"))

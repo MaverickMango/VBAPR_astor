@@ -318,11 +318,12 @@ public class ProgramVariantFactory {
 //					&& !ReadFileUtil.hasThisElement(ctElement))
 //				continue;
 			if (!ReadFileUtil.hasThisElement(ctElement)) {//!(ctElement instanceof CtStatement) &&
-				if (!ReadFileUtil.hasThisElement(ctElement.getParent(CtLocalVariable.class))
-						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class))
-						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtOperatorAssignment.class))) {
-					continue;
-				}
+//				if (!ReadFileUtil.hasThisElement(ctElement.getParent(CtLocalVariable.class))
+//						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class))
+//						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtOperatorAssignment.class))) {
+//					continue;
+//				}
+				continue;
 			}
 			SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
 			modifPoint.setSuspicious(suspiciousCode);
@@ -418,8 +419,8 @@ public class ProgramVariantFactory {
 		ProgramVariant childVariant = new ProgramVariant(id);
 		childVariant.setGenerationSource(generation);
 		childVariant.setParent(parentVariant);
-		// childVariant.copyModificationPoints(parentVariant.getModificationPoints());
-		childVariant.addModificationPoints(parentVariant.getModificationPoints());
+		childVariant.copyModificationPoints(parentVariant.getModificationPoints());//problem
+		//childVariant.addModificationPoints(parentVariant.getModificationPoints());
 
 		if (!ConfigurationProperties.getPropertyBool("resetoperations"))
 			childVariant.getOperations().putAll(parentVariant.getOperations());

@@ -31,6 +31,7 @@ public class ReadFileUtil {
     public static final String supsLineError = outputSrc + "NoSuspiciousLine";
     public static final String timeOutput = outputSrc + "BugStatus";
     public static final String loadError = outputSrc + "LoadError";
+    public static final String buildError = outputSrc + "BuildError";
     public static final String mapping = outputSrc + "mapping";
     private static final String buggyFileDir = baseDir + "buggyfiles/";
     private static final String GTFileDir = baseDir + "groundtruth/";
