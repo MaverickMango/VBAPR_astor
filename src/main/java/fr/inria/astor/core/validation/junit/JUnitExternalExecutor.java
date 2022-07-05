@@ -3,7 +3,9 @@ package fr.inria.astor.core.validation.junit;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,25 +33,27 @@ public class JUnitExternalExecutor {
 	public String createOutput(Result r) {
 		String out = "[";
 		int count = 0;
-		int failures = 0;
+//		int failures = 0;
+		Set<String> failures = new HashSet<>();
 		try {
 			for (Failure f : r.getFailures()) {
 				String s = failureMessage(f);
-				if (!s.startsWith("warning")) {
-					failures++;
+				if (!s.startsWith("warning")) {//
+//					failures++;
+					failures.add(f.getTestHeader());
 				}
-				out += s + "-,";
+				out += s + "-" + f.getException() +"##";
 				count++;
-				if (count > 10) {
-					out += "...and " + (r.getFailureCount() - 10) + " failures more,";
-					// break;
-				}
+//				if (count > 10) {
+//					out += "...and " + (r.getFailureCount() - 10) + " failures more,";
+//					// break;
+//				}
 			}
 		} catch (Exception e) {
 			// We do not care about this exception,
 		}
 		out = out + "]";
-		return (OUTSEP + r.getRunCount() + OUTSEP + failures + OUTSEP + out + OUTSEP);
+		return (OUTSEP + r.getRunCount() + OUTSEP + failures.size() + OUTSEP + out + OUTSEP);
 	}
 
 	protected String failureMessage(Failure f) {

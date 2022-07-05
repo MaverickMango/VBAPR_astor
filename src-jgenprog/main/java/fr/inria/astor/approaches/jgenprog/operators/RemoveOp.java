@@ -7,6 +7,8 @@ import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.entities.OperatorInstance;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.entities.StatementOperatorInstance;
+import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.astor.util.MapList;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtReturn;
@@ -43,6 +45,7 @@ public class RemoveOp extends StatatementIngredientOperator implements Statement
 			}
 		} else {
 			log.error("Operation not applied. Parent null ");
+			successful = false;
 		}
 		return successful;
 	}
@@ -107,10 +110,23 @@ public class RemoveOp extends StatatementIngredientOperator implements Statement
 		return false;
 	}
 
+	public List<String> cache = new ArrayList<>();
+	private static final Boolean DESACTIVATE_CACHE = ConfigurationProperties
+			.getPropertyBool("desactivateingredientcache");
 	@Override
 	public List<OperatorInstance> createOperatorInstances(ModificationPoint modificationPoint) {
 		List<OperatorInstance> operatorIntances = new ArrayList<>();
-		operatorIntances.add(this.createOperatorInstance(modificationPoint));
+
+		String lockey = modificationPoint.getCodeElement().getPosition().toString() + "-"
+				+ modificationPoint.getCodeElement() + "-"
+//                + modPoint.getCodeElement().getParent() + "-"
+				+ modificationPoint.toString();
+		OperatorInstance newOp = null;
+		if (DESACTIVATE_CACHE || !this.cache.contains(lockey)) {
+			this.cache.add(lockey);
+			newOp = this.createOperatorInstance(modificationPoint);
+			operatorIntances.add(newOp);
+		}
 
 		return operatorIntances;
 	}

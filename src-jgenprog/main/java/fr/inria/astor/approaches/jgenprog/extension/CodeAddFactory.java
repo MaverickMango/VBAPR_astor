@@ -5,6 +5,7 @@ import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.RandomManager;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
@@ -27,12 +28,14 @@ public class CodeAddFactory {
         newCond.setKind(selection == 0? BinaryOperatorKind.AND : BinaryOperatorKind.OR);
         left.setParent(newCond);
         right.setParent(newCond);
+        newCond.setParent(root.getParent());
         return newCond;
     }
 
     public static CtElement deleteCondition(CtBinaryOperator old) {
         int selection = RandomManager.nextInt(1);
         CtExpression newCond = MutationSupporter.getFactory().Core().clone(selection == 0? old.getLeftHandOperand(): old.getRightHandOperand());
+        newCond.setParent(old.getParent());
         return newCond;
     }
 
@@ -57,6 +60,7 @@ public class CodeAddFactory {
             wholeExp.setRightHandOperand(right);
             newOne.setParent(wholeExp);
             right.setParent(wholeExp);
+            wholeExp.setParent(old.getParent());
         } else if (old.getLeftHandOperand() instanceof CtBinaryOperator) {
             left = MutationSupporter.getFactory().Core().clone(((CtBinaryOperator<?>) old.getLeftHandOperand()).getLeftHandOperand());
             right = MutationSupporter.getFactory().Core().clone(((CtBinaryOperator<?>) old.getLeftHandOperand()).getRightHandOperand());
@@ -72,6 +76,7 @@ public class CodeAddFactory {
             wholeExp.setRightHandOperand(newOne);
             newOne.setParent(wholeExp);
             left.setParent(wholeExp);
+            wholeExp.setParent(old.getParent());
         }
         return wholeExp;
     }
@@ -80,11 +85,12 @@ public class CodeAddFactory {
         return MutationSupporter.getFactory().Core().createContinue();
     }
 
-    public static CtVariableRead createVariableRead(CtVariableReference old) {
-        CtVariableReference oldVariable = MutationSupporter.getFactory().Core().clone(old);
+    public static CtVariableRead createVariableRead(CtVariable old) {
+        CtVariableReference oldVariable = MutationSupporter.getFactory().Core().clone(old.getReference());
         CtVariableRead newElement =  MutationSupporter.getFactory().Core().createVariableRead();
         newElement.setVariable(oldVariable);
         newElement.setType(oldVariable.getType());
+        newElement.setParent(old);
         return newElement;
     }
 
@@ -97,6 +103,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(MutationSupporter.getFactory().Core().clone(typeReference));
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
+        newExp.setParent(root.getParent());
         return newExp;
     }
 
@@ -111,6 +118,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
+        newExp.setParent(newroot.getParent());
         return newExp;
     }
 
@@ -124,6 +132,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
+        newExp.setParent(newroot.getParent());
         return newExp;
     }
 
@@ -139,6 +148,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
+        newExp.setParent(newroot.getParent());
         return newExp;
     }
 
@@ -153,6 +163,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
+        newExp.setParent(newroot.getParent());
         return newExp;
     }
 
@@ -167,6 +178,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
+        newExp.setParent(newroot.getParent());
         return newExp;
     }
 
@@ -177,6 +189,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
+        newExp.setParent(root.getParent());
         return newExp;
     }
 
@@ -199,6 +212,7 @@ public class CodeAddFactory {
             copy.setParent(newExp);
         }
         newExp.setArguments(args_copy);
+        newExp.setParent(old.getParent());
         return newExp;
     }
 
@@ -221,6 +235,7 @@ public class CodeAddFactory {
             copy.setParent(newExp);
         }
         newExp.setArguments(args_copy);
+        newExp.setParent(old.getParent());
         return newExp;
     }
 
@@ -237,6 +252,7 @@ public class CodeAddFactory {
                         CtLocalVariable newPoint = MutationSupporter.getFactory().Core().clone(point);
                         newType.setSimpleName(_types[j]);
                         newPoint.setType(newType);
+                        newPoint.setParent(point.getParent());
                         list.add(new Ingredient(newPoint));
                     }
                     break;
@@ -247,6 +263,7 @@ public class CodeAddFactory {
             CtLocalVariable newPoint = MutationSupporter.getFactory().Core().clone(point);
             newType.setSimpleName("Object");
             newPoint.setType(newType);
+            newPoint.setParent(point.getParent());
             list.add(new Ingredient(newPoint));
         }
         return list;

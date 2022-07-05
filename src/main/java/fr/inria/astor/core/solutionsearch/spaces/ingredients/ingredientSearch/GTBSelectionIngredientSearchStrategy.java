@@ -141,11 +141,14 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             exps.addAll(base);
         }
         if (point.getCodeElement() instanceof CtVariableRead) {
+            CtVariableRead mpvar = (CtVariableRead) point.getCodeElement();
             List<CtVariable> contexts = point.getContextOfModificationPoint();
             for (CtVariable context : contexts) {//target
                 if (context.getSimpleName().equals(point.getCodeElement().toString()))
                     continue;
-                Ingredient ingredient = new Ingredient(CodeAddFactory.createVariableRead(context.getReference()));
+                if (!mpvar.getType().isPrimitive() && !mpvar.getType().equals(context.getType()))
+                    continue;
+                Ingredient ingredient = new Ingredient(CodeAddFactory.createVariableRead(context));
                 exps.add(ingredient);
             }
         }
@@ -188,7 +191,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             Collection<CtExecutableReference<?>> methods = point.getCodeElement().getParent(new TypeFilter<>(CtClass.class)).getAllExecutables();
             for (CtExecutableReference exe :methods) {
                 List<CtTypeReference<?>> paras = exe.getParameters();
-                if (!isParasSame(paras, argsType))
+                if (!isParasSame(paras, argsType) || !((CtInvocation<?>) point.getCodeElement()).getExecutable().getType().equals(exe.getType()))
                     continue;
                 Ingredient ingredient = new Ingredient(CodeAddFactory.createInvocationSameArgs((CtInvocation) point.getCodeElement(), exe));
                 if (!contains(exps, ingredient))
@@ -200,7 +203,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             if (point.getCodeElement() instanceof CtInvocation && in.getCode() instanceof CtInvocation) {
                 CtInvocation pinv = (CtInvocation) point.getCodeElement();
                 CtInvocation ininv = (CtInvocation) in.getCode();
-                if (ininv.getType().equals(pinv.getType())) {
+                if (ininv.getExecutable().getType().equals(pinv.getExecutable().getType())) {
                     String fixName = ((CtInvocation) in.getCode()).getExecutable().getSimpleName();
                     if (pinv.getExecutable().getSimpleName().equals(fixName)) {
                         if (!pinv.toString().equals(ininv.toString())) {
@@ -223,7 +226,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             if (point.getCodeElement() instanceof CtVariableRead) {
                 if (in.getCode() instanceof CtVariableRead)
                     continue;
-                if (point.getCodeElement().getRoleInParent().toString().equalsIgnoreCase("target")
+                if ("target".equalsIgnoreCase(String.valueOf(point.getCodeElement().getRoleInParent()))
                         && in.getCode() instanceof CtLiteral)
                     continue;
                 exps.add(in);
@@ -341,8 +344,18 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
             Ingredient baseIngredient = getRandomFromSpace(baseElements);
 
-            if (modificationPoint.getCodeElement().toString().equals(baseIngredient.getCode().toString()))
+            boolean flag = false;
+            for (ModificationPoint mp :modificationPoint.getProgramVariant().getModificationPoints()) {
+                if (mp == modificationPoint) {
+                    String orig = modificationPoint.getCodeElement().toString().replaceAll("\\n", "");
+                    String modi = baseIngredient.getCode().toString().replaceAll("\\n", "");
+                    flag = flag || orig.equals(modi);
+                }
+                flag = flag || mp.getCodeElement() == baseIngredient.getCode();
+            }
+            if (flag)
                 continue;
+
 
             String newingredientkey = getKey(modificationPoint, operationType);
 
@@ -369,7 +382,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
     public String getKey(ModificationPoint modPoint, AstorOperator operator) {
         String lockey = modPoint.getCodeElement().getPosition().toString() + "-"
                 + modPoint.getCodeElement() + "-"
-                + modPoint.getCodeElement().getParent() + "-"
+//                + modPoint.getCodeElement().getParent() + "-"
                 + operator.toString();
         return lockey;
     }

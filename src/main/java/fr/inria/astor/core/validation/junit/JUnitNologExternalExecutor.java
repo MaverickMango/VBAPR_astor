@@ -19,7 +19,7 @@ public class JUnitNologExternalExecutor extends JUnitExternalExecutor {
 		try {
 			for (Failure f : r.getFailures()) {
 				String s = failureMessage(f);
-				if (!s.startsWith("warning")) {
+				if (!s.startsWith("warning")) {//warning
 					nr_failures++;
 				}
 			}

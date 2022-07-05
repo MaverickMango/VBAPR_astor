@@ -146,14 +146,19 @@ public class VBAPR  extends JGenProg {
 
         currentStat.increment(Stats.GeneralStatEnum.NR_GENERATIONS);
 
-//        beforeGenerate(generation);
+        beforeGenerate(generation);
 
         for (ProgramVariant parentVariant : variants) {
 
             log.debug("**Parent Variant: " + parentVariant);
 
             this.saveOriginalVariant(parentVariant);
-            ProgramVariant newVariant = createNewProgramVariant(parentVariant, generation);
+            ProgramVariant newVariant = null;
+//            if (generation == 1) {
+//                newVariant = createNewProgramVariantInitial(parentVariant);
+//            } else
+                newVariant = createNewProgramVariant(parentVariant, generation);
+
 
             if (newVariant == null) {
                 continue;
@@ -319,8 +324,9 @@ public class VBAPR  extends JGenProg {
             }
             ProgramVariant target = remaining.remove(idx);
             found.add(target);
-        }
-        if (found.size() < crossoverSize) {
+        }//
+        crossoverSize = found.size();
+        if (crossoverSize < 2) {
             log.debug("CO|Not Enough ops to apply Crossover");
             return;
         }
@@ -343,11 +349,13 @@ public class VBAPR  extends JGenProg {
                 log.debug("CO|Not Enough ops to apply Crossover");
                 continue;
             }
+            v1 = variantFactory.createProgramVariantFromAnother(v1, generation);
+            v2 = variantFactory.createProgramVariantFromAnother(v2, generation);
 
             randomlyChangeOperations(v1, v2);
             // update each fitness of variants
-            setFitnessForVariant(v1);
-            setFitnessForVariant(v2);
+            updatePVAfterCrossover(v1);
+            updatePVAfterCrossover(v2);
         }
         remaining.addAll(found);
         assert remaining.size() >= this.variants.size();
@@ -361,16 +369,33 @@ public class VBAPR  extends JGenProg {
         Arrays.sort(gens1);
         Arrays.sort(gens2);
 
-        int rgen1index = RandomManager.nextInt(gens1.length);
-        int rgen2index = RandomManager.nextInt(gens2.length);
+        int gen1startidx = RandomManager.nextInt(gens1.length);
+        int gen1endidx = RandomManager.nextInt(gens1.length);
+        if (gen1endidx < gen1startidx)
+            gen1endidx = gen1startidx;
+        int gen2startidx = RandomManager.nextInt(gens2.length);
+        int gen2endidx = RandomManager.nextInt(gens2.length);
+        if (gen2endidx < gen2startidx)
+            gen2endidx = gen2startidx;
 
         //select the order of op
-        int op1index = RandomManager.nextInt(v1.getOperations((int) gens1[rgen1index]).size());
-        int op2index = RandomManager.nextInt(v2.getOperations((int) gens2[rgen2index]).size());
+        int op1startidx = RandomManager.nextInt(v1.getOperations((Integer) gens1[gen1startidx]).size());
+        int op1endidx = RandomManager.nextInt(v1.getOperations((Integer) gens1[gen1endidx]).size());
+        if (gen1startidx == gen1endidx && op1endidx < op1startidx)
+            op1endidx = op1startidx;
+        int op2startidx = RandomManager.nextInt(v2.getOperations((Integer) gens2[gen2startidx]).size());
+        int op2endidx = RandomManager.nextInt(v2.getOperations((Integer) gens2[gen2endidx]).size());
+        if (gen2startidx == gen2endidx && op2endidx < op2startidx)
+            op2endidx = op2startidx;
 
         //crossover: change all ops before op1index and op2index
-        Map<Integer, List<OperatorInstance>> preorder1 = getPreorderOps(v1, gens1, rgen1index, op1index);
-        Map<Integer, List<OperatorInstance>> preorder2 = getPreorderOps(v2, gens2, rgen2index, op2index);
+//        Map<Integer, List<OperatorInstance>> preorder1 = getPreorderOps(v1, gens1, gen1startidx, op1startidx);
+//        Map<Integer, List<OperatorInstance>> preorder2 = getPreorderOps(v2, gens2, gen2startidx, op2startidx);
+        Map<Integer, List<OperatorInstance>> preorder1 = getPreorderOps(v1, gens1,
+                gen1startidx, gen1endidx, op1startidx, op1endidx);
+        Map<Integer, List<OperatorInstance>> preorder2 = getPreorderOps(v2, gens2,
+                gen2startidx, gen2endidx, op2startidx, op2endidx);
+
 
         // The generation of both new operators is the Last one.
         // In the first variant we put the operator taken from the 2 one.
@@ -389,14 +414,48 @@ public class VBAPR  extends JGenProg {
         preorder.put(gen, new ArrayList<>());
         List<OperatorInstance> ops = new ArrayList<>(pv.getOperations().get(gen));
         assert !ops.isEmpty();
-        for (int i = 0; i <= opidx && !ops.isEmpty(); i++) {//problem here, ops should never be empty!
-            preorder.get(gen).add(ops.get(i));
-            pv.getOperations(gen).remove(i);
+        for (int i = 0; i <= opidx; i++) {//ops should never be empty!
+            OperatorInstance op = ops.get(i);
+            preorder.get(gen).add(op);
+            pv.getOperations(gen).remove(op);//
         }
-//        if (pv.getOperations(gen).isEmpty()) {
-//            pv.getOperations().remove(gen);
-//        }
+        removeEmptyOps(pv, gen);
         return preorder;
+    }
+
+
+    private Map<Integer, List<OperatorInstance>> getPreorderOps(ProgramVariant pv, Object[] gens,
+                        int genstartidx, int genendidx, int opstartidx, int opendidx) {
+        Map<Integer, List<OperatorInstance>> preorder = new HashMap<>();
+        List<OperatorInstance> parentops = pv.getOperations().remove((Integer) gens[genstartidx]);
+        List<OperatorInstance> childpreops = new ArrayList<>();
+        for (int j = opstartidx; j < parentops.size(); j++) {
+            childpreops.add(parentops.remove(j));
+        }
+        pv.getOperations().put((Integer) gens[genstartidx], parentops);
+        removeEmptyOps(pv, (Integer) gens[genstartidx]);
+        preorder.put((Integer)gens[genstartidx], childpreops);
+        for (int i = genstartidx + 1; i < genendidx; i++) {
+            parentops = pv.getOperations().remove((Integer) gens[i]);
+            preorder.put((int)gens[i], parentops);
+        }
+        if (genstartidx == genendidx)
+            return preorder;
+        parentops = pv.getOperations().remove((Integer) gens[genendidx]);
+        childpreops = new ArrayList<>();
+        for (int j = 0; j < opendidx; j++) {
+            childpreops.add(parentops.remove(j));
+        }
+        pv.getOperations().put((Integer) gens[genendidx], parentops);
+        removeEmptyOps(pv, (Integer) gens[genendidx]);
+        preorder.put((Integer)gens[genendidx], childpreops);
+        return preorder;
+    }
+
+    private void removeEmptyOps(ProgramVariant pv, int gen) {
+        if (pv.getOperations(gen).isEmpty()) {
+            pv.getOperations().remove(gen);
+        }
     }
 
     private void changeops(ProgramVariant pv, Map<Integer, List<OperatorInstance>> preorder) {
@@ -408,6 +467,14 @@ public class VBAPR  extends JGenProg {
             }
             pv.getOperations().put(key, preOps);
         }
+    }
+
+    private void updatePVAfterCrossover(ProgramVariant variant) {
+        setFitnessForVariant(variant);
+//        variant.setModificationPoints(originalVariant.getModificationPoints());
+//        for (Integer gen : variant.getOperations().keySet()) {
+//            updateVariantGenList(variant, gen);
+//        }
     }
 
 }

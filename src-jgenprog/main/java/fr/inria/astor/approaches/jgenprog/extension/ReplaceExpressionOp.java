@@ -72,7 +72,7 @@ public class ReplaceExpressionOp extends ExpressionIngredientOperator implements
         boolean sucess = true;
         sucess &= removePoint(p, opInstance);
         sucess &= addPoint(p, opInstance);
-
+        assert sucess;
         return sucess;
     }
 

@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import fr.inria.astor.approaches.jgenprog.LocalVariableProcessor;
 import fr.inria.astor.approaches.jgenprog.VariableReferenceProcessor;
 import fr.inria.astor.approaches.jgenprog.extension.ExpressionFilter;
+import fr.inria.astor.approaches.jgenprog.extension.MethodParaFilter;
 import fr.inria.astor.approaches.jgenprog.extension.StatementFilter;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
@@ -556,9 +557,19 @@ public class ReadFileUtil {
                 StatementFilter stamentFilter = new StatementFilter();
                 stamentFilter.set_positions(poses);
                 List<CtStatement> stmts = type.getElements(stamentFilter);
-                stmts = removeSame(stmts);
+                List<CtElement> nodes = new ArrayList<>();
                 String name = gt.getName();
-                List<CtElement> nodes = getNodes(stmts, name);
+                if (!stmts.isEmpty()) {
+                    stmts = removeSame(stmts);
+                    nodes = getNodes(stmts, name);
+                } else {
+                    MethodParaFilter mthparaFilter = new MethodParaFilter();
+                    mthparaFilter.set_positions(poses);
+                    mthparaFilter.set_name(name);
+                    List<CtMethod> mths = type.getElements(mthparaFilter);
+                    assert mths.size() == 1;
+                    nodes.add(mths.get(0).getBody().getStatements().get(0));
+                }
                 gt.setNodes(nodes);
                 gt.setClazz(gt.getLocation());
 //                gt.setClazz(nodes.get(0).getParent(CtClass.class).getSimpleName());//

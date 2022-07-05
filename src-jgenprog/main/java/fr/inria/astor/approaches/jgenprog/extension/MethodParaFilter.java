@@ -5,16 +5,21 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.cu.position.NoSourcePosition;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.support.reflect.code.CtStatementImpl;
 
 import java.util.List;
 
-public class StatementFilter extends AbstractFilter<CtStatement> {
+public class MethodParaFilter extends AbstractFilter<CtMethod> {
     private List<Integer> _positions;
+    private String _name;
 
     public void set_positions(List<Integer> positions) {
         _positions = positions;
+    }
+    public void set_name(String name) {
+        this._name = name;
     }
 
     public boolean compare(int startLine, int endLine) {
@@ -30,19 +35,13 @@ public class StatementFilter extends AbstractFilter<CtStatement> {
     }
 
     @Override
-    public boolean matches(CtStatement element) {
-        if ((element instanceof CtStatementImpl && !(element instanceof CtBlock))
-                || (element instanceof CtInvocation && element.getPosition() != null &&
-                !(element.getPosition() instanceof NoSourcePosition))) {//
-            int start = 0;
-            int end = 0;
-            try {
-                start = element.getPosition().getLine();
-                end = element.getPosition().getEndLine();
-            } catch (Exception e) {
-                e.printStackTrace();
+    public boolean matches(CtMethod element) {
+        if (!element.getParameters().isEmpty() && element.getPosition().getLine() == _positions.get(0)) {
+            List paras = element.getParameters();
+            for (Object para :paras) {
+                if (((CtParameter) para).getSimpleName().equals(_name))
+                    return true;
             }
-            return compare(start, end);
         }
         return false;
     }

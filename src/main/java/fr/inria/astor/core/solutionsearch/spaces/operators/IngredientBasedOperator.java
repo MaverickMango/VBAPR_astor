@@ -3,10 +3,13 @@ package fr.inria.astor.core.solutionsearch.spaces.operators;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.inria.astor.approaches.jgenprog.operators.InsertStatementOp;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.entities.OperatorInstance;
+import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.IngredientTransformationStrategy;
+import spoon.reflect.declaration.CtElement;
 
 /**
  * 
@@ -37,7 +40,10 @@ public abstract class IngredientBasedOperator extends AstorOperator {
 
 			if (ingredientsAfterTransformation == null) {
 				log.debug("Empty transformations mp " + modificationPoint + " " + ingredient);
-				return operatorIntances;
+				if (!(this instanceof InsertStatementOp)) {
+					return operatorIntances;
+				}
+
 			}
 
 			for (Ingredient ingredientTransformed : ingredientsAfterTransformation) {
@@ -51,7 +57,13 @@ public abstract class IngredientBasedOperator extends AstorOperator {
 			}
 		} else {// No transformation
 			OperatorInstance opInstance = createOperatorInstance(modificationPoint);
-			opInstance.setModified(ingredient.getCode());
+			CtElement modifed = MutationSupporter.getFactory().Core().clone(ingredient.getCode());
+			try {
+				modifed.setParent(ingredient.getCode().getParent());
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+			opInstance.setModified(modifed);
 			opInstance.setIngredient(ingredient);
 			operatorIntances.add(opInstance);//todo
 		}
@@ -60,7 +72,13 @@ public abstract class IngredientBasedOperator extends AstorOperator {
 
 	protected OperatorInstance createOperatorInstance(ModificationPoint modificationPoint, Ingredient ingredient) {
 		OperatorInstance operatorInstance = this.createOperatorInstance(modificationPoint);
-		operatorInstance.setModified(ingredient.getCode());
+		CtElement modifed = MutationSupporter.getFactory().Core().clone(ingredient.getCode());
+		try {
+			modifed.setParent(ingredient.getCode().getParent());
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		operatorInstance.setModified(modifed);
 		operatorInstance.setIngredient(ingredient);
 		return operatorInstance;
 

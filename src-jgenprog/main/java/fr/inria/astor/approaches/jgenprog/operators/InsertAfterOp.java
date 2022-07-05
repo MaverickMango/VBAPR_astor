@@ -33,7 +33,6 @@ public class InsertAfterOp extends InsertStatementOp {
 			StatementSupporter.updateBlockImplicitly(parentBlock, true);
 		} else {
 			log.error("Operation not applied. Parent null");
-			successful = false;
 		}
 		operation.setSuccessfulyApplied(successful);
 		return successful;

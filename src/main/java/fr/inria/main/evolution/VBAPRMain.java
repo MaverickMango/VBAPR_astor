@@ -86,6 +86,8 @@ public class VBAPRMain extends AbstractMain {
 			core = createEngineFromArgument(customengine, mutSupporter, projectFacade);
 
 		}
+		if (ReadFileUtil.GTs.isEmpty())
+			return null;
 
 		// Loading extension Points
 		core.loadExtensionPoints();

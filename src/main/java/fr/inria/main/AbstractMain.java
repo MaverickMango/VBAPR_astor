@@ -454,6 +454,9 @@ public abstract class AbstractMain {
 		if (cmd.hasOption("population"))
 			ConfigurationProperties.properties.setProperty("population", cmd.getOptionValue("population"));
 
+		if (cmd.hasOption("useGTsizeAsPopSize"))
+			ConfigurationProperties.properties.setProperty("useGTsizeAsPopSize", cmd.getOptionValue("useGTsizeAsPopSize"));
+
 		if (cmd.hasOption("validation"))
 			ConfigurationProperties.properties.setProperty("validation", cmd.getOptionValue("validation"));
 
@@ -474,6 +477,9 @@ public abstract class AbstractMain {
 			}
 		}
 
+		if (cmd.hasOption("applyCrossover")) {
+			ConfigurationProperties.properties.setProperty("applyCrossover", cmd.getOptionValue("applyCrossover"));
+		}
 
 		if (cmd.hasOption("crossoverProb")) {
 			try {

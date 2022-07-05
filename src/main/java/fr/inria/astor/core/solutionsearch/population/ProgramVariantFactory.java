@@ -1,8 +1,6 @@
 package fr.inria.astor.core.solutionsearch.population;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import fr.inria.astor.core.entities.OperatorInstance;
@@ -80,7 +78,28 @@ public class ProgramVariantFactory {
 
 		List<ProgramVariant> variants = new ArrayList<ProgramVariant>();
 
-		for (int ins = 1; ins <= maxNumberInstances; ins++) {
+//		for (int ins = 1; ins <= maxNumberInstances; ins++) {
+//			// -Initial setup of directories----------
+//			idCounter = ins;
+//			ProgramVariant v_i = createProgramInstance(suspiciousList, idCounter);
+//			variants.add(v_i);
+//			log.info("Creating program variant #" + idCounter + ", " + v_i.toString());
+//
+//			if (ConfigurationProperties.getPropertyBool("saveall")) {
+//				String srcOutput = projectFacade.getInDirWithPrefix(v_i.currentMutatorIdentifier());
+//				mutatorSupporter.saveSourceCodeOnDiskProgramVariant(v_i, srcOutput);
+//			}
+//
+//		}
+
+		ProgramVariant v_0 = createProgramInstance(suspiciousList, idCounter);
+		variants.add(v_0);
+		log.info("Creating program variant #" + idCounter + ", " + v_0.toString());
+		if (ConfigurationProperties.getPropertyBool("useGTsizeAsPopSize") && v_0.getModificationPoints().size() > maxNumberInstances) {
+			maxNumberInstances = v_0.getModificationPoints().size();
+			ConfigurationProperties.setProperty("population", String.valueOf(maxNumberInstances));
+		}
+		for (int ins = 1; ins < maxNumberInstances; ins++) {
 			// -Initial setup of directories----------
 			idCounter = ins;
 			ProgramVariant v_i = createProgramInstance(suspiciousList, idCounter);
@@ -422,8 +441,14 @@ public class ProgramVariantFactory {
 		childVariant.copyModificationPoints(parentVariant.getModificationPoints());//problem
 		//childVariant.addModificationPoints(parentVariant.getModificationPoints());
 
-		if (!ConfigurationProperties.getPropertyBool("resetoperations"))
-			childVariant.getOperations().putAll(parentVariant.getOperations());
+		if (!ConfigurationProperties.getPropertyBool("resetoperations")) {
+			Map<Integer, List<OperatorInstance>> childmap = new HashMap<>(parentVariant.getOperations());
+			for (Integer key :childmap.keySet()) {
+				List<OperatorInstance> newops = new ArrayList<>(childmap.get(key));
+				childmap.put(key,newops);
+			}
+			childVariant.getOperations().putAll(childmap);
+		}
 		childVariant.setLastModificationPointAnalyzed(parentVariant.getLastModificationPointAnalyzed());
 		childVariant.getBuiltClasses().putAll(parentVariant.getBuiltClasses());
 		childVariant.setFitness(parentVariant.getFitness());

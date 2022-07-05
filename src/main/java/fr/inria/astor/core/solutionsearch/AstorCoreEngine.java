@@ -613,7 +613,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	 * @param variant
 	 * @param generation
 	 */
-	protected void updateVariantGenList(ProgramVariant variant, int generation) {
+	public void updateVariantGenList(ProgramVariant variant, int generation) {
 		List<OperatorInstance> operations = variant.getOperations().get(generation);
 
 		for (OperatorInstance genOperationInstance : operations) {

@@ -265,7 +265,7 @@ public class LaucherJUnitProcess {
 					int nrfailing = Integer.valueOf(resultPrinted[2]);
 					tr.failures = nrfailing;
 					if (resultPrinted.length > 3 && !"".equals(resultPrinted[3])) {
-						String[] failingTestList = resultPrinted[3].replace("[", "").replace("]", "").split(",");
+						String[] failingTestList = resultPrinted[3].replace("[", "").replace("]", "").split("##");
 						for (String failingTest : failingTestList) {
 							failingTest = failingTest.trim();
 							if (!failingTest.isEmpty() && !failingTest.equals("-"))

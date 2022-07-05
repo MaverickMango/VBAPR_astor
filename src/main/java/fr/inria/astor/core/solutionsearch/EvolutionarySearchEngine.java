@@ -213,7 +213,7 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 		log.debug("\n--Child created id: " + childVariant.getId());
 
 		// Apply previous operations (i.e., from previous operators)
-		applyPreviousOperationsToVariantModel(childVariant, generation);
+ 		applyPreviousOperationsToVariantModel(childVariant, generation);
 
 		boolean isChildMutatedInThisGeneration = modifyProgramVariant(childVariant, generation);
 

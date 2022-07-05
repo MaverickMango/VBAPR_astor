@@ -1,7 +1,9 @@
 package fr.inria.astor.core.solutionsearch.spaces.operators;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import fr.inria.astor.core.setup.ConfigurationProperties;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.core.entities.ModificationPoint;
@@ -10,6 +12,10 @@ import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.entities.SuspiciousModificationPoint;
 import fr.inria.astor.core.solutionsearch.extension.AstorExtensionPoint;
 import fr.inria.astor.core.solutionsearch.population.ProgramVariantFactory;
+import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtMethod;
 
 /**
  * Class that represents a Operator in Astor framework. New Operators cna be
@@ -125,8 +131,36 @@ public abstract class AstorOperator implements AstorExtensionPoint {
 	protected boolean removePoint(ProgramVariant variant, OperatorInstance operation) {
 		List<ModificationPoint> modifPoints = variant.getModificationPoints();
 		boolean removed = modifPoints.remove(operation.getModificationPoint());
+		if (!ConfigurationProperties.getPropertyBool("applyCrossover")) {
+			List<ModificationPoint> remaining = new ArrayList<>(modifPoints);
+			for (ModificationPoint mp : modifPoints) {
+				if (mp.getCodeElement().hasParent(operation.getOriginal())) {
+//				if (!hasChild2Modi(operation.getModified(), mp))
+					remaining.remove(mp);
+				}
+			}
+			variant.setModificationPoints(remaining);
+		}
 		return removed;
 
+	}
+
+	private boolean hasChild2Modi(CtElement parent, ModificationPoint mp) {
+		if (parent instanceof CtVariableRead || parent instanceof CtLiteral)
+			return false;
+		List<CtElement> children = parent.getDirectChildren();
+		boolean flag = false;
+		for (CtElement child :children) {
+			if (child.toString().equals(mp.getCodeElement().toString())) {
+				flag = true;
+				mp.getCodeElement().setParent(child.getParent());
+				break;
+			}
+			if (child.getDirectChildren() != null) {
+				flag = hasChild2Modi(child, mp);
+			}
+		}
+		return flag;
 	}
 
 	/**
