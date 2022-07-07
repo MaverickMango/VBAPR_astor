@@ -7,8 +7,10 @@ import fr.inria.astor.approaches.jgenprog.VariableReferenceProcessor;
 import fr.inria.astor.approaches.jgenprog.extension.ExpressionFilter;
 import fr.inria.astor.approaches.jgenprog.extension.MethodParaFilter;
 import fr.inria.astor.approaches.jgenprog.extension.StatementFilter;
+import fr.inria.astor.approaches.jgenprog.extension.VBAPR;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
+import org.apache.log4j.Logger;
 import spoon.SpoonModelBuilder;
 import spoon.compiler.SpoonResourceHelper;
 import spoon.processing.ProcessingManager;
@@ -524,7 +526,7 @@ public class ReadFileUtil {
         String lowerP = proj.toLowerCase();
         String buggyFileDir = ReadFileUtil.buggyFileDir + lowerP + "/" + lowerP + "_" + version + "_buggy";
         List<String> buggyFilePath = getFilePaths(buggyFileDir, ".java");
-        List<GroundTruth> gts =  ReadFileUtil.GTs;
+        List<GroundTruth> gts = new ArrayList<>(ReadFileUtil.GTs);
         if (gts.size() == 0) {
             return false;
         }
@@ -570,6 +572,14 @@ public class ReadFileUtil {
                     assert mths.size() == 1;
                     nodes.add(mths.get(0).getBody().getStatements().get(0));
                 }
+
+                if (nodes.isEmpty()) {
+                    Logger log = Logger.getLogger(VBAPR.class.getSimpleName());
+                    log.error("can not find nodes of gt element: " + gt + ", remove it from gts");
+                    ReadFileUtil.GTs.remove(gt);
+                    continue;
+                }
+
                 gt.setNodes(nodes);
                 gt.setClazz(gt.getLocation());
 //                gt.setClazz(nodes.get(0).getParent(CtClass.class).getSimpleName());//

@@ -1,11 +1,14 @@
 package fr.inria.main.test;
 
+import fr.inria.astor.approaches.jgenprog.extension.VBAPR;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
+import fr.inria.astor.core.solutionsearch.EvolutionarySearchEngine;
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.main.evolution.VBAPRMain;
 import org.apache.log4j.Level;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -26,7 +29,7 @@ public class ParameterizedTest{
     public static Logger log = Logger.getLogger(Thread.currentThread().getName());
     static VBAPRMain main;
     static TestArgsUtil argsUtil;
-    static String fileName;
+    static String fileName = "expect.txt";
     private String proj;
     private String version;
 
@@ -38,24 +41,25 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
         String[][] data = {
-                {"Lang", "34"}
-                ,{"Cli", "25"}
-                ,{"Cli", "32"}
-                ,{"Math", "26"}
-                ,{"Math", "72"}
-                ,{"Math", "46"}
-                ,{"Math", "67"}
-                ,{"Codec", "1"}
-                ,{"Codec", "2"}
-                ,{"Codec", "8"}
-                ,{"Jsoup", "43"}
-                ,{"Jsoup", "62"}
-                ,{"Jsoup", "88"}
-                ,{"JacksonDatabind", "37"}
-                ,{"JacksonDatabind", "70"}
-                ,{"JacksonDatabind", "16"}
-                ,{"JacksonDatabind", "102"}
-                ,{"JacksonCore", "5"}
+                {"Math", "46"}
+//                {"Lang", "34"}
+//                ,{"Cli", "25"}
+//                ,{"Cli", "32"}
+//                ,{"Math", "26"}
+//                ,{"Math", "72"}
+//                ,{"Math", "46"}
+//                ,{"Math", "67"}
+//                ,{"Codec", "1"}
+//                ,{"Codec", "2"}
+//                ,{"Codec", "8"}
+//                ,{"Jsoup", "43"}
+//                ,{"Jsoup", "62"}
+//                ,{"Jsoup", "88"}
+//                ,{"JacksonDatabind", "37"}
+//                ,{"JacksonDatabind", "70"}
+//                ,{"JacksonDatabind", "16"}
+//                ,{"JacksonDatabind", "102"}
+//                ,{"JacksonCore", "5"}
 
 //                ,{"Lang", "6"}
 //                ,{"Math", "33"}
@@ -63,15 +67,18 @@ public class ParameterizedTest{
 //                , {"Chart", "10"}
         };
         return Arrays.asList(data);
+
 //        String fileName = ReadFileUtil.outputSrc + "part2.txt";
+
 //        return readPVInfos(fileName);
     }
 
 
     @Before
     public void setUp() throws Exception {
-//        MutationSupporter.cleanFactory();
-        Logger.getLogger(StandardEnvironment.class).setLevel(Level.ERROR);
+        LogManager.getRootLogger().setLevel(Level.ERROR);
+//        LogManager.getLogger(EvolutionarySearchEngine.class.getSimpleName()).setLevel(Level.INFO);
+//        LogManager.getLogger("DetailLog").setLevel(Level.INFO);
     }
 
     @BeforeClass
@@ -82,7 +89,6 @@ public class ParameterizedTest{
 
     @Test
     public void testSoulutionFound() throws Exception {
-//        org.apache.log4j.LogManager.getRootLogger().setLevel(Level.OFF);
         main.execute(argsUtil.getArgs(proj, version));
         AstorCoreEngine engine = main.getEngine();
         List<ProgramVariant> solutions = engine.getSolutions();
@@ -101,6 +107,8 @@ public class ParameterizedTest{
             String tempString = null;
             while((tempString = reader.readLine()) != null) {
                 tempString = tempString.replace("\r", "");
+                if (tempString.equals(""))
+                    break;
                 String[] split = tempString.substring(tempString.indexOf(":") + 1).split(",");
                 String proj = tempString.substring(0, tempString.indexOf(":"));
                 for (String id :split) {

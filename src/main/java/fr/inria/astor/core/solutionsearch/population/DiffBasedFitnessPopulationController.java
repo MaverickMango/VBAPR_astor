@@ -13,12 +13,10 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
     private Logger log = Logger.getLogger(Thread.currentThread().getName());
 
     public FitnessComparator comparator = new FitnessComparator();
-    private int _generation;
 
     @Override
     public List<ProgramVariant> selectProgramVariantsForNextGeneration(List<ProgramVariant> parentVariants, List<ProgramVariant> childVariants, int populationSize, ProgramVariantFactory variantFactory, ProgramVariant original, int generation) {
 
-        _generation = generation;
         List<ProgramVariant> solutionsFromGeneration = new ArrayList<ProgramVariant>();
 
         List<ProgramVariant> newPopulation = new ArrayList<>(childVariants);
@@ -27,7 +25,11 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             newPopulation.addAll(parentVariants);
         }
 
-        Collections.sort(newPopulation, comparator);
+        try {
+            newPopulation.sort(comparator);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         for (ProgramVariant programVariant : newPopulation) {
             if (programVariant.isSolution()) {
@@ -193,19 +195,12 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             int fitness = Double.compare(o1.getFitness(), o2.getFitness());
             if (fitness != 0)
                 return fitness;
-            if (!o1.getOperations().isEmpty() && !o2.getOperations().isEmpty()) {
-                int res = Integer.compare(o1.getOperations().size(), o2.getOperations().size());
-                if (res != 0)
-                    return res;
-                if (o1.getOperations().get(_generation) != null)
-                    return -1;
-                if (o2.getOperations().get(_generation) != null)
-                    return 1;
+            if (!o1.getOperations().isEmpty() || !o2.getOperations().isEmpty()) {
+                int res1 = Integer.compare(o1.getOperations().size(), o2.getOperations().size());
+                if (res1 != 0)
+                    return res1;
+                return Integer.compare(o1.getOperationsSize(), o2.getOperationsSize());
             }
-            if (!o1.getOperations().isEmpty())
-                return -1;
-            if (!o2.getOperations().isEmpty())
-                return 1;
             return Integer.compare(o2.getId(), o1.getId());
         }
 

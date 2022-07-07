@@ -67,7 +67,7 @@ public class LaucherJUnitProcess {
 			List<String> command = new ArrayList<String>();
 
 			command.add(jvmPath);
-			command.add("-Xmx2048m");
+			command.add("-Xmx512m");
 
 			String[] ids = ConfigurationProperties.getProperty(MetaGenerator.METALL).split(File.pathSeparator);
 			for (String mutid : ids) {
@@ -145,7 +145,7 @@ public class LaucherJUnitProcess {
 			TestResult tr = getTestResult(output);
 			p.destroyForcibly();
 			return tr;
-		} catch (IOException | InterruptedException | IllegalThreadStateException ex) {
+		} catch (IOException | InterruptedException | RuntimeException ex) {
 			log.info("The Process that runs JUnit test cases had problems: " + ex.getMessage());
 			killProcess(p, waitTime);
 		}
@@ -249,7 +249,7 @@ public class LaucherJUnitProcess {
 	 * @param p
 	 * @return
 	 */
-	protected TestResult getTestResult(BufferedReader in) {
+	protected TestResult getTestResult(BufferedReader in) throws RuntimeException {
 		log.debug("Analyzing output from process");
 		TestResult tr = new TestResult();
 		boolean success = false;
@@ -284,7 +284,8 @@ public class LaucherJUnitProcess {
 			return tr;
 		else {
 			log.error("Error reading the validation process\n output: \n" + processOut);
-			return null;
+			throw new RuntimeException(processOut);
+//			return null;
 		}
 	}
 

@@ -28,6 +28,7 @@ import java.util.*;
 
 public class VBAPR  extends JGenProg {
     protected static Logger log = Logger.getLogger(VBAPR.class.getSimpleName());
+    protected static Logger detailLog = Logger.getLogger("DetailLog");
 
     public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
@@ -147,6 +148,9 @@ public class VBAPR  extends JGenProg {
         currentStat.increment(Stats.GeneralStatEnum.NR_GENERATIONS);
 
         beforeGenerate(generation);
+        detailLog.info("----------------- Generation " + generation);
+        detailLog.info("after apply crossover, we got " + variants.size() + " variants to mutate.");
+        logProgramVariant(variants, true);
 
         for (ProgramVariant parentVariant : variants) {
 
@@ -173,8 +177,13 @@ public class VBAPR  extends JGenProg {
                     solution = processCreatedVariant(newVariant, generation);
                 }
             } else {
-                temporalInstances.add(newVariant);
                 solution = processCreatedVariant(newVariant, generation);
+                if (newVariant.getFitness() != Double.MAX_VALUE) {
+                    temporalInstances.add(newVariant);
+                    detailLog.debug("valid variant created.");
+                } else {
+                    detailLog.debug("variant can not compile or testing process did not terminate within wait time");
+                }
             }
 
             if (solution) {
@@ -196,6 +205,8 @@ public class VBAPR  extends JGenProg {
             }
 
         }
+        detailLog.info("after generation " + generation + ", we got " + temporalInstances.size() + " children");
+        logProgramVariant(temporalInstances, true);
         prepareNextGeneration(temporalInstances, generation);
 
         if (!foundOneVariant)
@@ -475,6 +486,27 @@ public class VBAPR  extends JGenProg {
 //        for (Integer gen : variant.getOperations().keySet()) {
 //            updateVariantGenList(variant, gen);
 //        }
+    }
+
+    public void logProgramVariant(List<ProgramVariant> pvs, boolean logopinfo) {
+        for (ProgramVariant pv :pvs) {
+            detailLog.info(pv + " fitness: " + pv.getFitness());
+            if (!logopinfo)
+                continue;
+            Map<Integer, List<OperatorInstance>> genops = pv.getOperations();
+            if (!genops.keySet().isEmpty())
+                detailLog.info("operation instances of this variant: ");
+            for (Integer gen : genops.keySet()) {
+                detailLog.info("    at generation: " + gen);
+                detailLog.info("    operation instances:");
+                for (OperatorInstance op : genops.get(gen)) {
+                    detailLog.info("        modification point: " + op.getModificationPoint());
+                    detailLog.info("        operator type: " + op.getOperationApplied().name());
+                    detailLog.info("        original: " + op.getOriginal().toString().replaceAll("\\n", ""));
+                    detailLog.info("        modified: " + (op.getModified() == null ? "null" : op.getModified().toString().replaceAll("\\n", "")));
+                }
+            }
+        }
     }
 
 }

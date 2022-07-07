@@ -57,9 +57,7 @@ public class ExpressionFilter extends AbstractFilter<CtElement> {
             String str = "";
             if (element instanceof CtLocalVariable)
                 str = ((CtLocalVariable<?>) element).getSimpleName();
-            else if(element instanceof CtVariableRead) {
-                str = ((CtVariableRead) element).getVariable().getSimpleName();
-            } else {
+            else {
                 try {
                     str = element.getOriginalSourceFragment().getSourceCode();
                 } catch (Exception e) {
@@ -67,7 +65,10 @@ public class ExpressionFilter extends AbstractFilter<CtElement> {
 //                System.err.println(str);
                 }
             }
-            return compare(str);
+            boolean res = compare(str);
+            if (!res && element instanceof CtVariableRead)
+                res = compare(((CtVariableRead) element).getVariable().getSimpleName());
+            return res;
         }
         return false;
     }

@@ -39,6 +39,7 @@ import spoon.reflect.declaration.CtVariable;
 public class ProgramVariantFactory {
 
 	private Logger log = Logger.getLogger(Thread.currentThread().getName());
+	private Logger detailLog = Logger.getLogger("DetailLog");
 
 	/**
 	 * counter of id to assign to program instances
@@ -95,6 +96,11 @@ public class ProgramVariantFactory {
 		ProgramVariant v_0 = createProgramInstance(suspiciousList, idCounter);
 		variants.add(v_0);
 		log.info("Creating program variant #" + idCounter + ", " + v_0.toString());
+		detailLog.info("modification points created: ");
+		for (int i = 0; i < v_0.getModificationPoints().size(); i ++) {
+			ModificationPoint mp  = v_0.getModificationPoints().get(i);
+			detailLog.info(i + "- " + mp + ", codeElement: " + mp.getCodeElement());
+		}
 		if (ConfigurationProperties.getPropertyBool("useGTsizeAsPopSize") && v_0.getModificationPoints().size() > maxNumberInstances) {
 			maxNumberInstances = v_0.getModificationPoints().size();
 			ConfigurationProperties.setProperty("population", String.valueOf(maxNumberInstances));
@@ -342,7 +348,8 @@ public class ProgramVariantFactory {
 //						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtOperatorAssignment.class))) {
 //					continue;
 //				}
-				continue;
+				if (!(ctElement.getParent(CtAssignment.class) != null && ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class))))
+					continue;
 			}
 			SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
 			modifPoint.setSuspicious(suspiciousCode);

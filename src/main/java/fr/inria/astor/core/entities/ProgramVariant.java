@@ -160,16 +160,16 @@ public class ProgramVariant {
 		if (operations.isEmpty())
 			return 0;
 		int res = 0;
-//		List<Integer> emptyKeys = new ArrayList<>();
+		List<Integer> emptyKeys = new ArrayList<>();
 		for (Integer key : operations.keySet()) {
-//			if (operations.get(key).isEmpty()) {
-//				emptyKeys.add(key);
-//			}
+			if (operations.get(key).isEmpty()) {
+				emptyKeys.add(key);
+			}
 			res += operations.get(key).size();
 		}
-//		for (Integer key :emptyKeys) {
-//			operations.remove(key);
-//		}
+		for (Integer key :emptyKeys) {
+			operations.remove(key);
+		}
 		return res;
 	}
 

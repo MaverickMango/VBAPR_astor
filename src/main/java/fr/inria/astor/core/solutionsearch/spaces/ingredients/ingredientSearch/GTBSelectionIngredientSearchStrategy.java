@@ -13,6 +13,8 @@ import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.stats.Stats;
+import fr.inria.astor.util.MapList;
+import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.astor.util.StringUtil;
 import org.apache.log4j.Logger;
 import spoon.reflect.code.*;
@@ -289,6 +291,8 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         return flag;
     }
 
+    private Set<String> elementSet = new HashSet<>();
+
 
     /**
      * Method that returns an Ingredient from the ingredient space given a
@@ -324,6 +328,17 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 || parent instanceof CtReturn)
             baseElements = limitIngredients(baseElements, modificationPoint);
 
+        if (!elementSet.contains(modificationPoint.getCodeElement().toString())) {
+            elementSet.add(modificationPoint.getCodeElement().toString());
+            Logger detailLog = Logger.getLogger("DetailLog");
+            detailLog.info("BaseElements for " + modificationPoint.getCodeElement() + " of modificationpoint " + modificationPoint);
+            StringBuilder stringBuilder = new StringBuilder("[");
+            for (Ingredient in :baseElements) {
+                stringBuilder.append("\"").append(in.getCode().toString().replaceAll("\\n", "")).append("\",");
+            }
+            stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(),"]");
+            detailLog.info("= " + stringBuilder);
+        }
 
         if (baseElements == null || baseElements.isEmpty()) {
             log.debug("Any element available for mp " + modificationPoint);
