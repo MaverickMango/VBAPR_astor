@@ -12,6 +12,7 @@ import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.setup.RandomManager;
+import fr.inria.astor.core.solutionsearch.navigation.ForceOrderSuspiciousNavitation;
 import fr.inria.astor.core.solutionsearch.population.ProgramVariantFactory;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.IngredientBasedOperator;
@@ -137,7 +138,6 @@ public class VBAPR  extends JGenProg {
         this.setVariantFactory(new ProgramVariantFactory(this.getTargetElementProcessors()));
     }
 
-
     public boolean processGenerations(int generation) throws Exception {
 
         log.debug("\n***** Generation " + generation + " : " + this.nrGenerationWithoutModificatedVariant);
@@ -150,9 +150,10 @@ public class VBAPR  extends JGenProg {
         beforeGenerate(generation);
         detailLog.info("----------------- Generation " + generation);
         detailLog.info("after apply crossover, we got " + variants.size() + " variants to mutate.");
-        logProgramVariant(variants, true);
+        logProgramVariant(variants, false);
 
-        for (ProgramVariant parentVariant : variants) {
+        for (int i = 0; i < variants.size(); i++) {
+            ProgramVariant parentVariant = variants.get(i);
 
             log.debug("**Parent Variant: " + parentVariant);
 
@@ -161,7 +162,7 @@ public class VBAPR  extends JGenProg {
 //            if (generation == 1) {
 //                newVariant = createNewProgramVariantInitial(parentVariant);
 //            } else
-                newVariant = createNewProgramVariant(parentVariant, generation);
+                newVariant = createNewProgramVariant(parentVariant, generation, i);
 
 
             if (newVariant == null) {
@@ -182,7 +183,7 @@ public class VBAPR  extends JGenProg {
                     temporalInstances.add(newVariant);
                     detailLog.debug("valid variant created.");
                 } else {
-                    detailLog.debug("variant can not compile or testing process did not terminate within wait time");
+                    detailLog.debug("variant can not compile or an error happened in testing process(such as do not terminate within wait time or out of memory");
                 }
             }
 
@@ -218,8 +219,35 @@ public class VBAPR  extends JGenProg {
         return foundSolution;
     }
 
+    protected ProgramVariant createNewProgramVariant(ProgramVariant parentVariant, int generation, int mpidx) throws Exception {
+        // This is the copy of the original program
+        ProgramVariant childVariant = variantFactory.createProgramVariantFromAnother(parentVariant, generation);
+        log.debug("\n--Child created id: " + childVariant.getId());
 
-    public boolean modifyProgramVariant(ProgramVariant variant, int generation) throws Exception {
+        // Apply previous operations (i.e., from previous operators)
+        applyPreviousOperationsToVariantModel(childVariant, generation);
+
+        boolean isChildMutatedInThisGeneration = modifyProgramVariant(childVariant, generation, mpidx);
+
+        if (!isChildMutatedInThisGeneration) {
+            log.debug("--Not Operation generated in child variant: " + childVariant);
+            reverseOperationInModel(childVariant, generation);
+            return null;
+        }
+
+        boolean appliedOperations = applyNewOperationsToVariantModel(childVariant, generation);
+
+        if (!appliedOperations) {
+            log.debug("---Not Operation applied in child variant:" + childVariant);
+            reverseOperationInModel(childVariant, generation);
+            return null;
+        }
+
+        return childVariant;
+    }
+
+
+    public boolean modifyProgramVariant(ProgramVariant variant, int generation, int mpsidx) throws Exception {
 
         log.debug("--Creating new operations for variant " + variant);
         boolean oneOperationCreated = false;
@@ -230,8 +258,14 @@ public class VBAPR  extends JGenProg {
 
         // We retrieve the list of modification point ready to be navigated
         // sorted a criterion
-        List<ModificationPoint> modificationPointsToProcess = this.suspiciousNavigationStrategy
-                .getSortedModificationPointsList(variant.getModificationPoints());
+        List<ModificationPoint> modificationPointsToProcess = null;
+        if (this.suspiciousNavigationStrategy instanceof ForceOrderSuspiciousNavitation) {
+            modificationPointsToProcess = ((ForceOrderSuspiciousNavitation)this.suspiciousNavigationStrategy)
+                    .getSortedModificationPointsList(variant.getModificationPoints(), mpsidx);
+        } else {
+            modificationPointsToProcess = this.suspiciousNavigationStrategy
+                    .getSortedModificationPointsList(variant.getModificationPoints());
+        }
 
         for (int i = 0; i < modificationPointsToProcess.size(); i ++) {
             ModificationPoint modificationPoint = modificationPointsToProcess.get(i);

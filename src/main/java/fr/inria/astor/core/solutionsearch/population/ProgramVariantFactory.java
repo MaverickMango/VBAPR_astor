@@ -92,6 +92,13 @@ public class ProgramVariantFactory {
 //			}
 //
 //		}
+		if (ConfigurationProperties.getPropertyBool("skipfaultlocalization")) {
+			//if skipfaultlocalization, we use gt variable to extract.
+			//set testcases
+			List<String> regressionTestForFaultLocalization = FinderTestCases.findJUnit4XTestCasesForRegression(projectFacade);
+			projectFacade.getProperties().setRegressionCases(regressionTestForFaultLocalization);
+			log.info("Test retrieved from classes: " + regressionTestForFaultLocalization.size());
+		}
 
 		ProgramVariant v_0 = createProgramInstance(suspiciousList, idCounter);
 		variants.add(v_0);
@@ -187,12 +194,6 @@ public class ProgramVariantFactory {
 //			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance);
 //			progInstance.getModificationPoints().addAll(pointsFromAllStatements);
 
-			//if skipfaultlocalization, we use gt variable to extract.
-			//set testcases
-			List<String> regressionTestForFaultLocalization = FinderTestCases.findJUnit4XTestCasesForRegression(projectFacade);
-			projectFacade.getProperties().setRegressionCases(regressionTestForFaultLocalization);
-
-			log.info("Test retrieved from classes: " + regressionTestForFaultLocalization.size());
 			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance, ReadFileUtil.GTs);
 			progInstance.getModificationPoints().addAll(pointsFromAllStatements);
 		}
@@ -220,7 +221,11 @@ public class ProgramVariantFactory {
 				lines.add(line);
 				sus.setLineNumber(line);
 				List<SuspiciousModificationPoint> temp = this.createModificationPoints(sus, progInstance);
-				suspGen.addAll(temp);
+				if (temp != null) {
+					suspGen.addAll(temp);
+				} else {
+					detailLog.error("class of sus " + sus + "can not be resolved. May be gt path error.");
+				}
 			}
 		}
 		return suspGen;

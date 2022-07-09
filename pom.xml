@@ -209,13 +209,19 @@
 				<configuration>
 					<filters>
 						<filter>
+							<artifact>fr.inria.gforge.spoon:spoon-core</artifact>
+							<excludes>
+								<exclude>org.apache.logging.log4j:log4j-to-slf4j</exclude>
+								<exclude>org.apache.logging.log4j:log4j-api</exclude>
+							</excludes>
+						</filter>
+						<filter>
 							<artifact>*:*</artifact>
 							<excludes>
 								<exclude>module-info.class</exclude>
 								<exclude>META-INF/*.SF</exclude>
 								<exclude>META-INF/*.DSA</exclude>
 								<exclude>META-INF/*.RSA</exclude>
-								<exclude>**/Log4j2Plugins.dat</exclude>
 							</excludes>
 						</filter>
 					</filters>

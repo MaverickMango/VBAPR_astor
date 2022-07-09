@@ -155,7 +155,6 @@ public class VBAPRMain extends AbstractMain {
 	public void run(String location, String projectName, String dependencies, String packageToInstrument, double thfl,
 			String failing) throws Exception {
 
-		long startT = System.currentTimeMillis();
 		initProject(location, projectName, dependencies, packageToInstrument, thfl, failing);
 
 		String mode = ConfigurationProperties.getProperty("mode").toLowerCase();
@@ -186,18 +185,6 @@ public class VBAPRMain extends AbstractMain {
 
 		core.atEnd();
 
-		long endT = System.currentTimeMillis();
-		log.info("Time Total(s): " + (endT - startT) / 1000d);
-		BufferedOutputStream buff =null;
-		try {
-			String content = ReadFileUtil.proj + "_" + ReadFileUtil.version + ":" + ReadFileUtil.compileButFail + "," + ((endT - startT) / 1000d) + ";\n";
-			buff = new BufferedOutputStream(new FileOutputStream(ReadFileUtil.timeOutput, true));
-			buff.write(content.getBytes(StandardCharsets.UTF_8));
-			buff.flush();
-			buff.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/**

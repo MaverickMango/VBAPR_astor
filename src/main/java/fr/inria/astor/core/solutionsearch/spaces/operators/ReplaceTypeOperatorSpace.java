@@ -30,7 +30,7 @@ public class ReplaceTypeOperatorSpace extends OperatorSelectionStrategy {
         List<AstorOperator> operators = new ArrayList<>();
         switch (type) {
             case 1:
-                operators.add(getNextOperator("ReplaceTypeOp"));
+                operators.add(getNextOperator("BinaryExpressionMutOp"));
             default:break;
         }
         return operators.get(RandomManager.nextInt(operators.size()));
@@ -55,7 +55,7 @@ public class ReplaceTypeOperatorSpace extends OperatorSelectionStrategy {
     @Override
     public AstorOperator getNextOperator(SuspiciousModificationPoint modificationPoint) {
         CtElement element = modificationPoint.getCodeElement();
-        if (element instanceof CtLocalVariable) {
+        if (element instanceof CtExpression && !(element instanceof CtAssignment)) {
             return this.getNextOperator(1);
         }
         return null;

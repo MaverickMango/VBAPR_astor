@@ -17,17 +17,15 @@ public class TestArgsUtil {
     public TestArgsUtil() {
         this.cs = new CommandSummary();
         cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR");
-        cs.command.put("-maxgen", "500");
-//        cs.command.put("-population", "5");
+        cs.command.put("-maxgen", "2");
 //        cs.command.put("-scope", "file");
         cs.command.put("-skipfaultlocalization", "true");
-//        cs.command.put("-jvm4testexecution", "/usr/lib/jvm/jdk1.7.0_80/bin");
-//        cs.command.put("-applyCrossover", "true");
+        cs.command.put("-stopfirst", "true");
         cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");
 //        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
         cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
         cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
-        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");//ReplaceExpOperatorSpace
+        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");//ReplaceTypeOperatorSpace
         cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
     }
 

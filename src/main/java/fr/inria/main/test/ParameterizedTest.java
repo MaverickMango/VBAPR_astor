@@ -3,6 +3,7 @@ package fr.inria.main.test;
 import fr.inria.astor.approaches.jgenprog.extension.VBAPR;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.manipulation.MutationSupporter;
+import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
 import fr.inria.astor.core.solutionsearch.EvolutionarySearchEngine;
 import fr.inria.astor.util.ReadFileUtil;
@@ -29,7 +30,7 @@ public class ParameterizedTest{
     public static Logger log = Logger.getLogger(Thread.currentThread().getName());
     static VBAPRMain main;
     static TestArgsUtil argsUtil;
-    static String fileName = "expect.txt";
+    static String fileName = "";
     private String proj;
     private String version;
 
@@ -41,7 +42,7 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
         String[][] data = {
-                {"Math", "46"}
+                {"JacksonCore" , "5"}
 //                {"Lang", "34"}
 //                ,{"Cli", "25"}
 //                ,{"Cli", "32"}
@@ -76,8 +77,13 @@ public class ParameterizedTest{
 
     @Before
     public void setUp() throws Exception {
-        LogManager.getRootLogger().setLevel(Level.ERROR);
-//        LogManager.getLogger(EvolutionarySearchEngine.class.getSimpleName()).setLevel(Level.INFO);
+//        String logfile = System.getProperty("logFileName");
+//        if (logfile == null) {
+//            logfile = proj + version;
+//            System.setProperty("logFileName", logfile);
+//        }
+//        LogManager.getRootLogger().setLevel(Level.ERROR);
+//        LogManager.getLogger(VBAPR.class.getSimpleName()).setLevel(Level.INFO);
 //        LogManager.getLogger("DetailLog").setLevel(Level.INFO);
     }
 

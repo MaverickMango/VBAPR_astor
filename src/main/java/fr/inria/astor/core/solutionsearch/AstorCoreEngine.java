@@ -2,7 +2,6 @@ package fr.inria.astor.core.solutionsearch;
 
 import java.io.*;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -176,8 +175,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		log.info("generationsexecuted: " + this.generationsExecuted);
 
 		currentStat.getGeneralStats().put(GeneralStatEnum.OUTPUT_STATUS, this.getOutputStatus());
-		currentStat.getGeneralStats().put(GeneralStatEnum.EXECUTION_IDENTIFIER,
-				ConfigurationProperties.getProperty("projectIdentifier"));
+//		currentStat.getGeneralStats().put(GeneralStatEnum.EXECUTION_IDENTIFIER,
+//				ConfigurationProperties.getProperty("projectIdentifier"));
 		//
 		if (!ConfigurationProperties.getPropertyBool("skipfaultlocalization"))
 			currentStat.getGeneralStats().put(GeneralStatEnum.FAULT_LOCALIZATION,
@@ -187,13 +186,13 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 		if (this.solutions.size() > 0) {
 			this.sortPatches();
-			try {
-
-				this.computePatchDiff(this.solutions);
-
-			} catch (Exception e) {
-				log.error("Problem at computing diff" + e);
-			}
+//			try {
+//
+//				this.computePatchDiff(this.solutions);
+//
+//			} catch (Exception e) {
+//				log.error("Problem at computing diff" + e);
+//			}
 			log.info(this.getSolutionData(this.solutions, this.generationsExecuted) + "\n");
 
 			patchInfo = createStatsForPatches(solutions, generationsExecuted, dateInitEvolution);
@@ -202,11 +201,12 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		}
 		// Reporting results
 		String output = this.projectFacade.getProperties().getWorkingDirRoot();
-		for (ReportResults out : this.getOutputResults()) {
-			out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
-			if (ConfigurationProperties.getPropertyBool("removeworkingfolder")) {
-				File fout = new File(output);
-
+		if (ConfigurationProperties.getPropertyBool("removeworkingfolder")) {
+			String[] deldirs = new String[2];
+			deldirs[0] = output + File.separator + "bin";
+			deldirs[1] = output + File.separator + "src" + File.separator + ProgramVariant.DEFAULT_ORIGINAL_VARIANT;
+			for (String deldir: deldirs) {
+				File fout = new File(deldir);
 				try {
 					FileUtils.deleteDirectory(fout);
 				} catch (IOException e) {
@@ -214,6 +214,9 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 					log.error(e);
 				}
 			}
+		}
+		for (ReportResults out : this.getOutputResults()) {
+			out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
 		}
 		try {
 			List<SuspiciousCode> susp = new ArrayList<>();
@@ -264,6 +267,10 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 			JSONObject ob = p.stat(statsPatchSolution);
 
 			String output = ConfigurationProperties.getProperty("folderDiff");
+			if (output == null) {
+				log.error("can not save patch, folderDiff is null");
+				return;
+			}
 			File f = new File(output);
 			if (!f.exists())
 				f.mkdirs();
@@ -547,7 +554,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 				return true;
 			} else {
-				ReadFileUtil.compileButFail ++ ;//problem
+				currentStat.increment(GeneralStatEnum.NR_COMPILE_BUT_FAILED);
 			}
 		} else {
 			log.debug("-The child does NOT compile: " + programVariant.getId() + ", errors: "
@@ -712,7 +719,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 					line += "\nline= " + gs.getSuspicious().getLineNumber();
 					line += "\nlineSuspiciousness= " + gs.getSuspicious().getSuspiciousValueString();
 				}
-				line += "\nlineSuspiciousness= " + genOperationInstance.getModificationPoint().identified;
+//				line += "\nlineSuspiciousness= " + genOperationInstance.getModificationPoint().identified;
 				line += "\noriginal statement= " + genOperationInstance.getOriginal().toString();
 				line += "\nbuggy kind= " + genOperationInstance.getOriginal().getClass().getSimpleName() + "|"
 						+ genOperationInstance.getOriginal().getParent().getClass().getSimpleName();
@@ -1303,6 +1310,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		for (ProgramVariant solutionVariant : variants) {
 
 			if (solutionVariant.getPatchInfo() != null) {
+				patches.add(solutionVariant.getPatchInfo());
 				continue;
 			}
 			PatchStat stats = getStatSingle(solutionVariant, generation);
@@ -1326,8 +1334,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		patch_i.addStat(PatchStatEnum.PATCH_DIFF_ORIG,
 				solutionVariant.getPatchDiff().getOriginalStatementAlignmentDiff());
 
-		patch_i.addStat(PatchStatEnum.FOLDER_SOLUTION_CODE,
-				projectFacade.getInDirWithPrefix(solutionVariant.currentMutatorIdentifier()));
+//		patch_i.addStat(PatchStatEnum.FOLDER_SOLUTION_CODE,
+//				projectFacade.getInDirWithPrefix(solutionVariant.currentMutatorIdentifier()));
 
 		List<PatchHunkStats> hunks = new ArrayList<>();
 		patch_i.addStat(PatchStatEnum.HUNKS, hunks);
@@ -1358,15 +1366,15 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 				hunk.getStats().put(HunkStatEnum.LOCATION,
 						genOperationInstance.getModificationPoint().getCtClass().getQualifiedName());
 
-				hunk.getStats().put(HunkStatEnum.PATH, genOperationInstance.getModificationPoint().getCtClass()
-						.getPosition().getFile().getAbsolutePath());
+//				hunk.getStats().put(HunkStatEnum.PATH, genOperationInstance.getModificationPoint().getCtClass()
+//						.getPosition().getFile().getAbsolutePath());
 
 				boolean originalAlingment = ConfigurationProperties.getPropertyBool("parsesourcefromoriginal");
-				String mpath = determineSourceFolderInWorkspace(solutionVariant, !originalAlingment) + File.separator
-						+ genOperationInstance.getModificationPoint().getCtClass().getQualifiedName().replace(".",
-								File.separator)
-						+ ".java";
-				hunk.getStats().put(HunkStatEnum.MODIFIED_FILE_PATH, mpath);
+//				String mpath = determineSourceFolderInWorkspace(solutionVariant, !originalAlingment) + File.separator
+//						+ genOperationInstance.getModificationPoint().getCtClass().getQualifiedName().replace(".",
+//								File.separator)
+//						+ ".java";
+//				hunk.getStats().put(HunkStatEnum.MODIFIED_FILE_PATH, mpath);
 
 				hunk.getStats().put(HunkStatEnum.MP_RANKING, genOperationInstance.getModificationPoint().identified);
 
@@ -1376,7 +1384,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 					hunk.getStats().put(HunkStatEnum.LINE, gs.getSuspicious().getLineNumber());
 					hunk.getStats().put(HunkStatEnum.SUSPICIOUNESS, gs.getSuspicious().getSuspiciousValueString());
 				}
-				hunk.getStats().put(HunkStatEnum.ORIGINAL_CODE, genOperationInstance.getOriginal().toString());
+				hunk.getStats().put(HunkStatEnum.ORIGINAL_CODE, genOperationInstance.getOriginal().toString().replaceAll("\n", ""));
 				hunk.getStats().put(HunkStatEnum.BUGGY_CODE_TYPE,
 						genOperationInstance.getOriginal().getClass().getSimpleName() + "|"
 								+ genOperationInstance.getOriginal().getParent().getClass().getSimpleName());
@@ -1388,10 +1396,10 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 					if (genOperationInstance.getModified().toString() != genOperationInstance.getOriginal().toString())
 
 						hunk.getStats().put(HunkStatEnum.PATCH_HUNK_CODE,
-								genOperationInstance.getModified().toString());
+								genOperationInstance.getModified().toString().replaceAll("\n", ""));
 					else {
 						hunk.getStats().put(HunkStatEnum.PATCH_HUNK_CODE,
-								genOperationInstance.getOriginal().toString());
+								genOperationInstance.getOriginal().toString().replaceAll("\n", ""));
 
 					}
 					// Information about types Parents

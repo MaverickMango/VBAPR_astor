@@ -196,7 +196,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 if (!isParasSame(paras, argsType) || !((CtInvocation<?>) point.getCodeElement()).getExecutable().getType().equals(exe.getType()))
                     continue;
                 Ingredient ingredient = new Ingredient(CodeAddFactory.createInvocationSameArgs((CtInvocation) point.getCodeElement(), exe));
-                if (!contains(exps, ingredient))
+                if (ingredient.getCode() != null && !contains(exps, ingredient))
                     exps.add(ingredient);
             }
         }
@@ -210,7 +210,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                     if (pinv.getExecutable().getSimpleName().equals(fixName)) {
                         if (!pinv.toString().equals(ininv.toString())) {
                             Ingredient ingredient = new Ingredient(CodeAddFactory.createInvocationSameName(pinv, ininv));
-                            if (!contains(exps, ingredient))
+                            if (ingredient.getCode() != null && !contains(exps, ingredient))
                                 exps.add(ingredient);
                         }
                     } else {
@@ -218,7 +218,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                         CtExecutableReference pe = pinv.getExecutable();
                         if (isParasSame(ine.getParameters(), pe.getParameters())) {
                             Ingredient ingredient = new Ingredient(CodeAddFactory.createInvocationSameArgs(pinv, ininv.getExecutable()));
-                            if (!contains(exps, ingredient))
+                            if (ingredient.getCode() != null && !contains(exps, ingredient))
                                 exps.add(ingredient);
                         }
                     }
@@ -253,7 +253,8 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 } else if (!(in.getCode() instanceof CtBinaryOperator))
                     continue;
                 Ingredient ingredient = new Ingredient(CodeAddFactory.createCondition(point.getCodeElement(), in.getCode()));
-                exps.add(ingredient);
+                if (ingredient.getCode() != null)
+                    exps.add(ingredient);
             }
 
         }
@@ -281,11 +282,15 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
     boolean contains(List<Ingredient> bases, Ingredient in) {
         boolean flag = false;
         for (Ingredient base :bases) {
-            String baseCode = base.getCode().toString().replaceAll("\n", "");
-            String inCode = in.getCode().toString().replaceAll("\n", "");
-            if (baseCode.equals(inCode)) {
-                flag = true;
-                break;
+            try {
+                String baseCode = base.getCode().toString().replaceAll("\n", "");
+                String inCode = in.getCode().toString().replaceAll("\n", "");
+                if (baseCode.equals(inCode)) {
+                    flag = true;
+                    break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         return flag;
@@ -328,21 +333,22 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 || parent instanceof CtReturn)
             baseElements = limitIngredients(baseElements, modificationPoint);
 
+
+        if (baseElements == null || baseElements.isEmpty()) {
+            log.debug("Any element available for mp " + modificationPoint);
+            return null;
+        }
+
         if (!elementSet.contains(modificationPoint.getCodeElement().toString())) {
             elementSet.add(modificationPoint.getCodeElement().toString());
             Logger detailLog = Logger.getLogger("DetailLog");
-            detailLog.info("BaseElements for " + modificationPoint.getCodeElement() + " of modificationpoint " + modificationPoint);
+            detailLog.debug("BaseElements for " + modificationPoint.getCodeElement().toString().replaceAll("\\n", "") + " of modificationpoint " + modificationPoint);
             StringBuilder stringBuilder = new StringBuilder("[");
             for (Ingredient in :baseElements) {
                 stringBuilder.append("\"").append(in.getCode().toString().replaceAll("\\n", "")).append("\",");
             }
             stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(),"]");
-            detailLog.info("= " + stringBuilder);
-        }
-
-        if (baseElements == null || baseElements.isEmpty()) {
-            log.debug("Any element available for mp " + modificationPoint);
-            return null;
+            detailLog.debug("= " + stringBuilder);
         }
 
         int elementsFromFixSpace = baseElements.size();

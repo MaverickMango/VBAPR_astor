@@ -67,7 +67,7 @@ public class LaucherJUnitProcess {
 			List<String> command = new ArrayList<String>();
 
 			command.add(jvmPath);
-			command.add("-Xmx512m");
+			command.add("-Xmx256m");
 
 			String[] ids = ConfigurationProperties.getProperty(MetaGenerator.METALL).split(File.pathSeparator);
 			for (String mutid : ids) {
@@ -241,14 +241,6 @@ public class LaucherJUnitProcess {
 
 	}
 
-	/**
-	 * This method analyze the output of the junit executor (i.e.,
-	 * {@link JUnitTestExecutor}) and return an entity called TestResult with the
-	 * result of the test execution
-	 *
-	 * @param p
-	 * @return
-	 */
 	protected TestResult getTestResult(BufferedReader in) throws RuntimeException {
 		log.debug("Analyzing output from process");
 		TestResult tr = new TestResult();

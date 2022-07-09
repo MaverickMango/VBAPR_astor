@@ -29,6 +29,11 @@ public class CodeAddFactory {
         left.setParent(newCond);
         right.setParent(newCond);
         newCond.setParent(root.getParent());
+        try {
+            newCond.toString();
+        } catch (Exception e) {
+            return null;
+        }
         return newCond;
     }
 
@@ -118,7 +123,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
-        newExp.setParent(newroot.getParent());
+        newExp.setParent(root.getParent());
         return newExp;
     }
 
@@ -132,7 +137,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
-        newExp.setParent(newroot.getParent());
+        newExp.setParent(root.getParent());
         return newExp;
     }
 
@@ -148,7 +153,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
-        newExp.setParent(newroot.getParent());
+        newExp.setParent(root.getParent());
         return newExp;
     }
 
@@ -163,7 +168,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
-        newExp.setParent(newroot.getParent());
+        newExp.setParent(root.getParent());
         return newExp;
     }
 
@@ -178,7 +183,7 @@ public class CodeAddFactory {
         typecast.setDeclaringType(typeReference);
         newExp.addTypeCast(typecast);
         typecast.setParent(newExp);
-        newExp.setParent(newroot.getParent());
+        newExp.setParent(root.getParent());
         return newExp;
     }
 
@@ -213,6 +218,11 @@ public class CodeAddFactory {
         }
         newExp.setArguments(args_copy);
         newExp.setParent(old.getParent());
+        try {
+            newExp.toString();
+        } catch (Exception e) {
+            return null;
+        }
         return newExp;
     }
 
@@ -236,6 +246,11 @@ public class CodeAddFactory {
         }
         newExp.setArguments(args_copy);
         newExp.setParent(old.getParent());
+        try {
+            newExp.toString();
+        } catch (Exception e) {
+            return null;
+        }
         return newExp;
     }
 
