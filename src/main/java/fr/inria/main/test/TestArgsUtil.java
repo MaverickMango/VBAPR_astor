@@ -1,5 +1,6 @@
 package fr.inria.main.test;
 
+import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.main.CommandSummary;
 
@@ -17,13 +18,14 @@ public class TestArgsUtil {
     public TestArgsUtil() {
         this.cs = new CommandSummary();
         cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR");
-        cs.command.put("-maxgen", "2");
+        cs.command.put("-maxgen", "500");
 //        cs.command.put("-scope", "file");
         cs.command.put("-skipfaultlocalization", "true");
-        cs.command.put("-stopfirst", "true");
+//        cs.command.put("-stopfirst", "true");
         cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");
 //        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
         cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
+        cs.command.put("-modificationpointnavigation","fr.inria.astor.core.solutionsearch.navigation.ForceOrderSuspiciousNavitation");
         cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
         cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");//ReplaceTypeOperatorSpace
         cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
@@ -68,10 +70,10 @@ public class TestArgsUtil {
             case "Compress":
                 levels[0] = "5";
                 break;
-            case "JacksonCore":
             case "Gson":
                 levels[0] = "6";
                 break;
+            case "JacksonCore":
             case "JacksonXml":
             case "JacksonDatabind":
             case "Csv":

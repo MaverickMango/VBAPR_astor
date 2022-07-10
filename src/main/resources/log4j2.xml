@@ -73,6 +73,9 @@
         <Logger name="DetailLog" level="DEBUG" additivity="false">
             <AppenderRef ref="RollingFile1" />
         </Logger>
+        <Logger name="VBAPR" level="ERROR" additivity="true">
+            <AppenderRef ref="RollingFile2" />
+        </Logger>
         <Logger name="InfoLog" level="INFO" additivity="true">
             <AppenderRef ref="RollingFile2" />
         </Logger>

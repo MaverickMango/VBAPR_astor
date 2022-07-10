@@ -21,6 +21,7 @@ import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.astor.util.StringUtil;
 import fr.inria.main.evolution.ExtensionPoints;
 import org.apache.log4j.Logger;
+import org.apache.logging.log4j.util.StringBuilders;
 import spoon.processing.AbstractProcessor;
 
 import java.io.File;
@@ -181,7 +182,7 @@ public class VBAPR  extends JGenProg {
                 solution = processCreatedVariant(newVariant, generation);
                 if (newVariant.getFitness() != Double.MAX_VALUE) {
                     temporalInstances.add(newVariant);
-                    detailLog.debug("valid variant created.");
+//                    detailLog.debug("valid variant created.");
                 } else {
                     detailLog.debug("variant can not compile or an error happened in testing process(such as do not terminate within wait time or out of memory");
                 }
@@ -524,22 +525,26 @@ public class VBAPR  extends JGenProg {
 
     public void logProgramVariant(List<ProgramVariant> pvs, boolean logopinfo) {
         for (ProgramVariant pv :pvs) {
-            detailLog.info(pv + " fitness: " + pv.getFitness());
-            if (!logopinfo)
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(pv + " fitness: " + pv.getFitness());
+            if (!logopinfo) {
+                detailLog.info(stringBuilder.toString());
                 continue;
+            }
             Map<Integer, List<OperatorInstance>> genops = pv.getOperations();
             if (!genops.keySet().isEmpty())
-                detailLog.info("operation instances of this variant: ");
+                stringBuilder.append("\n").append("operation instances of this variant: ");
             for (Integer gen : genops.keySet()) {
-                detailLog.info("    at generation: " + gen);
-                detailLog.info("    operation instances:");
+                stringBuilder.append("\n").append("at generation: " + gen);
+                stringBuilder.append("\n").append("operation instances:");
                 for (OperatorInstance op : genops.get(gen)) {
-                    detailLog.info("        modification point: " + op.getModificationPoint());
-                    detailLog.info("        operator type: " + op.getOperationApplied().name());
-                    detailLog.info("        original: " + op.getOriginal().toString().replaceAll("\\n", ""));
-                    detailLog.info("        modified: " + (op.getModified() == null ? "null" : op.getModified().toString().replaceAll("\\n", "")));
+                    stringBuilder.append("\n").append("modification point: " + op.getModificationPoint());
+                    stringBuilder.append("\n").append("operator type: " + op.getOperationApplied().name());
+                    stringBuilder.append("\n").append("original: " + op.getOriginal().toString().replaceAll("\\n", ""));
+                    stringBuilder.append("\n").append("modified: " + (op.getModified() == null ? "null" : op.getModified().toString().replaceAll("\\n", "")));
                 }
             }
+            detailLog.info(stringBuilder.toString());
         }
     }
 

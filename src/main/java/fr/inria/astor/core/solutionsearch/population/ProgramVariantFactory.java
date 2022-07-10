@@ -8,6 +8,7 @@ import fr.inria.astor.core.setup.FinderTestCases;
 import fr.inria.astor.util.GroundTruth;
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.astor.util.StringUtil;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import com.martiansoftware.jsap.JSAPException;

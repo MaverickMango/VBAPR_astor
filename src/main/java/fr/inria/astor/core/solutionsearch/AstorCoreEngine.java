@@ -10,6 +10,7 @@ import fr.inria.astor.core.manipulation.filters.*;
 import fr.inria.astor.util.ReadFileUtil;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 
@@ -859,6 +860,10 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		originalVariant.setFitness(fitness);
 
 		log.info("The original fitness is : " + fitness);
+//		if (Double.compare(fitness, (double)projectFacade.getProperties().getFailingTestCases().size()) != 0) {
+//			Logger infoLog = LogManager.getLogger("InfoLog");
+//			infoLog.error("failing tests error: " + fitness + ", actual is " + projectFacade.getProperties().getFailingTestCases().size());
+//		}
 		for (ProgramVariant initvariant : variants) {
 			initvariant.setFitness(fitness);
 		}

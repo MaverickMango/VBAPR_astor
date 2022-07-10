@@ -30,6 +30,7 @@ import spoon.support.reflect.code.CtBreakImpl;
 import spoon.support.reflect.code.CtInvocationImpl;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionIngredientStrategy {
 
@@ -154,6 +155,18 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 exps.add(ingredient);
             }
         }
+        if (point.getCodeElement() instanceof CtUnaryOperator) {
+            CtUnaryOperator mpvar = (CtUnaryOperator) point.getCodeElement();
+            List<CtVariable> contexts = point.getContextOfModificationPoint();
+            for (CtVariable context : contexts) {//target
+                if (context.getSimpleName().equals(point.getCodeElement().toString()))
+                    continue;
+                if (!mpvar.getType().isPrimitive() && !mpvar.getType().equals(context.getType()))
+                    continue;
+                Ingredient ingredient = new Ingredient(CodeAddFactory.createVariableRead(context));
+                exps.add(ingredient);
+            }
+        }
         if (point.getCodeElement() instanceof CtVariableRead && ((CtVariableRead<?>) point.getCodeElement()).getType().isPrimitive()) {//
             CtTypeReference typeReference = MutationSupporter.getFactory().Core().createTypeReference();
             typeReference.setSimpleName("double");
@@ -225,7 +238,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 }
             }
 
-            if (point.getCodeElement() instanceof CtVariableRead) {
+            if (point.getCodeElement() instanceof CtVariableRead || point.getCodeElement() instanceof CtUnaryOperator) {
                 if (in.getCode() instanceof CtVariableRead)
                     continue;
                 if ("target".equalsIgnoreCase(String.valueOf(point.getCodeElement().getRoleInParent()))
@@ -341,14 +354,15 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
         if (!elementSet.contains(modificationPoint.getCodeElement().toString())) {
             elementSet.add(modificationPoint.getCodeElement().toString());
+            StringBuilder stringBuilder = new StringBuilder();
             Logger detailLog = Logger.getLogger("DetailLog");
-            detailLog.debug("BaseElements for " + modificationPoint.getCodeElement().toString().replaceAll("\\n", "") + " of modificationpoint " + modificationPoint);
-            StringBuilder stringBuilder = new StringBuilder("[");
+            stringBuilder.append("BaseElements for " + modificationPoint.getCodeElement().toString().replaceAll("\\n", "") + " of modificationpoint " + modificationPoint + ":");
+            stringBuilder.append(" [");
             for (Ingredient in :baseElements) {
                 stringBuilder.append("\"").append(in.getCode().toString().replaceAll("\\n", "")).append("\",");
             }
             stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(),"]");
-            detailLog.debug("= " + stringBuilder);
+            detailLog.debug(stringBuilder);
         }
 
         int elementsFromFixSpace = baseElements.size();
