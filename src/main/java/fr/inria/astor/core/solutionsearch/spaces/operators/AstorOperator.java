@@ -3,6 +3,7 @@ package fr.inria.astor.core.solutionsearch.spaces.operators;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import org.apache.log4j.Logger;
 
@@ -116,7 +117,13 @@ public abstract class AstorOperator implements AstorExtensionPoint {
 		log.debug("---" + newPoint);
 		log.debug("---" + operation);
 
-		return modifPoints.add(newPoint);
+		if (!ConfigurationProperties.getPropertyBool("addnewModificationpoints"))
+			return modifPoints.add(newPoint);
+		else {
+//			modifPoints.add(newPoint);
+			List<ModificationPoint> newPoints = ProgramVariantFactory.createPointsFormNewPoint(existingPoints, operation.getModified());
+			return modifPoints.addAll(newPoints);
+		}
 	}
 
 	/**
@@ -131,7 +138,7 @@ public abstract class AstorOperator implements AstorExtensionPoint {
 	protected boolean removePoint(ProgramVariant variant, OperatorInstance operation) {
 		List<ModificationPoint> modifPoints = variant.getModificationPoints();
 		boolean removed = modifPoints.remove(operation.getModificationPoint());
-		if (!ConfigurationProperties.getPropertyBool("applyCrossover")) {
+		if (ConfigurationProperties.getPropertyBool("applyCrossover")) {
 			List<ModificationPoint> remaining = new ArrayList<>(modifPoints);
 			for (ModificationPoint mp : modifPoints) {
 				if (mp.getCodeElement().hasParent(operation.getOriginal())) {

@@ -2,6 +2,8 @@ package fr.inria.astor.core.solutionsearch.population;
 
 import fr.inria.astor.core.entities.OperatorInstance;
 import fr.inria.astor.core.entities.ProgramVariant;
+import fr.inria.astor.core.entities.WeightElement;
+import fr.inria.astor.core.entities.WeightElementWithTwo;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
 import org.apache.log4j.Logger;
@@ -63,8 +65,10 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
 //            while (nextVariants.size() < populationSize) {}
 
             //3. for all left
-            nextVariants.addAll(weightRandomChoose(newPopulation, hadbeenModi, populationSize - nextVariants.size()));
-
+            if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
+                nextVariants.addAll(rouletteWheelSelection(newPopulation, populationSize - nextVariants.size()));
+            } else
+                nextVariants.addAll(weightRandomChoose(newPopulation, hadbeenModi, populationSize - nextVariants.size()));
         } else {
             nextVariants.addAll(newPopulation);
         }
@@ -141,6 +145,22 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
         return found;
     }
 
+    public List<ProgramVariant> rouletteWheelSelection(List<ProgramVariant> remaining, int targetSize) {
+        assert targetSize >= 0;
+        if (targetSize == 0) {
+            return null;
+        }
+        List<ProgramVariant> found = new ArrayList<>();
+        for (int i = 0; found.size() < targetSize && !remaining.isEmpty();) {
+            ProgramVariant pv = weightedSelectWithNormalize(remaining);
+            if (pv != null) {
+                found.add(pv);
+                remaining.remove(pv);
+            }
+        }
+        return found;
+    }
+
     public List<ProgramVariant> weightRandomChoose(List<ProgramVariant> remaining, Set<Integer> hadbennModi, int targetSize) {//
         assert targetSize >= 0;
         if (targetSize == 0) {
@@ -148,12 +168,8 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
         }
         List<ProgramVariant> candidates = new ArrayList<>(remaining);
         List<ProgramVariant> found = new ArrayList<>();
-        for (int i = 0; found.size() < targetSize && !remaining.isEmpty();) {//would it be dead loop? if the threshold will be always bigger than the prob?
-            double sum = 0.0;
-            for (ProgramVariant pv :remaining) {
-                double fitness = pv.getFitness();
-                sum += 1.0 + fitness;//add 1.0 to guarantee the solution not always be chosen.
-            }
+        for (int i = 0; found.size() < targetSize && !remaining.isEmpty();) {
+            double sum = getSumOfProgramVariant(remaining);
             if (Double.compare(sum, 0.0) != 0) {
                 ProgramVariant pv = candidates.get(i);
                 double prob = 1.0 - (1.0 + pv.getFitness()) / sum;//
@@ -186,6 +202,59 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             }
         }
         return found;
+    }
+
+    private double getSumOfProgramVariant(List<ProgramVariant> remaining) {
+        double sum = 0d;
+        for (ProgramVariant pv :remaining) {
+            double weight = pv.getFitness();
+            sum += 1.0 + weight;//add 1.0 to guarantee the solution not always be chosen.
+        }
+        return sum;
+    }
+
+    private ProgramVariant weightedSelectWithNormalize(List<ProgramVariant> remaining) {
+        List<WeightElementWithTwo<?>> wes = new ArrayList<>();
+        double sum1 = 0d, sum2 = 0d;
+        double max1 = 0, max2 = 0, min1 = Double.MAX_VALUE, min2 = Double.MAX_VALUE;
+        for (ProgramVariant pv :remaining) {
+            double score1 = pv.getFitness(), score2 = pv.getSimilarity();
+            if (score1 != Double.MAX_VALUE) {
+                max1 = Math.max(max1, score1);
+                min1 = Math.min(min1, score1);
+            }
+            max2 = Math.max(max2, score2);
+            min2 = Math.min(min2, score2);
+        }
+        for (ProgramVariant pv :remaining) {
+            double score1 = pv.getFitness(), score2 = pv.getSimilarity();
+            double nor1 = 0d, nor2 = 0d;
+            WeightElementWithTwo<?> we = null;
+            nor2 = (score2 - min2) / (max2 - min2) + 1;
+            if (score1 != Double.MAX_VALUE) {
+                nor1 = (score1 - min1) / (max1 - min1) + 1;
+                we= new WeightElementWithTwo<>(pv, 2 - nor1, nor2);
+                sum1 += nor1;
+            } else {
+                we = new WeightElementWithTwo<>(pv, -1d,  nor2);
+            }
+            sum2 += nor2;
+            wes.add(we);
+        }
+        WeightElementWithTwo<?> selected = null;
+        if (sum1 != 0 || sum2 != 0) {
+            for (WeightElementWithTwo<?> we : wes) {
+                if (sum1 != 0 && we.weight != -1d )
+                    we.weight = we.weight / sum1;
+                if (sum2 != 0)
+                    we.simWeight = we.simWeight / sum2;
+            }
+            WeightElementWithTwo.feedAccumulativeWithWeight(wes);
+            WeightElementWithTwo.feedAccumulativeWithSim(wes);
+
+            selected = WeightElementWithTwo.selectElementWeightBalancedWithTwo(wes);
+        }
+        return selected == null ? null : (ProgramVariant) selected.element;
     }
 
     class FitnessComparator implements Comparator<ProgramVariant> {

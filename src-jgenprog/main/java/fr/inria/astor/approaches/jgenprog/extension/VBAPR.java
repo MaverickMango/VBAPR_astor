@@ -2,6 +2,9 @@ package fr.inria.astor.approaches.jgenprog.extension;
 
 import com.martiansoftware.jsap.JSAPException;
 import fr.inria.astor.approaches.jgenprog.JGenProg;
+import fr.inria.astor.approaches.jgenprog.operators.InsertBeforeOp;
+import fr.inria.astor.approaches.jgenprog.operators.InsertStatementOp;
+import fr.inria.astor.approaches.jgenprog.operators.RemoveOp;
 import fr.inria.astor.core.antipattern.AntiPattern;
 import fr.inria.astor.core.entities.*;
 import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
@@ -17,12 +20,14 @@ import fr.inria.astor.core.solutionsearch.population.ProgramVariantFactory;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.IngredientBasedOperator;
 import fr.inria.astor.core.stats.Stats;
+import fr.inria.astor.util.EditDistanceWithTokens;
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.astor.util.StringUtil;
 import fr.inria.main.evolution.ExtensionPoints;
 import org.apache.log4j.Logger;
-import org.apache.logging.log4j.util.StringBuilders;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtStatement;
+import spoon.reflect.declaration.CtElement;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,11 +36,13 @@ import java.util.*;
 public class VBAPR  extends JGenProg {
     protected static Logger log = Logger.getLogger(VBAPR.class.getSimpleName());
     protected static Logger detailLog = Logger.getLogger("DetailLog");
+    protected static Logger fitASim = Logger.getLogger("FitASim");
 
     public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
         ReadFileUtil.getGTs(ReadFileUtil.getInfos());
         ReadFileUtil.setGTElements();
+        log.error("vbapr error log");
     }
 
     @Override
@@ -180,12 +187,15 @@ public class VBAPR  extends JGenProg {
                 }
             } else {
                 solution = processCreatedVariant(newVariant, generation);
-                if (newVariant.getFitness() != Double.MAX_VALUE) {
-                    temporalInstances.add(newVariant);
-//                    detailLog.debug("valid variant created.");
-                } else {
+                temporalInstances.add(newVariant);
+                if (newVariant.getFitness() == Double.MAX_VALUE) {
                     detailLog.debug("variant can not compile or an error happened in testing process(such as do not terminate within wait time or out of memory");
                 }
+            }
+
+
+            if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
+                setSimilarityForPV(newVariant);//ForPV
             }
 
             if (solution) {
@@ -218,6 +228,32 @@ public class VBAPR  extends JGenProg {
         }
 
         return foundSolution;
+    }
+
+    private void setSimilarityForPVMul(ProgramVariant newVariant) {
+        EditDistanceWithTokens editor = new EditDistanceWithTokens();
+        Map<Integer, List<OperatorInstance>> genops = newVariant.getOperations();
+        double res = 1d;
+        for (Integer gen : genops.keySet()) {
+            List<OperatorInstance> ops = genops.get(gen);
+            for (OperatorInstance op :ops) {
+                CtElement original = op.getOriginal();
+                CtElement modified = op.getModified();
+                if (op.getOperationApplied() instanceof InsertStatementOp) {
+                    assert original instanceof CtStatement && modified instanceof CtStatement;
+                    modified = CodeAddFactory.createStatementsBlock((CtStatement) original,
+                            (CtStatement) modified,
+                            op.getOperationApplied() instanceof InsertBeforeOp);
+                }
+                if (modified == null) {
+                    assert op.getOperationApplied() instanceof RemoveOp;
+                    modified = CodeAddFactory.createStatementsBlock(null, null, true);
+                }
+                String ed = editor.calEditDisctance(original, modified);
+                res *= Double.parseDouble(ed);
+            }
+        }
+        newVariant.setSimilarity(res);
     }
 
     protected ProgramVariant createNewProgramVariant(ProgramVariant parentVariant, int generation, int mpidx) throws Exception {
@@ -545,7 +581,27 @@ public class VBAPR  extends JGenProg {
                 }
             }
             detailLog.info(stringBuilder.toString());
+            fitASim.info(pv.getFitness() + "," + pv.getSimilarity());
         }
+    }
+
+    private void setSimilarityForPV(ProgramVariant newVariant) {
+        EditDistanceWithTokens editor = new EditDistanceWithTokens();
+        Map<Integer, List<OperatorInstance>> genops = newVariant.getOperations();
+        double res = 1d;
+        StringBuilder originalsb = new StringBuilder(), modifiedsb = new StringBuilder();
+        for (Integer gen : genops.keySet()) {
+            List<OperatorInstance> ops = genops.get(gen);
+            for (OperatorInstance op :ops) {
+                CtElement original = op.getOriginal();
+                originalsb.append(" ").append(original.toString().replaceAll("\n", ""));
+                CtElement modified = op.getModified();
+                modifiedsb.append(" ").append(modified == null ? " " : modified.toString().replaceAll("\n", ""));
+            }
+        }
+        String ed = editor.calEditDisctance(originalsb, modifiedsb);
+        res = Double.parseDouble(ed);
+        newVariant.setSimilarity(res);
     }
 
 }

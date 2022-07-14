@@ -75,7 +75,7 @@ public class Ingredient {
 	 */
 	public String getChacheCodeString() {
 		if (cacheString == null && this.getCode() != null) {
-			cacheString = this.getCode().toString();
+			cacheString = this.getCode().toString().replaceAll("\n", "");
 		}
 		return cacheString;
 	}
@@ -100,7 +100,7 @@ public class Ingredient {
 		if (ingredientCode == null) {
 			if (other.ingredientCode != null)
 				return false;
-		} else if (!ingredientCode.equals(other.ingredientCode))
+		} else if (getChacheCodeString() != null && !cacheString.equals(other.getChacheCodeString()))//if (!ingredientCode.equals(other.ingredientCode))
 			return false;
 		return true;
 	}

@@ -457,6 +457,15 @@ public abstract class AbstractMain {
 		if (cmd.hasOption("useGTsizeAsPopSize"))
 			ConfigurationProperties.properties.setProperty("useGTsizeAsPopSize", cmd.getOptionValue("useGTsizeAsPopSize"));
 
+		if (cmd.hasOption("usevariableedit"))
+			ConfigurationProperties.properties.setProperty("usevariableedit", cmd.getOptionValue("usevariableedit"));
+
+		if (cmd.hasOption("addnewModificationpoints"))
+			ConfigurationProperties.properties.setProperty("addnewModificationpoints", cmd.getOptionValue("addnewModificationpoints"));
+
+		if (cmd.hasOption("addsimilaritycomparasion"))
+			ConfigurationProperties.properties.setProperty("addsimilaritycomparasion", cmd.getOptionValue("addsimilaritycomparasion"));
+
 		if (cmd.hasOption("validation"))
 			ConfigurationProperties.properties.setProperty("validation", cmd.getOptionValue("validation"));
 

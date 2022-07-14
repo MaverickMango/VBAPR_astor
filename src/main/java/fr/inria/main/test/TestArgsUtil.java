@@ -27,7 +27,7 @@ public class TestArgsUtil {
         cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
         cs.command.put("-modificationpointnavigation","fr.inria.astor.core.solutionsearch.navigation.ForceOrderSuspiciousNavitation");
         cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
-        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");//ReplaceTypeOperatorSpace
+        cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.ReplaceExpOperatorSpace");//GTBRepairOperatorSpace Type
         cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
     }
 

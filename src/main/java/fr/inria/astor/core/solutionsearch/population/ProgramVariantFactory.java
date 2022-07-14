@@ -4,6 +4,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import fr.inria.astor.core.entities.OperatorInstance;
+import fr.inria.astor.core.faultlocalization.bridgeFLSpoon.SpoonElementPointer;
+import fr.inria.astor.core.faultlocalization.bridgeFLSpoon.SpoonElementPointerLauncher;
+import fr.inria.astor.core.faultlocalization.bridgeFLSpoon.SpoonLauncher;
 import fr.inria.astor.core.setup.FinderTestCases;
 import fr.inria.astor.util.GroundTruth;
 import fr.inria.astor.util.ReadFileUtil;
@@ -26,10 +29,8 @@ import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.CodeParserLauncher;
 import spoon.reflect.code.*;
 import spoon.reflect.cu.position.NoSourcePosition;
-import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtType;
-import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.declaration.*;
+import spoon.reflect.visitor.filter.TypeFilter;
 
 /**
  * Creates the initial population of program variants
@@ -354,7 +355,10 @@ public class ProgramVariantFactory {
 //						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtOperatorAssignment.class))) {
 //					continue;
 //				}
-				if (!(ctElement.getParent(CtAssignment.class) != null && ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class))))
+				if (!((ctElement.getParent(CtAssignment.class) != null
+						&& ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class)))
+					|| (ctElement.getParent(CtLocalVariable.class) != null
+						&& ReadFileUtil.hasThisElement(ctElement.getParent(CtLocalVariable.class)))))
 					continue;
 			}
 			SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
@@ -488,6 +492,12 @@ public class ProgramVariantFactory {
 		return susp;
 	}
 
+	public static List<CtElement> retrieveCtElement(CtElement root) throws Exception {
+		SpoonElementPointerLauncher launcher = new SpoonElementPointerLauncher(MutationSupporter.getFactory());
+		List<CtElement> children = launcher.run(root);
+		return children;
+	}
+
 	@SuppressWarnings({ "static-access", "rawtypes" })
 	public CtClass getCtClassFromName(String className) {
 
@@ -521,6 +531,27 @@ public class ProgramVariantFactory {
 		List<CtVariable> context = existingGen.getContextOfModificationPoint();
 		ModificationPoint newGen = new ModificationPoint(modified, ctClass, context);
 		return newGen;
+
+	}
+
+	public static List<ModificationPoint> createPointsFormNewPoint(ModificationPoint existingGen, CtElement modified) {
+		Logger detailLog = LogManager.getLogger("DetailLog");
+		List<ModificationPoint> list = new ArrayList<>();
+		try {
+			List<CtElement> eles = retrieveCtElement(modified);
+			for (CtElement e :eles) {
+				ModificationPoint modifPoint = null;
+				if (existingGen instanceof SuspiciousModificationPoint)
+					modifPoint = clonePoint((SuspiciousModificationPoint) existingGen, e);
+				else
+					modifPoint = clonePoint(existingGen, e);
+				list.add(modifPoint);
+				detailLog.debug("new modification added. element: " + e);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return list;
 
 	}
 

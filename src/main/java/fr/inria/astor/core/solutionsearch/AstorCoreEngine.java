@@ -169,11 +169,12 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 	public void atEnd() {
 
+		Logger infolog = LogManager.getLogger("InfoLog");
 		long startT = dateInitEvolution.getTime();
 		long endT = System.currentTimeMillis();
-		log.info("Time Repair Loop (s): " + (endT - startT) / 1000d);
+		infolog.info("Time Repair Loop (s): " + (endT - startT) / 1000d);
 		currentStat.getGeneralStats().put(GeneralStatEnum.TOTAL_TIME, ((endT - startT)) / 1000d);
-		log.info("generationsexecuted: " + this.generationsExecuted);
+		infolog.info("generationsexecuted: " + this.generationsExecuted);
 
 		currentStat.getGeneralStats().put(GeneralStatEnum.OUTPUT_STATUS, this.getOutputStatus());
 //		currentStat.getGeneralStats().put(GeneralStatEnum.EXECUTION_IDENTIFIER,
@@ -194,7 +195,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 //			} catch (Exception e) {
 //				log.error("Problem at computing diff" + e);
 //			}
-			log.info(this.getSolutionData(this.solutions, this.generationsExecuted) + "\n");
+			infolog.info(this.getSolutionData(this.solutions, this.generationsExecuted) + "\n");
 
 			patchInfo = createStatsForPatches(solutions, generationsExecuted, dateInitEvolution);
 		} else {

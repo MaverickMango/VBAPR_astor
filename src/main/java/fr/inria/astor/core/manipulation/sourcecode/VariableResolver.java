@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import fr.inria.astor.approaches.jgenprog.extension.CodeAddFactory;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.core.manipulation.MutationSupporter;
@@ -22,6 +23,7 @@ import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.NGramManager;
+import org.netbeans.lib.cvsclient.commandLine.command.log;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
@@ -39,6 +41,7 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.PotentialVariableDeclarationFunction;
+import spoon.reflect.visitor.filter.TypeFilter;
 
 /**
  * Variable manipulations: methods to analyze variables and scope
@@ -139,7 +142,7 @@ public class VariableResolver {
 	}
 
 	public static List<CtVariableAccess> collectVariableAccess(CtElement element) {
-		return collectVariableAccess(element, false);
+		return collectVariableAccess(element, true);//problem?
 	}
 
 	public static List<CtVariableAccess> collectVariableRead(CtElement element) {
@@ -324,6 +327,8 @@ public class VariableResolver {
 		return fitInContext(varContext, element, true);
 	}
 
+	public static List<CtVariableAccess> _notmapped = null;
+
 	/**
 	 * This methods determines whether all the variable access contained in a
 	 * CtElement passes as parameter match with a variable from a set of variables
@@ -339,8 +344,13 @@ public class VariableResolver {
 		Map<CtVariableAccess, List<CtVariable>> matched = getMapping(varContext, ingredientCtElement, matchName);
 		if (matched == null)
 			return false;
+		List<CtVariableAccess> notmapped = checkMapping(matched);
 
-		return checkMapping(matched).isEmpty();
+		if (ConfigurationProperties.getPropertyBool("usevariableedit")) {
+			_notmapped = notmapped;
+		}
+
+		return notmapped.isEmpty();
 
 	}
 
@@ -397,6 +407,14 @@ public class VariableResolver {
 
 		// Now, we match the remain var access.
 		Map<CtVariableAccess, List<CtVariable>> matched = matchVars(varContext, varAccessCollected, matchName);
+		for (CtVariableAccess staticvar :varStaticAccessCollected) {
+			if (staticvar.getVariable().getDeclaration() == null)
+				continue;
+			Set<ModifierKind> modifierKinds = staticvar.getVariable().getDeclaration().getModifiers();
+			if (modifierKinds.contains(ModifierKind.PRIVATE)) {
+				matched.put(staticvar, new ArrayList<>());
+			}
+		}
 		return matched;
 	}
 

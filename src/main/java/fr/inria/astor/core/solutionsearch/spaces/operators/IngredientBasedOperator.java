@@ -3,13 +3,22 @@ package fr.inria.astor.core.solutionsearch.spaces.operators;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.inria.astor.approaches.jgenprog.extension.CodeAddFactory;
 import fr.inria.astor.approaches.jgenprog.operators.InsertStatementOp;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.entities.OperatorInstance;
 import fr.inria.astor.core.manipulation.MutationSupporter;
+import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.IngredientTransformationStrategy;
+import org.apache.log4j.LogManager;
+import org.codehaus.plexus.logging.LoggerManager;
+import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.visitor.filter.TypeFilter;
 
 /**
  * 
@@ -40,6 +49,7 @@ public abstract class IngredientBasedOperator extends AstorOperator {
 
 			if (ingredientsAfterTransformation == null) {
 				log.debug("Empty transformations mp " + modificationPoint + " " + ingredient);
+
 				if (!(this instanceof InsertStatementOp)) {
 					return operatorIntances;
 				}

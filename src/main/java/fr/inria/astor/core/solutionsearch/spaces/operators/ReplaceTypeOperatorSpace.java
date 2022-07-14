@@ -5,6 +5,7 @@ import fr.inria.astor.core.setup.RandomManager;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtElement;
 
 import java.util.ArrayList;
@@ -30,7 +31,8 @@ public class ReplaceTypeOperatorSpace extends OperatorSelectionStrategy {
         List<AstorOperator> operators = new ArrayList<>();
         switch (type) {
             case 1:
-                operators.add(getNextOperator("BinaryExpressionMutOp"));
+                operators.add(getNextOperator("InsertAfterOp"));
+                operators.add(getNextOperator("InsertBeforeOp"));
             default:break;
         }
         return operators.get(RandomManager.nextInt(operators.size()));
@@ -55,7 +57,7 @@ public class ReplaceTypeOperatorSpace extends OperatorSelectionStrategy {
     @Override
     public AstorOperator getNextOperator(SuspiciousModificationPoint modificationPoint) {
         CtElement element = modificationPoint.getCodeElement();
-        if (element instanceof CtExpression && !(element instanceof CtAssignment)) {
+        if (element instanceof CtStatement) {
             return this.getNextOperator(1);
         }
         return null;

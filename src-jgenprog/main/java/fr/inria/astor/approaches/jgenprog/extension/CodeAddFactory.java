@@ -18,23 +18,61 @@ import java.util.Set;
 public class CodeAddFactory {
     static String[] _types = {"double", "float", "long", "int", "short", "short", "byte"};
 
-    public static CtBinaryOperator createCondition(CtElement root, CtElement newPart) {
+    public static CtBlock createStatementsBlock(CtStatement original, CtStatement modified, boolean before) {
+        CtBlock block = MutationSupporter.getFactory().Core().createBlock();
+        CtStatement root = MutationSupporter.getFactory().Core().clone(original);
+        CtStatement add = MutationSupporter.getFactory().Core().clone(modified);
+        root.setParent(block);
+        add.setParent(block);
+        if (before) {
+            block.getStatements().add(add);
+            block.getStatements().add(root);
+        } else {
+            block.getStatements().add(root);
+            block.getStatements().add(add);
+        }
+        return block;
+    }
+
+    public static CtExpression createExpression(CtExpression exp, CtElement parent) {
+        CtExpression newElement = MutationSupporter.getFactory().Core().clone(exp);
+        newElement.setParent(parent);
+        return newElement;
+    }
+
+    public static List<CtBinaryOperator> createCondition(CtElement root, CtElement newPart) {
+        List<CtBinaryOperator> list = new ArrayList<>();
         CtExpression left = (CtExpression) MutationSupporter.getFactory().Core().clone(root);
         CtExpression right = (CtExpression) MutationSupporter.getFactory().Core().clone(newPart);
-        int selection = RandomManager.nextInt(1);
         CtBinaryOperator newCond = MutationSupporter.getFactory().Core().createBinaryOperator();
         newCond.setLeftHandOperand(left);
         newCond.setRightHandOperand(right);
-        newCond.setKind(selection == 0? BinaryOperatorKind.AND : BinaryOperatorKind.OR);
         left.setParent(newCond);
         right.setParent(newCond);
         newCond.setParent(root.getParent());
+        newCond.setKind(BinaryOperatorKind.AND);
         try {
             newCond.toString();
+            list.add(newCond);
         } catch (Exception e) {
-            return null;
+            e.printStackTrace();
         }
-        return newCond;
+        left = (CtExpression) MutationSupporter.getFactory().Core().clone(root);
+        right = (CtExpression) MutationSupporter.getFactory().Core().clone(newPart);
+        newCond = MutationSupporter.getFactory().Core().createBinaryOperator();
+        newCond.setLeftHandOperand(left);
+        newCond.setRightHandOperand(right);
+        left.setParent(newCond);
+        right.setParent(newCond);
+        newCond.setParent(root.getParent());
+        newCond.setKind(BinaryOperatorKind.OR);
+        try {
+            newCond.toString();
+            list.add(newCond);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     public static CtElement deleteCondition(CtBinaryOperator old) {
@@ -178,6 +216,7 @@ public class CodeAddFactory {
         newExp.setExecutable(newroot.getExecutable());
         newExp.setType(newroot.getType());
         newExp.setArguments(newroot.getArguments());
+        newExp.setTarget(newroot.getTarget());
 
         CtTypeReference typecast = MutationSupporter.getFactory().Core().createTypeReference();
         typecast.setDeclaringType(typeReference);
@@ -198,9 +237,36 @@ public class CodeAddFactory {
         return newExp;
     }
 
+
+    public static CtInvocation createInvocationWithVar(CtInvocation old, CtExpression var) {
+        CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();
+        if (old.getTarget() != null) {
+            CtExpression target = MutationSupporter.getFactory().Core().clone(old.getTarget());
+            newExp.setTarget(target);
+            target.setParent(newExp);
+        }
+        CtExecutableReference exe = MutationSupporter.getFactory().Core().clone(old.getExecutable());
+        newExp.setExecutable(exe);
+        exe.setParent(newExp);
+        newExp.setType(exe.getType());
+        List<CtExpression<?>> args_copy = new ArrayList<>();
+        CtExpression copy = MutationSupporter.getFactory().Core().clone(var);
+        args_copy.add(copy);
+        copy.setParent(newExp);
+        newExp.setArguments(args_copy);
+        newExp.setParent(old.getParent());
+        try {
+            newExp.toString();
+        } catch (Exception e) {
+            return null;
+        }
+        return newExp;
+    }
+
+
     public static CtInvocation createInvocationSameName(CtInvocation old, CtInvocation change) {
         CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();
-        if (old.getTarget() != null && old.getTarget() instanceof CtVariableRead) {
+        if (old.getTarget() != null) {
             CtExpression target = MutationSupporter.getFactory().Core().clone(old.getTarget());
             newExp.setTarget(target);
             target.setParent(newExp);
@@ -228,7 +294,7 @@ public class CodeAddFactory {
 
     public static CtInvocation createInvocationSameArgs(CtInvocation old, CtExecutableReference change) {
         CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();
-        if (old.getTarget() != null && old.getTarget() instanceof CtVariableRead) {
+        if (old.getTarget() != null) {
             CtExpression target = MutationSupporter.getFactory().Core().clone(old.getTarget());
             newExp.setTarget(target);
             target.setParent(newExp);

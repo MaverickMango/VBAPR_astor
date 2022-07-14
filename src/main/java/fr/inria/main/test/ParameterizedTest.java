@@ -41,37 +41,37 @@ public class ParameterizedTest{
 
     @Parameterized.Parameters
     public static Collection<String[]> data() {
-//        String[][] data = {
-//                {"Math" , "5"}
-////                {"Lang", "34"}
-////                ,{"Cli", "25"}
-////                ,{"Cli", "32"}
-////                ,{"Math", "26"}
-////                ,{"Math", "72"}
-////                ,{"Math", "46"}
-////                ,{"Math", "67"}
-////                ,{"Codec", "1"}
-////                ,{"Codec", "2"}
-////                ,{"Codec", "8"}
-////                ,{"Jsoup", "43"}
-////                ,{"Jsoup", "62"}
-////                ,{"Jsoup", "88"}
-////                ,{"JacksonDatabind", "37"}
-////                ,{"JacksonDatabind", "70"}
-////                ,{"JacksonDatabind", "16"}
-////                ,{"JacksonDatabind", "102"}
-////                ,{"JacksonCore", "5"}
-//
-////                ,{"Lang", "6"}
-////                ,{"Math", "33"}
-////                ,{"Cli", "5"}
-////                , {"Chart", "10"}
-//        };
-//        return Arrays.asList(data);
+        String[][] data = {
+                {"Math" , "26"}
+//                {"Lang", "34"}
+//                ,{"Cli", "25"}
+//                ,{"Cli", "32"}
+//                ,{"Math", "26"}
+//                ,{"Math", "72"}
+//                ,{"Math", "46"}
+//                ,{"Math", "67"}
+//                ,{"Codec", "1"}
+//                ,{"Codec", "2"}
+//                ,{"Codec", "8"}
+//                ,{"Jsoup", "43"}
+//                ,{"Jsoup", "62"}
+//                ,{"Jsoup", "88"}
+//                ,{"JacksonDatabind", "37"}
+//                ,{"JacksonDatabind", "70"}
+//                ,{"JacksonDatabind", "16"}
+//                ,{"JacksonDatabind", "102"}
+//                ,{"JacksonCore", "5"}
+
+//                ,{"Lang", "6"}
+//                ,{"Math", "33"}
+//                ,{"Cli", "5"}
+//                , {"Chart", "10"}
+        };
+        return Arrays.asList(data);
 
 //        String fileName = ReadFileUtil.outputSrc + "part2.txt";
 
-        return readPVInfos(fileName);
+//        return readPVInfos(fileName);
     }
 
 

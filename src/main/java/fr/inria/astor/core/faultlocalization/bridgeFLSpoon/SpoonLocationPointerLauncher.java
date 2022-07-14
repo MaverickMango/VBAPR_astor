@@ -36,11 +36,11 @@ public class SpoonLocationPointerLauncher extends SpoonLauncher {
 	 * @return ctElements from the line
 	 */
 	public List<CtElement> run(CtElement ctelement, int lineNumber) {
-		this.addProcessor(SpoonElementPointer.class.getName());
-		SpoonElementPointer.inLine.clear();
-		SpoonElementPointer.line = lineNumber;
+		this.addProcessor(SpoonLocationPointer.class.getName());
+		SpoonLocationPointer.inLine.clear();
+		SpoonLocationPointer.line = lineNumber;
 		this.process(ctelement);
-		return new ArrayList<>(SpoonElementPointer.inLine);
+		return new ArrayList<>(SpoonLocationPointer.inLine);
 	}
 
 

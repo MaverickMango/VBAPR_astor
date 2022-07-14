@@ -65,6 +65,16 @@ public class ProgramVariant {
 	 */
 	protected double fitness = Double.MAX_VALUE;
 
+	public void setSimilarity(double similarity) {
+		this.similarity = similarity;
+	}
+
+	public double getSimilarity() {
+		return similarity;
+	}
+
+	protected double similarity = 1d;
+
 	/**
 	 * Parent Variant
 	 */
