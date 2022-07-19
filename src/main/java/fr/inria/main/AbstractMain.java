@@ -457,6 +457,9 @@ public abstract class AbstractMain {
 		if (cmd.hasOption("useGTsizeAsPopSize"))
 			ConfigurationProperties.properties.setProperty("useGTsizeAsPopSize", cmd.getOptionValue("useGTsizeAsPopSize"));
 
+		if (cmd.hasOption("deleteParentMP"))
+			ConfigurationProperties.properties.setProperty("deleteParentMP", cmd.getOptionValue("deleteParentMP"));
+
 		if (cmd.hasOption("usevariableedit"))
 			ConfigurationProperties.properties.setProperty("usevariableedit", cmd.getOptionValue("usevariableedit"));
 

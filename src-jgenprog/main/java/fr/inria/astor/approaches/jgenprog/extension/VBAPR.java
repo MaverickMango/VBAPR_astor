@@ -2,9 +2,6 @@ package fr.inria.astor.approaches.jgenprog.extension;
 
 import com.martiansoftware.jsap.JSAPException;
 import fr.inria.astor.approaches.jgenprog.JGenProg;
-import fr.inria.astor.approaches.jgenprog.operators.InsertBeforeOp;
-import fr.inria.astor.approaches.jgenprog.operators.InsertStatementOp;
-import fr.inria.astor.approaches.jgenprog.operators.RemoveOp;
 import fr.inria.astor.core.antipattern.AntiPattern;
 import fr.inria.astor.core.entities.*;
 import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
@@ -21,12 +18,12 @@ import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.IngredientBasedOperator;
 import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.util.EditDistanceWithTokens;
+import fr.inria.astor.util.PatchDiffCalculator;
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.astor.util.StringUtil;
 import fr.inria.main.evolution.ExtensionPoints;
 import org.apache.log4j.Logger;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtElement;
 
 import java.io.File;
@@ -158,7 +155,7 @@ public class VBAPR  extends JGenProg {
         beforeGenerate(generation);
         detailLog.info("----------------- Generation " + generation);
         detailLog.info("after apply crossover, we got " + variants.size() + " variants to mutate.");
-        logProgramVariant(variants, false);
+        logProgramVariant(variants, generation, false);
 
         for (int i = 0; i < variants.size(); i++) {
             ProgramVariant parentVariant = variants.get(i);
@@ -171,7 +168,6 @@ public class VBAPR  extends JGenProg {
 //                newVariant = createNewProgramVariantInitial(parentVariant);
 //            } else
                 newVariant = createNewProgramVariant(parentVariant, generation, i);
-
 
             if (newVariant == null) {
                 continue;
@@ -193,23 +189,30 @@ public class VBAPR  extends JGenProg {
                 }
             }
 
-
+            HashMap<String, List<String>> affectedMap = null;
             if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
-                setSimilarityForPV(newVariant);//ForPV
+//                setSimilarityForPV(newVariant);//ForPV
+                affectedMap = newVariant.computeAffectedStringOfClassesAndBlocks();
             }
 
             if (solution) {
                 foundSolution = true;
                 newVariant.setBornDate(new Date());
+				saveVariant(newVariant);
             }
             foundOneVariant = true;
             // Finally, reverse the changes done by the child
             reverseOperationInModel(newVariant, generation);
             boolean validation = this.validateReversedOriginalVariant(newVariant);
+            assert validation;
+
+            if (affectedMap != null) {
+                setSimilarityForSnippets(newVariant, affectedMap);
+                fitASim.info(newVariant.getFitness() + "," + newVariant.getSimilarity());
+            }
 
             if (solution) {
                 this.savePatch(newVariant);
-
             }
 
             if (foundSolution && ConfigurationProperties.getPropertyBool("stopfirst")) {
@@ -218,7 +221,7 @@ public class VBAPR  extends JGenProg {
 
         }
         detailLog.info("after generation " + generation + ", we got " + temporalInstances.size() + " children");
-        logProgramVariant(temporalInstances, true);
+        logProgramVariant(temporalInstances, generation, true);
         prepareNextGeneration(temporalInstances, generation);
 
         if (!foundOneVariant)
@@ -228,32 +231,6 @@ public class VBAPR  extends JGenProg {
         }
 
         return foundSolution;
-    }
-
-    private void setSimilarityForPVMul(ProgramVariant newVariant) {
-        EditDistanceWithTokens editor = new EditDistanceWithTokens();
-        Map<Integer, List<OperatorInstance>> genops = newVariant.getOperations();
-        double res = 1d;
-        for (Integer gen : genops.keySet()) {
-            List<OperatorInstance> ops = genops.get(gen);
-            for (OperatorInstance op :ops) {
-                CtElement original = op.getOriginal();
-                CtElement modified = op.getModified();
-                if (op.getOperationApplied() instanceof InsertStatementOp) {
-                    assert original instanceof CtStatement && modified instanceof CtStatement;
-                    modified = CodeAddFactory.createStatementsBlock((CtStatement) original,
-                            (CtStatement) modified,
-                            op.getOperationApplied() instanceof InsertBeforeOp);
-                }
-                if (modified == null) {
-                    assert op.getOperationApplied() instanceof RemoveOp;
-                    modified = CodeAddFactory.createStatementsBlock(null, null, true);
-                }
-                String ed = editor.calEditDisctance(original, modified);
-                res *= Double.parseDouble(ed);
-            }
-        }
-        newVariant.setSimilarity(res);
     }
 
     protected ProgramVariant createNewProgramVariant(ProgramVariant parentVariant, int generation, int mpidx) throws Exception {
@@ -559,7 +536,7 @@ public class VBAPR  extends JGenProg {
 //        }
     }
 
-    public void logProgramVariant(List<ProgramVariant> pvs, boolean logopinfo) {
+    public void logProgramVariant(List<ProgramVariant> pvs, int generation, boolean logopinfo) {
         for (ProgramVariant pv :pvs) {
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder.append(pv + " fitness: " + pv.getFitness());
@@ -568,12 +545,9 @@ public class VBAPR  extends JGenProg {
                 continue;
             }
             Map<Integer, List<OperatorInstance>> genops = pv.getOperations();
-            if (!genops.keySet().isEmpty())
-                stringBuilder.append("\n").append("operation instances of this variant: ");
-            for (Integer gen : genops.keySet()) {
-                stringBuilder.append("\n").append("at generation: " + gen);
-                stringBuilder.append("\n").append("operation instances:");
-                for (OperatorInstance op : genops.get(gen)) {
+            if (!genops.get(generation).isEmpty()) {
+                stringBuilder.append("\n").append("operation instances at generation: " + generation);
+                for (OperatorInstance op : genops.get(generation)) {
                     stringBuilder.append("\n").append("modification point: " + op.getModificationPoint());
                     stringBuilder.append("\n").append("operator type: " + op.getOperationApplied().name());
                     stringBuilder.append("\n").append("original: " + op.getOriginal().toString().replaceAll("\\n", ""));
@@ -581,9 +555,9 @@ public class VBAPR  extends JGenProg {
                 }
             }
             detailLog.info(stringBuilder.toString());
-            fitASim.info(pv.getFitness() + "," + pv.getSimilarity());
         }
     }
+
 
     private void setSimilarityForPV(ProgramVariant newVariant) {
         EditDistanceWithTokens editor = new EditDistanceWithTokens();
@@ -602,6 +576,66 @@ public class VBAPR  extends JGenProg {
         String ed = editor.calEditDisctance(originalsb, modifiedsb);
         res = Double.parseDouble(ed);
         newVariant.setSimilarity(res);
+    }
+
+    private void setSimilarityForSnippets(ProgramVariant newVariant, HashMap<String, List<String>> affectedMap) {
+        EditDistanceWithTokens editor = new EditDistanceWithTokens();
+        double res = 1d;
+        HashMap<String, List<String>> origianl = newVariant.computeAffectedStringOfClassesAndBlocks();
+        assert origianl.values().size() == affectedMap.values().size();
+        StringBuilder originalsb = getSnippets(origianl);
+        StringBuilder modifiedsb = getSnippets(affectedMap);
+        String ed = editor.calEditDisctance(originalsb, modifiedsb);
+        res = Double.parseDouble(ed);
+        newVariant.setSimilarity(res);
+    }
+
+    private StringBuilder getSnippets(HashMap<String, List<String>> map) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (List<String> blocks :map.values()) {
+            for (String block :blocks) {
+                stringBuilder.append(" ").append(block);
+            }
+        }
+        return stringBuilder;
+    }
+
+    List<String> solutions_f = new ArrayList<>();
+
+    public void saveVariant(ProgramVariant programVariant) throws Exception {
+        final boolean codeFormated = true;
+        savePatchDiff(programVariant, !codeFormated);
+        savePatchDiff(programVariant, codeFormated);
+        computePatchDiff(new PatchDiffCalculator(), programVariant, solutions_f);
+    }
+
+    private void computePatchDiff(PatchDiffCalculator cdiff, ProgramVariant solutionVariant,
+                                  List<String> solutions_f) throws Exception {
+
+        if (solutionVariant.getPatchDiff() != null) {
+            return;
+        }
+
+        PatchDiff pdiff = new PatchDiff();
+        boolean format = true;
+
+        String diffPatchFormated = cdiff.getDiff(getProjectFacade(), this.originalVariant, solutionVariant,
+                this.mutatorSupporter, format, solutions_f);
+
+        if (diffPatchFormated == null)
+            return;
+
+        pdiff.setFormattedDiff(diffPatchFormated);
+        solutions_f.add(diffPatchFormated);
+
+        format = false;
+
+        String diffPatchOriginalAlign = cdiff.getDiff(getProjectFacade(), this.originalVariant, solutionVariant, format,
+                this.mutatorSupporter);
+
+        pdiff.setOriginalStatementAlignmentDiff(diffPatchOriginalAlign);
+
+        solutionVariant.setPatchDiff(pdiff);
     }
 
 }

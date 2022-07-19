@@ -138,7 +138,7 @@ public abstract class AstorOperator implements AstorExtensionPoint {
 	protected boolean removePoint(ProgramVariant variant, OperatorInstance operation) {
 		List<ModificationPoint> modifPoints = variant.getModificationPoints();
 		boolean removed = modifPoints.remove(operation.getModificationPoint());
-		if (ConfigurationProperties.getPropertyBool("applyCrossover")) {
+		if (ConfigurationProperties.getPropertyBool("deleteParentMP")) {
 			List<ModificationPoint> remaining = new ArrayList<>(modifPoints);
 			for (ModificationPoint mp : modifPoints) {
 				if (mp.getCodeElement().hasParent(operation.getOriginal())) {

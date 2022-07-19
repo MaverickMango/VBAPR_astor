@@ -14,8 +14,10 @@ import fr.inria.astor.core.entities.validation.VariantValidationResult;
 import fr.inria.astor.core.manipulation.bytecode.entities.CompilationResult;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.stats.PatchStat;
+import spoon.reflect.code.CtBlock;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 
 /**
@@ -344,6 +346,25 @@ public class ProgramVariant {
 			}
 		}
 		return typesToProcess;
+	}
+
+	public HashMap<String, List<String>> computeAffectedStringOfClassesAndBlocks() {
+		HashMap<String, List<String>> map = new HashMap<>();
+		for (List<OperatorInstance> modifofGens: this.getOperations().values()) {
+			for (OperatorInstance mis :modifofGens) {
+				String type = mis.getModificationPoint().getCtClass().getQualifiedName();
+				CtElement element = mis.getModified();
+				if (element != null)
+					element = element.getParent(CtBlock.class);
+				else
+					element = mis.getOriginal().getParent(CtBlock.class);
+				String block = element.toString().replaceAll("\n", "");
+				if (!map.containsKey(type))
+					map.put(type, new ArrayList<>());
+				map.get(type).add(block);
+			}
+		}
+		return map;
 	}
 
 	public PatchDiff getPatchDiff() {

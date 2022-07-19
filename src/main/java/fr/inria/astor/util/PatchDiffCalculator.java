@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.log4j.Logger;
@@ -51,17 +53,19 @@ public class PatchDiffCalculator {
 		// Get the path where the Default variant is located:
 		String srcOutputfDefaultOriginal = projectFacade
 				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT + suffix);
+		mutsupporter.saveSourceCodeOnDiskProgramVariant(originalVariant, srcOutputfDefaultOriginal);
 
 		ConfigurationProperties.setProperty("preservelinenumbers", Boolean.toString(!format));
-		// save the default variant according to the format
-		mutsupporter.saveSourceCodeOnDiskProgramVariant(originalVariant, srcOutputfDefaultOriginal);
 
 		// get the path of a Particular variant
 		String srcOutputSolutionVariant = projectFacade
 				.getInDirWithPrefix(programVariant.currentMutatorIdentifier() + suffix);
+		HashSet<String> types = new HashSet<>();
 
 		for (CtType<?> t : programVariant.computeAffectedClassesByOperators()) {
-
+			if (types.contains(t.getQualifiedName()))
+				continue;
+			types.add(t.getQualifiedName());
 			String fileName = t.getQualifiedName().replace(".", File.separator) + ".java";
 			File foriginal = new File(srcOutputfDefaultOriginal + File.separator + fileName);
 			File ffixed = new File(srcOutputSolutionVariant + File.separator + fileName);
@@ -80,6 +84,7 @@ public class PatchDiffCalculator {
 			diffResults += diff + '\n';
 		}
 
+		// save the default variant according to the format
 		FileWriter patchWriter = new FileWriter(srcOutputSolutionVariant + File.separator + PATCH_DIFF_FILE_NAME);
 		patchWriter.write(diffResults);
 		patchWriter.flush();
@@ -87,6 +92,63 @@ public class PatchDiffCalculator {
 
 		return diffResults;
 	}
+
+	public String getDiff(ProjectRepairFacade projectFacade, ProgramVariant originalVariant,
+						  ProgramVariant programVariant, MutationSupporter mutsupporter,
+						  boolean format, List<String> solutions_f) throws Exception {
+
+		String diffResults = "";
+
+		String difftype = ConfigurationProperties.getProperty("diff_type");
+
+		final String suffix = DIFF_SUFFIX;
+
+		// Get the path where the Default variant is located:
+		String srcOutputfDefaultOriginal = projectFacade
+				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT + suffix);
+
+		ConfigurationProperties.setProperty("preservelinenumbers", "true");
+
+		// get the path of a Particular variant
+		String srcOutputSolutionVariant = projectFacade
+				.getInDirWithPrefix(programVariant.currentMutatorIdentifier() + suffix);
+		HashSet<String> types = new HashSet<>();
+
+		for (CtType<?> t : programVariant.computeAffectedClassesByOperators()) {
+			if (types.contains(t.getQualifiedName()))
+				continue;
+			types.add(t.getQualifiedName());
+			String fileName = t.getQualifiedName().replace(".", File.separator) + ".java";
+			File foriginal = new File(srcOutputfDefaultOriginal + File.separator + fileName);
+			File ffixed = new File(srcOutputSolutionVariant + File.separator + fileName);
+
+			log.debug(foriginal.getAbsolutePath());
+			log.debug(ffixed.getAbsolutePath());
+			if (!foriginal.exists() || !ffixed.exists()) {
+				log.error("A file with a solution does not exist");
+				return null;
+			}
+
+			String fileLeft = getPrefixOriginal(difftype, t, fileName);
+			String fileRight = getPrefixPatched(difftype, t, fileName);
+
+			String diff = getDiff(foriginal, ffixed, fileLeft, fileRight);
+			if (solutions_f.contains(diff)) {
+				ffixed.delete();
+				return null;
+			}
+			diffResults += diff + '\n';
+		}
+
+		// save the default variant according to the format
+		FileWriter patchWriter = new FileWriter(srcOutputSolutionVariant + File.separator + PATCH_DIFF_FILE_NAME);
+		patchWriter.write(diffResults);
+		patchWriter.flush();
+		patchWriter.close();
+
+		return diffResults;
+	}
+
 
 	public String getPrefixOriginal(String difftype, CtType<?> t, String fileName) {
 		return getPrefix(difftype, t, fileName, true);

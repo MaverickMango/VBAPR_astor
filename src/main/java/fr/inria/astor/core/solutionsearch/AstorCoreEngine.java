@@ -77,6 +77,8 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
 
+import static fr.inria.astor.util.PatchDiffCalculator.DIFF_SUFFIX;
+
 /**
  * 
  * 
@@ -261,9 +263,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	}
 
 	protected void savePatch(ProgramVariant solutionVariant) {
-		PatchDiffCalculator cdiff = new PatchDiffCalculator();
 		try {
-			computePatchDiff(cdiff, solutionVariant);
 			PatchStat statsPatchSolution = getStatSingle(solutionVariant, generationsExecuted);
 			PatchJSONStandarOutput p = new PatchJSONStandarOutput();
 			JSONObject ob = p.stat(statsPatchSolution);
@@ -497,10 +497,12 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		final boolean codeFormated = true;
 		savePatchDiff(programVariant, !codeFormated);
 		savePatchDiff(programVariant, codeFormated);
+		computePatchDiff(new PatchDiffCalculator(), programVariant);
 
 	}
 
-	private void savePatchDiff(ProgramVariant programVariant, boolean format) throws Exception {
+
+	public void savePatchDiff(ProgramVariant programVariant, boolean format) throws Exception {
 
 		boolean originalValue = ConfigurationProperties.getPropertyBool("preservelinenumbers");
 
@@ -513,7 +515,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	}
 
 	private String determineSourceFolderInWorkspace(ProgramVariant programVariant, boolean format) {
-		final String suffix = format ? PatchDiffCalculator.DIFF_SUFFIX : "";
+		final String suffix = format ? DIFF_SUFFIX : "";
 		String srcOutput = projectFacade.getInDirWithPrefix(programVariant.currentMutatorIdentifier()) + suffix;
 		return srcOutput;
 	}
@@ -552,8 +554,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 			if (validationResult != null && validationResult.isSuccessful()) {
 				log.info("-Found Solution, child variant #" + programVariant.getId());
 				saveStaticSucessful(programVariant.getId(), generation);
-				saveVariant(programVariant);
-
+//				saveVariant(programVariant);
 				return true;
 			} else {
 				currentStat.increment(GeneralStatEnum.NR_COMPILE_BUT_FAILED);
@@ -922,6 +923,12 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		}
 		// We save the first variant
 		this.originalVariant = variants.get(0);
+		String srcOutputfDefaultOriginal = projectFacade
+				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT + DIFF_SUFFIX);
+		getMutatorSupporter().saveSourceCodeOnDiskProgramVariant(originalVariant, srcOutputfDefaultOriginal);
+		srcOutputfDefaultOriginal = projectFacade
+				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
+		getMutatorSupporter().saveSourceCodeOnDiskProgramVariant(originalVariant, srcOutputfDefaultOriginal);
 
 		if (originalVariant.getModificationPoints().isEmpty()) {
 			// throw new IllegalStateException("Variant without any modification point. It

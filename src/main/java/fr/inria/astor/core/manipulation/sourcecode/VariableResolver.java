@@ -23,7 +23,6 @@ import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.NGramManager;
-import org.netbeans.lib.cvsclient.commandLine.command.log;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;

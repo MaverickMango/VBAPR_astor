@@ -17,7 +17,9 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
     public FitnessComparator comparator = new FitnessComparator();
 
     @Override
-    public List<ProgramVariant> selectProgramVariantsForNextGeneration(List<ProgramVariant> parentVariants, List<ProgramVariant> childVariants, int populationSize, ProgramVariantFactory variantFactory, ProgramVariant original, int generation) {
+    public List<ProgramVariant> selectProgramVariantsForNextGeneration(List<ProgramVariant> parentVariants,
+                List<ProgramVariant> childVariants, int populationSize, ProgramVariantFactory variantFactory,
+                    ProgramVariant original, int generation) {
 
         List<ProgramVariant> solutionsFromGeneration = new ArrayList<ProgramVariant>();
 
@@ -25,6 +27,10 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
 
         if (ConfigurationProperties.getProperty("reintroduce").contains(PopulationConformation.PARENTS.toString())) {
             newPopulation.addAll(parentVariants);
+        }
+
+        if (!ConfigurationProperties.getProperty("reintroduce").contains(PopulationConformation.SOLUTIONS.toString())) {
+            newPopulation.removeAll(solutionsFromGeneration);
         }
 
         try {
@@ -39,9 +45,6 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             }
         }
 
-        if (!ConfigurationProperties.getProperty("reintroduce").contains(PopulationConformation.SOLUTIONS.toString())) {
-            newPopulation.removeAll(solutionsFromGeneration);
-        }
 
         int totalInstances = newPopulation.size();
         List<ProgramVariant> nextVariants = new ArrayList<>();
@@ -151,13 +154,19 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             return null;
         }
         List<ProgramVariant> found = new ArrayList<>();
-        for (int i = 0; found.size() < targetSize && !remaining.isEmpty();) {
+        for (int i = 0; found.size() < targetSize && !remaining.isEmpty();) {//this process might cost much.
             ProgramVariant pv = weightedSelectWithNormalize(remaining);
             if (pv != null) {
                 found.add(pv);
                 remaining.remove(pv);
             }
         }
+        found.sort(new Comparator<ProgramVariant>() {
+            @Override
+            public int compare(ProgramVariant p1, ProgramVariant p2) {
+                return Double.compare(p1.getFitness(), p2.getFitness());
+            }
+        });
         return found;
     }
 
@@ -214,7 +223,7 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
     }
 
     private ProgramVariant weightedSelectWithNormalize(List<ProgramVariant> remaining) {
-        List<WeightElementWithTwo<?>> wes = new ArrayList<>();
+        List<WeightElement<?>> wes = new ArrayList<>();
         double sum1 = 0d, sum2 = 0d;
         double max1 = 0, max2 = 0, min1 = Double.MAX_VALUE, min2 = Double.MAX_VALUE;
         for (ProgramVariant pv :remaining) {
@@ -229,30 +238,26 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
         for (ProgramVariant pv :remaining) {
             double score1 = pv.getFitness(), score2 = pv.getSimilarity();
             double nor1 = 0d, nor2 = 0d;
-            WeightElementWithTwo<?> we = null;
-            nor2 = (score2 - min2) / (max2 - min2) + 1;
+            WeightElement<?> we = null;
+            nor2 = (score2 - min2) / (max2 - min2 == 0 ? 1 : max2 - min2) + 1;
             if (score1 != Double.MAX_VALUE) {
-                nor1 = (score1 - min1) / (max1 - min1) + 1;
-                we= new WeightElementWithTwo<>(pv, 2 - nor1, nor2);
+                nor1 = 2 - (score1 - min1) / (max1 - min1 == 0 ? 1 : max1 - min1);
+                we= new WeightElement<>(pv, nor1 + nor2);
                 sum1 += nor1;
             } else {
-                we = new WeightElementWithTwo<>(pv, -1d,  nor2);
+                we = new WeightElement<>(pv, nor2);
             }
-            sum2 += nor2;
+            sum1 += nor2;
             wes.add(we);
         }
-        WeightElementWithTwo<?> selected = null;
-        if (sum1 != 0 || sum2 != 0) {
-            for (WeightElementWithTwo<?> we : wes) {
-                if (sum1 != 0 && we.weight != -1d )
-                    we.weight = we.weight / sum1;
-                if (sum2 != 0)
-                    we.simWeight = we.simWeight / sum2;
+        WeightElement<?> selected = null;
+        if (sum1 != 0) {
+            for (WeightElement<?> we : wes) {
+                we.weight = we.weight / sum1;
             }
-            WeightElementWithTwo.feedAccumulativeWithWeight(wes);
-            WeightElementWithTwo.feedAccumulativeWithSim(wes);
+            WeightElement.feedAccumulative(wes);
 
-            selected = WeightElementWithTwo.selectElementWeightBalancedWithTwo(wes);
+            selected = WeightElement.selectElementWeightBalanced(wes);
         }
         return selected == null ? null : (ProgramVariant) selected.element;
     }
@@ -265,9 +270,9 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             if (fitness != 0)
                 return fitness;
             if (!o1.getOperations().isEmpty() || !o2.getOperations().isEmpty()) {
-                int res1 = Integer.compare(o1.getOperations().size(), o2.getOperations().size());
-                if (res1 != 0)
-                    return res1;
+//                int res1 = Integer.compare(o1.getOperations().size(), o2.getOperations().size());
+//                if (res1 != 0)
+//                    return res1;
                 return Integer.compare(o1.getOperationsSize(), o2.getOperationsSize());
             }
             return Integer.compare(o2.getId(), o1.getId());

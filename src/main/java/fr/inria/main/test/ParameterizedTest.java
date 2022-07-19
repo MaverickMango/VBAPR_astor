@@ -8,9 +8,12 @@ import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
 import fr.inria.astor.core.solutionsearch.EvolutionarySearchEngine;
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.main.evolution.VBAPRMain;
+import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -42,7 +45,7 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
         String[][] data = {
-                {"Math" , "26"}
+                {"Chart" , "1"}
 //                {"Lang", "34"}
 //                ,{"Cli", "25"}
 //                ,{"Cli", "32"}
@@ -77,6 +80,9 @@ public class ParameterizedTest{
 
     @Before
     public void setUp() throws Exception {
+//        for (Object o : System.getProperties().keySet()) {
+//            System.out.println(String.valueOf(o) + "->" + System.getProperties().get(o));
+//        }
 //        String logfile = System.getProperty("logFileName");
 //        if (logfile == null) {
 //            logfile = proj + version;
