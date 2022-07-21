@@ -38,7 +38,7 @@ public class ReadFileUtil {
     public static final String mapping = outputSrc + "mapping";
     private static final String buggyFileDir = baseDir + "buggyfiles/";
     private static final String GTFileDir = baseDir + "groundtruth/";
-    public static int compileButFail = 0;
+    public static int failingActualSize = 0;
     public static List<GroundTruth> GTs = null;
     public static String proj = "", version = "";
 //    static String fileBase = "/home/liu/Desktop/groundtruth/";

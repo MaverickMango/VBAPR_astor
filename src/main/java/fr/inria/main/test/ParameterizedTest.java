@@ -45,7 +45,7 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
         String[][] data = {
-                {"Chart" , "1"}
+                {"Math" , "58"}
 //                {"Lang", "34"}
 //                ,{"Cli", "25"}
 //                ,{"Cli", "32"}

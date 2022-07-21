@@ -1,9 +1,9 @@
 package fr.inria.main.test;
 
-import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.main.CommandSummary;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,7 +13,6 @@ public class TestArgsUtil {
     private String srcPathDir = ReadFileUtil.baseDir + "src_path/";//proj/version.txt
     private String ftsDir = ReadFileUtil.baseDir + "failed_tests/";//proj/version.txt
     private String locationDir = ReadFileUtil.outputSrc + "Defects4jProjs/";//proj_version/  //must be absolute path
-    private String outputDir = ReadFileUtil.outputSrc;
 
     public TestArgsUtil() {
         this.cs = new CommandSummary();
@@ -45,7 +44,7 @@ public class TestArgsUtil {
             stringBuilder.append(args.get(i)).append(":");
         }
         cs.command.put("-failing", stringBuilder.toString().substring(0, stringBuilder.length() - 1));
-        cs.command.put("-out", outputDir + proj + "/");
+        cs.command.put("-out", ReadFileUtil.outputSrc + proj + "/");
         String[] compilanceLevel = getCompilanceLevel(proj);
         cs.command.put("-javacompliancelevel", compilanceLevel[0]);
         cs.command.put("-alternativecompliancelevel", compilanceLevel[1]);
@@ -108,10 +107,15 @@ public class TestArgsUtil {
         args.add("/" + list.get(1) + "/");
         args.add("/" + list.get(2) + "/");
         args.add("/" + list.get(3) + "/");
-        args.add(locationDir + proj + "/" + proj + "_" + verison + "/");
-        args.add(locationDir + proj + "/lib/");
+        String projPath = locationDir + proj + "/" + proj + "_" + verison + "/";
+        args.add(projPath);
+        if (isMavenProj(projPath))
+            args.add(projPath + "target/dependency/");
+        else
+            args.add(projPath + "/lib/");
         list = ReadFileUtil.readFileByLineToList(ftsDir + proj.toLowerCase() + "/" + verison + ".txt");
         assert list.size() >= 1;
+        ReadFileUtil.failingActualSize = list.size();
         for (String str :list) {
             str = str.substring(0, str.indexOf("::"));
             if (!args.contains(str))
@@ -120,4 +124,14 @@ public class TestArgsUtil {
         return args;
     }
 
+    private boolean isMavenProj(String projPath) {
+        File dir = new File(projPath);
+        File[] files = dir.listFiles();
+        for (File f:files) {
+            if (f.isFile() && f.getName().equals("pom.xml")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

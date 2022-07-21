@@ -348,16 +348,15 @@ public class ProgramVariant {
 		return typesToProcess;
 	}
 
-	public HashMap<String, List<String>> computeAffectedStringOfClassesAndBlocks() {
+	public HashMap<String, List<String>> computeAffectedStringOfClassesAndBlocks(boolean isOrigianl) {
 		HashMap<String, List<String>> map = new HashMap<>();
 		for (List<OperatorInstance> modifofGens: this.getOperations().values()) {
 			for (OperatorInstance mis :modifofGens) {
 				String type = mis.getModificationPoint().getCtClass().getQualifiedName();
-				CtElement element = mis.getModified();
-				if (element != null)
-					element = element.getParent(CtBlock.class);
-				else
-					element = mis.getOriginal().getParent(CtBlock.class);
+				CtElement element = mis.getOriginal().getParent(CtBlock.class);
+				if (element == null) {
+					element = mis.getOriginal().getParent(CtMethod.class);
+				}
 				String block = element.toString().replaceAll("\n", "");
 				if (!map.containsKey(type))
 					map.put(type, new ArrayList<>());

@@ -24,14 +24,7 @@ import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.NGramManager;
 import spoon.reflect.code.*;
-import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtField;
-import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtPackage;
-import spoon.reflect.declaration.CtParameter;
-import spoon.reflect.declaration.CtVariable;
-import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtLocalVariableReference;
@@ -833,8 +826,12 @@ public class VariableResolver {
 		CtMethod method = element.getParent(CtMethod.class);
 		if (method != null) {
 			List<CtParameter> pars = method.getParameters();
-			for (CtParameter ctParameter : pars) {
-				variables.add(ctParameter);
+			variables.addAll(pars);
+		} else {
+			CtConstructor constructor = element.getParent(CtConstructor.class);
+			if (constructor != null) {
+				List<CtParameter> pars = constructor.getParameters();
+				variables.addAll(pars);
 			}
 		}
 

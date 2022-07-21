@@ -859,6 +859,10 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		}
 
 		double fitness = this.fitnessFunction.calculateFitnessValue(validationResult);
+		if (ReadFileUtil.failingActualSize != (int) fitness) {
+			throw new IllegalStateException("The Original Running of test case does not match the groundtruth file, failed "
+					+ (int)fitness + "but actually " + ReadFileUtil.failingActualSize);
+		}
 		originalVariant.setFitness(fitness);
 
 		log.info("The original fitness is : " + fitness);
@@ -924,11 +928,13 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		// We save the first variant
 		this.originalVariant = variants.get(0);
 		String srcOutputfDefaultOriginal = projectFacade
-				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT + DIFF_SUFFIX);
-		getMutatorSupporter().saveSourceCodeOnDiskProgramVariant(originalVariant, srcOutputfDefaultOriginal);
-		srcOutputfDefaultOriginal = projectFacade
 				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
 		getMutatorSupporter().saveSourceCodeOnDiskProgramVariant(originalVariant, srcOutputfDefaultOriginal);
+		ConfigurationProperties.setProperty("preservelinenumbers", "false");
+		srcOutputfDefaultOriginal = projectFacade
+				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT + DIFF_SUFFIX);
+		getMutatorSupporter().saveSourceCodeOnDiskProgramVariant(originalVariant, srcOutputfDefaultOriginal);
+		ConfigurationProperties.setProperty("preservelinenumbers", "true");
 
 		if (originalVariant.getModificationPoints().isEmpty()) {
 			// throw new IllegalStateException("Variant without any modification point. It

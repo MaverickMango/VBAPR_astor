@@ -101,13 +101,13 @@ public class PatchDiffCalculator {
 
 		String difftype = ConfigurationProperties.getProperty("diff_type");
 
-		final String suffix = DIFF_SUFFIX;
+		final String suffix = format ? DIFF_SUFFIX : "";
 
 		// Get the path where the Default variant is located:
 		String srcOutputfDefaultOriginal = projectFacade
 				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT + suffix);
 
-		ConfigurationProperties.setProperty("preservelinenumbers", "true");
+		ConfigurationProperties.setProperty("preservelinenumbers", String.valueOf(!format));//false
 
 		// get the path of a Particular variant
 		String srcOutputSolutionVariant = projectFacade

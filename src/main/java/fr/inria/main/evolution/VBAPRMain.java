@@ -17,6 +17,7 @@ import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.main.AbstractMain;
 import fr.inria.main.ExecutionMode;
 import org.apache.commons.cli.ParseException;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedOutputStream;
@@ -94,18 +95,25 @@ public class VBAPRMain extends AbstractMain {
 
 		core.initModel();
 
-		if (ConfigurationProperties.getPropertyBool("skipfaultlocalization")) {
-			// We dont use FL, so at this point the do not have suspicious
-			List<SuspiciousCode> suspicious = new ArrayList<SuspiciousCode>();
-			core.initPopulation(suspicious);
-		} else {
-			List<SuspiciousCode> suspicious = core.calculateSuspicious();
+		try {
+			if (ConfigurationProperties.getPropertyBool("skipfaultlocalization")) {
+				// We dont use FL, so at this point the do not have suspicious
+				List<SuspiciousCode> suspicious = new ArrayList<SuspiciousCode>();
+				core.initPopulation(suspicious);
+			} else {
+				List<SuspiciousCode> suspicious = core.calculateSuspicious();
 
-			if (suspicious == null || suspicious.isEmpty()) {
-				throw new IllegalStateException("No suspicious line detected by the fault localization");
+				if (suspicious == null || suspicious.isEmpty()) {
+					throw new IllegalStateException("No suspicious line detected by the fault localization");
+				}
+
+				core.initPopulation(suspicious);
 			}
-
-			core.initPopulation(suspicious);
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			Logger failingLog = LogManager.getLogger("FailingLog");
+			failingLog.error(ReadFileUtil.proj + "_" + ReadFileUtil.version);
+			e.printStackTrace();
 		}
 
 		return core;

@@ -10,10 +10,7 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CodeAddFactory {
     static String[] _types = {"double", "float", "long", "int", "short", "short", "byte"};
@@ -237,6 +234,42 @@ public class CodeAddFactory {
         return newExp;
     }
 
+    public static CtInvocation createInvocationWithVars(CtInvocation old, CtExecutableReference newExe,
+                                                        List<CtExpression<?>> vars) {
+        CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();
+        if (old.getTarget() != null) {
+            CtExpression target = MutationSupporter.getFactory().Core().clone(old.getTarget());
+            newExp.setTarget(target);
+            target.setParent(newExp);
+        }
+        CtExecutableReference exe = MutationSupporter.getFactory().Core().clone(newExe);
+        newExp.setExecutable(exe);
+        exe.setParent(newExp);
+        newExp.setType(exe.getType());
+        List<CtTypeReference<?>> paras = newExe.getParameters();
+        List<CtExpression<?>> args_copy = new ArrayList<>();
+        Collections.shuffle(vars);
+        for (CtTypeReference para :paras) {
+            for (CtExpression var :vars) {
+                if (para.equals(var.getType()) || (para.isPrimitive() && var.getType().isPrimitive())) {
+                    CtExpression copy = MutationSupporter.getFactory().Core().clone(var);
+                    args_copy.add(copy);
+                    copy.setParent(newExp);
+                    break;
+                }
+            }
+        }
+        if (args_copy.size() != paras.size())
+            return null;
+        newExp.setArguments(args_copy);
+        newExp.setParent(old.getParent());
+        try {
+            newExp.toString();
+        } catch (Exception e) {
+            return null;
+        }
+        return newExp;
+    }
 
     public static CtInvocation createInvocationWithVar(CtInvocation old, CtExpression var) {
         CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();

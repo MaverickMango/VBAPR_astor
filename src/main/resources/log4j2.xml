@@ -90,6 +90,9 @@
         <Logger name="VBAPR" level="ERROR" additivity="true">
             <AppenderRef ref="infoFile" />
         </Logger>
+        <Logger name="FailingLog" level="ERROR" additivity="false">
+            <AppenderRef ref="infoFile" />
+        </Logger>
         <Logger name="InfoLog" level="INFO" additivity="true">
             <AppenderRef ref="infoFile" />
         </Logger>

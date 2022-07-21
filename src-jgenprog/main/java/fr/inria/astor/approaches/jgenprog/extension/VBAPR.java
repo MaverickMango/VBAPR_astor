@@ -192,7 +192,7 @@ public class VBAPR  extends JGenProg {
             HashMap<String, List<String>> affectedMap = null;
             if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
 //                setSimilarityForPV(newVariant);//ForPV
-                affectedMap = newVariant.computeAffectedStringOfClassesAndBlocks();
+                affectedMap = newVariant.computeAffectedStringOfClassesAndBlocks(false);
             }
 
             if (solution) {
@@ -581,7 +581,7 @@ public class VBAPR  extends JGenProg {
     private void setSimilarityForSnippets(ProgramVariant newVariant, HashMap<String, List<String>> affectedMap) {
         EditDistanceWithTokens editor = new EditDistanceWithTokens();
         double res = 1d;
-        HashMap<String, List<String>> origianl = newVariant.computeAffectedStringOfClassesAndBlocks();
+        HashMap<String, List<String>> origianl = newVariant.computeAffectedStringOfClassesAndBlocks(true);
         assert origianl.values().size() == affectedMap.values().size();
         StringBuilder originalsb = getSnippets(origianl);
         StringBuilder modifiedsb = getSnippets(affectedMap);
@@ -630,8 +630,8 @@ public class VBAPR  extends JGenProg {
 
         format = false;
 
-        String diffPatchOriginalAlign = cdiff.getDiff(getProjectFacade(), this.originalVariant, solutionVariant, format,
-                this.mutatorSupporter);
+        String diffPatchOriginalAlign = cdiff.getDiff(getProjectFacade(), this.originalVariant, solutionVariant,
+                this.mutatorSupporter, format, solutions_f);
 
         pdiff.setOriginalStatementAlignmentDiff(diffPatchOriginalAlign);
 
