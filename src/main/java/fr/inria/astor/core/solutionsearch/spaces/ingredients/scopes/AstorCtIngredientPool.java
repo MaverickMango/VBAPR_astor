@@ -6,6 +6,7 @@ import com.martiansoftware.jsap.JSAPException;
 
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
+import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPoolLocationType;
 import spoon.reflect.code.CtCodeElement;
 import spoon.reflect.declaration.CtElement;
@@ -21,16 +22,19 @@ public abstract class AstorCtIngredientPool extends IngredientPoolLocationType<C
 	
 	public AstorCtIngredientPool() throws JSAPException {
 		super();
+		discartDuplicates =  !ConfigurationProperties.getPropertyBool("duplicateingredientsinspace");
 	}
 	
 	public AstorCtIngredientPool(TargetElementProcessor<?> processor)
 			throws JSAPException {
 		super(processor);
+		discartDuplicates =  !ConfigurationProperties.getPropertyBool("duplicateingredientsinspace");
 	}
 
 	public AstorCtIngredientPool(List<TargetElementProcessor<?>> processors)
 			throws JSAPException {
 		super(processors);
+		discartDuplicates =  !ConfigurationProperties.getPropertyBool("duplicateingredientsinspace");
 	}
 
 	/**

@@ -112,7 +112,7 @@ public class VBAPRMain extends AbstractMain {
 		} catch (Exception e) {
 			log.error(e.getMessage());
 			Logger failingLog = LogManager.getLogger("FailingLog");
-			failingLog.error(ReadFileUtil.proj + "_" + ReadFileUtil.version);
+			failingLog.error(ReadFileUtil.proj + "_" + ReadFileUtil.version + ": " + e.getMessage());
 			e.printStackTrace();
 		}
 

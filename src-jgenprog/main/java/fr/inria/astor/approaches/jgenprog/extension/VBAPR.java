@@ -305,6 +305,11 @@ public class VBAPR  extends JGenProg {
                 }
                 variant.putModificationInstance(generation, modificationInstance);
 
+                //set the op type
+                variant.setLastOp(modificationInstance.getOperationApplied().name()
+                        + "-" + (modificationInstance.getOriginal() == null ? "" : modificationInstance.getOriginal().getClass().getSimpleName())
+                        + "-" + (modificationInstance.getModified() == null ? "" : modificationInstance.getModified().getClass().getSimpleName()));
+
                 oneOperationCreated = true;
                 genMutated++;
                 // We analyze all gens

@@ -67,15 +67,8 @@ public class ProgramVariant {
 	 */
 	protected double fitness = Double.MAX_VALUE;
 
-	public void setSimilarity(double similarity) {
-		this.similarity = similarity;
-	}
-
-	public double getSimilarity() {
-		return similarity;
-	}
-
 	protected double similarity = 1d;
+	protected String lastOp = null;
 
 	/**
 	 * Parent Variant
@@ -132,6 +125,23 @@ public class ProgramVariant {
 
 	public void setModificationPoints(List<ModificationPoint> modificationPoints) {
 		this.modificationPoints = modificationPoints;
+	}
+
+
+	public void setSimilarity(double similarity) {
+		this.similarity = similarity;
+	}
+
+	public double getSimilarity() {
+		return similarity;
+	}
+
+	public String getLastOp() {
+		return lastOp;
+	}
+
+	public void setLastOp(String lastOp) {
+		this.lastOp = lastOp;
 	}
 
 	public double getFitness() {

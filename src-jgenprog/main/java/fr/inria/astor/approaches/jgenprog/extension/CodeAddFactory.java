@@ -13,7 +13,8 @@ import spoon.reflect.reference.CtVariableReference;
 import java.util.*;
 
 public class CodeAddFactory {
-    static String[] _types = {"double", "float", "long", "int", "short", "short", "byte"};
+    static String[] _types = {"double", "float", "long", "int", "short", "byte"};
+
 
     public static CtBlock createStatementsBlock(CtStatement original, CtStatement modified, boolean before) {
         CtBlock block = MutationSupporter.getFactory().Core().createBlock();
@@ -248,8 +249,8 @@ public class CodeAddFactory {
         newExp.setType(exe.getType());
         List<CtTypeReference<?>> paras = newExe.getParameters();
         List<CtExpression<?>> args_copy = new ArrayList<>();
-        Collections.shuffle(vars);
         for (CtTypeReference para :paras) {
+            Collections.shuffle(vars);
             for (CtExpression var :vars) {
                 if (para.equals(var.getType()) || (para.isPrimitive() && var.getType().isPrimitive())) {
                     CtExpression copy = MutationSupporter.getFactory().Core().clone(var);
@@ -296,6 +297,38 @@ public class CodeAddFactory {
         return newExp;
     }
 
+    public static CtConstructorCall createConstructorCall(List<String> paras,
+                                                          List<CtVariable> context, CtConstructorCall old) {
+        CtConstructorCall newCst = MutationSupporter.getFactory().Core().createConstructorCall();
+        newCst.setParent(old.getParent());
+        newCst.setType(old.getType());
+        CtExecutableReference exe = MutationSupporter.getFactory().Core().createExecutableReference();
+        exe.setParent(newCst);
+        exe.setType(old.getType());
+        List<CtExpression<?>> args_copy = new ArrayList<>();
+        for (String para :paras) {
+            Collections.shuffle(context);
+            for (CtVariable var :context) {
+                if (para.equals(var.getType().getQualifiedName())
+                        || (Arrays.stream(_types).anyMatch(e -> e.equals(para)) && var.getType().isPrimitive())) {
+                    CtVariableRead copy = MutationSupporter.getFactory().Core().createVariableRead();
+                    copy.setVariable(var.getReference());
+                    args_copy.add(copy);
+                    copy.setParent(newCst);
+                    break;
+                }
+            }
+        }
+        if (args_copy.size() != paras.size())
+            return null;
+        newCst.setArguments(args_copy);
+        try {
+            newCst.toString();
+        } catch (Exception e) {
+            return null;
+        }
+        return newCst;
+    }
 
     public static CtInvocation createInvocationSameName(CtInvocation old, CtInvocation change) {
         CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();

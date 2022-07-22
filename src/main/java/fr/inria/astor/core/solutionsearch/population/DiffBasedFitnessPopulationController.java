@@ -33,12 +33,6 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             newPopulation.removeAll(solutionsFromGeneration);
         }
 
-        try {
-            newPopulation.sort(comparator);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
         for (ProgramVariant programVariant : newPopulation) {
             if (programVariant.isSolution()) {
                 solutionsFromGeneration.add(programVariant);
@@ -70,8 +64,14 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             //3. for all left
             if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
                 nextVariants.addAll(rouletteWheelSelection(newPopulation, populationSize - nextVariants.size()));
-            } else
+            } else {
+                try {
+                    newPopulation.sort(comparator);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 nextVariants.addAll(weightRandomChoose(newPopulation, hadbeenModi, populationSize - nextVariants.size()));
+            }
         } else {
             nextVariants.addAll(newPopulation);
         }
@@ -155,8 +155,12 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
         }
         List<ProgramVariant> found = new ArrayList<>();
         for (int i = 0; found.size() < targetSize && !remaining.isEmpty();) {//this process might cost much.
-            ProgramVariant pv = weightedSelectWithNormalize(remaining);
+            ProgramVariant pv = weightedSelectWithNormalize(remaining, found);
             if (pv != null) {
+                if (pv.getModificationPoints().isEmpty()) {
+                    remaining.remove(pv);
+                    continue;
+                }
                 found.add(pv);
                 remaining.remove(pv);
             }
@@ -222,10 +226,12 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
         return sum;
     }
 
-    private ProgramVariant weightedSelectWithNormalize(List<ProgramVariant> remaining) {
+    private ProgramVariant weightedSelectWithNormalize(List<ProgramVariant> remaining, List<ProgramVariant> found) {
         List<WeightElement<?>> wes = new ArrayList<>();
+        Map<String, Double> diversity = new HashMap<>();
         double sum1 = 0d, sum2 = 0d;
-        double max1 = 0, max2 = 0, min1 = Double.MAX_VALUE, min2 = Double.MAX_VALUE;
+        double max1 = 0, max2 = 0;
+        double min1 = Double.MAX_VALUE, min2 = Double.MAX_VALUE;
         for (ProgramVariant pv :remaining) {
             double score1 = pv.getFitness(), score2 = pv.getSimilarity();
             if (score1 != Double.MAX_VALUE) {
@@ -234,20 +240,33 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
             }
             max2 = Math.max(max2, score2);
             min2 = Math.min(min2, score2);
+            String opType = pv.getLastOp();
+            if (opType != null && !diversity.containsKey(opType)) {
+                diversity.put(opType, 1d);
+            }
         }
+        for (ProgramVariant pv :found) {
+            if (diversity.containsKey(pv.getLastOp())) {
+                diversity.put(pv.getLastOp(), diversity.get(pv.getLastOp()) + 1);
+            }
+        }
+        diversity.put(null, 1d);
+        double min3 = Collections.min(diversity.values()), max3 = Collections.max(diversity.values());
         for (ProgramVariant pv :remaining) {
             double score1 = pv.getFitness(), score2 = pv.getSimilarity();
-            double nor1 = 0d, nor2 = 0d;
+            double score3 = diversity.get(pv.getLastOp());
+            double nor1 = 0d, nor2 = 0d, nor3 = 0d;
             WeightElement<?> we = null;
             nor2 = (score2 - min2) / (max2 - min2 == 0 ? 1 : max2 - min2) + 1;
+            nor3 = 2 - (score3 - min3) / (max3 - min3 == 0 ? 1 : max3 - min3);
             if (score1 != Double.MAX_VALUE) {
                 nor1 = 2 - (score1 - min1) / (max1 - min1 == 0 ? 1 : max1 - min1);
-                we= new WeightElement<>(pv, nor1 + nor2);
+                we= new WeightElement<>(pv, nor1 + nor2 + nor3);
                 sum1 += nor1;
             } else {
-                we = new WeightElement<>(pv, nor2);
+                we = new WeightElement<>(pv, nor2 + nor3);
             }
-            sum1 += nor2;
+            sum1 += nor2 + nor3;
             wes.add(we);
         }
         WeightElement<?> selected = null;

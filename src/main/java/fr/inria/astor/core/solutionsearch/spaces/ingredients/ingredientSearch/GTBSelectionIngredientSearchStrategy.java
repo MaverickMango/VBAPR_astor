@@ -147,6 +147,27 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             in = new Ingredient(CodeAddFactory.createExpression(cond.getElseExpression(), cond.getParent()));
             exps.add(in);
         }
+        if (point.getCodeElement() instanceof CtConstructorCall) {
+            try {
+                Class type = Class.forName(((CtConstructorCall<?>) point.getCodeElement()).getExecutable().getType().getQualifiedName());
+                Constructor[] cts = type.getConstructors();
+                List<CtVariable> contexts = point.getContextOfModificationPoint();
+                for (int i = 0; i < cts.length; i++) {
+                    Class[] paracls = cts[i].getParameterTypes();
+                    List<String> paras = new ArrayList<>();
+                    for (int j = 0; j < paracls.length; j++) {
+                        paras.add(paracls[j].getName());
+                    }
+                    Ingredient ingredient = new Ingredient(
+                            CodeAddFactory.createConstructorCall(paras,
+                                    contexts, (CtConstructorCall) point.getCodeElement()));
+                    if (ingredient.getCode() != null)// && !contains(exps, ingredient)
+                        exps.add(ingredient);
+                }
+            } catch (ClassNotFoundException ignored) {
+
+            }
+        }
         if (point.getCodeElement() instanceof CtTypedElement) {
             CtTypedElement mpvar = (CtTypedElement) point.getCodeElement();
             List<CtVariable> contexts = point.getContextOfModificationPoint();
@@ -363,7 +384,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
         int attemptsBaseIngredients = 0;
 
-        List<Ingredient> baseElements = geIngredientsFromSpace(modificationPoint, operationType);
+        List<Ingredient> baseElements = deduplicate(geIngredientsFromSpace(modificationPoint, operationType));
 
         if (operationType instanceof InsertBeforeOp || operationType instanceof InsertAfterOp)
             baseElements = getstmts(baseElements, operationType);
@@ -479,6 +500,10 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
     }
 
     private void removeUsed(List<Ingredient> bases, String eleKey) {
+        if (bases.size() == elementSet.get(eleKey).size()) {
+            elementSet.get(eleKey).clear();
+            return;
+        }
         for (String used: elementSet.get(eleKey)) {
             for (Ingredient in :bases) {
                 if (used.equals(in.getChacheCodeString())) {
