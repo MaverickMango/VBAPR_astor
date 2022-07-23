@@ -366,8 +366,11 @@ public class ProgramVariant {
 				CtElement element = mis.getOriginal().getParent(CtBlock.class);
 				if (element == null) {
 					element = mis.getOriginal().getParent(CtMethod.class);
+					if (element == null) {
+						element = isOrigianl ? mis.getOriginal() : mis.getModified();
+					}
 				}
-				String block = element.toString().replaceAll("\n", "");
+				String block = String.valueOf(element).replaceAll("\n", "");
 				if (!map.containsKey(type))
 					map.put(type, new ArrayList<>());
 				map.get(type).add(block);

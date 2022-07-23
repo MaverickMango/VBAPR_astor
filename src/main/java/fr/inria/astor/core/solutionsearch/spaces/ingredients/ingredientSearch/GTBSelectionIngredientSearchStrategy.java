@@ -384,7 +384,11 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
         int attemptsBaseIngredients = 0;
 
-        List<Ingredient> baseElements = deduplicate(geIngredientsFromSpace(modificationPoint, operationType));
+        List<Ingredient> baseElements = null;
+        if (ConfigurationProperties.getPropertyBool("duplicateingredientsinspace"))
+            baseElements = deduplicate(geIngredientsFromSpace(modificationPoint, operationType));
+        else
+            baseElements = geIngredientsFromSpace(modificationPoint, operationType);
 
         if (operationType instanceof InsertBeforeOp || operationType instanceof InsertAfterOp)
             baseElements = getstmts(baseElements, operationType);

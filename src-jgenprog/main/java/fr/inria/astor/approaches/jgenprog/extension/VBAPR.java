@@ -627,11 +627,7 @@ public class VBAPR  extends JGenProg {
         String diffPatchFormated = cdiff.getDiff(getProjectFacade(), this.originalVariant, solutionVariant,
                 this.mutatorSupporter, format, solutions_f);
 
-        if (diffPatchFormated == null)
-            return;
-
         pdiff.setFormattedDiff(diffPatchFormated);
-        solutions_f.add(diffPatchFormated);
 
         format = false;
 

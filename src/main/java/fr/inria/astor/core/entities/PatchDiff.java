@@ -12,7 +12,7 @@ public class PatchDiff {
 	String formattedDiff = null;
 
 	public String getOriginalStatementAlignmentDiff() {
-		return originalStatementAlignmentDiff;
+		return originalStatementAlignmentDiff == null ? "" : originalStatementAlignmentDiff;
 	}
 
 	public void setOriginalStatementAlignmentDiff(String originalStatementAlignmentDiff) {
@@ -20,7 +20,7 @@ public class PatchDiff {
 	}
 
 	public String getFormattedDiff() {
-		return formattedDiff;
+		return formattedDiff == null ? "" : formattedDiff;
 	}
 
 	public void setFormattedDiff(String formatedDiff) {

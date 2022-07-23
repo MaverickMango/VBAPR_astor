@@ -31,6 +31,7 @@ public class NegationUnaryOperatorConditionMutator extends SpoonMutator {
 			CtUnaryOperator<?> unary = (CtUnaryOperator<?>) toMutate;
 			if (unary.getKind() == UnaryOperatorKind.NOT) {
 				CtExpression expIF = factory.Core().clone(unary.getOperand());
+				expIF.setParent(unary.getParent());
 				MutantCtElement mutatn = new MutantCtElement(expIF,0.3);
 				//result.add(expIF);
 				result.add(mutatn);
@@ -43,6 +44,7 @@ public class NegationUnaryOperatorConditionMutator extends SpoonMutator {
 					CtUnaryOperator unary = factory.Core().createUnaryOperator();
 					unary.setOperand(invClone);
 					unary.setKind(UnaryOperatorKind.NOT);
+					unary.setParent(inv.getParent());
 					//result.add(unary);
 					MutantCtElement mutatn = new MutantCtElement(unary,3);
 					//result.add(expIF);

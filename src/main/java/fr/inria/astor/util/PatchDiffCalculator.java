@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.core.entities.ProgramVariant;
@@ -134,9 +135,11 @@ public class PatchDiffCalculator {
 
 			String diff = getDiff(foriginal, ffixed, fileLeft, fileRight);
 			if (solutions_f.contains(diff)) {
-				ffixed.delete();
+				File del = new File(srcOutputSolutionVariant);
+				FileUtils.deleteDirectory(del);
 				return null;
 			}
+			solutions_f.add(diff);
 			diffResults += diff + '\n';
 		}
 

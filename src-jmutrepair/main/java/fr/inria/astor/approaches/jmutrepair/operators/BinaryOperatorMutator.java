@@ -47,7 +47,7 @@ public abstract class BinaryOperatorMutator extends SpoonMutator<CtExpression> {
 					// Set parent
 					right.setParent(binaryOp);
 					left.setParent(binaryOp);
-
+					binaryOp.setParent(op.getParent());
 					result.add(binaryOp);
 				}
 			}
@@ -68,10 +68,12 @@ public abstract class BinaryOperatorMutator extends SpoonMutator<CtExpression> {
 
 				if (parentMutator != null) {
 					CtExpression rightOriginal = factory.Core().clone(op.getRightHandOperand());
+					rightOriginal.setParent(op);
 					List<MutantCtElement> mutationRight = parentMutator.execute(rightOriginal);
 					// mutationRight.add(right);
 
 					CtExpression leftOriginal = factory.Core().clone(op.getLeftHandOperand());
+					leftOriginal.setParent(op);
 					List<MutantCtElement> mutationLeft = parentMutator.execute(leftOriginal);
 					// mutationLeft.add(left);
 
@@ -99,6 +101,7 @@ public abstract class BinaryOperatorMutator extends SpoonMutator<CtExpression> {
 				// Set parent
 				right_c.setParent(binaryOp);
 				left_c.setParent(binaryOp);
+				binaryOp.setParent(op.getParent());
 				double prob = getProbabilityChange(op.getKind(), binaryOperatorKind);
 				MutantCtElement mutant = new MutantCtElement(binaryOp, prob);
 				// result.add(binaryOp);
@@ -120,6 +123,7 @@ public abstract class BinaryOperatorMutator extends SpoonMutator<CtExpression> {
 		// Set parent
 		right_c.setParent(binaryOp);
 		left_c.setParent(binaryOp);
+		binaryOp.setParent(op.getParent());
 		return binaryOp;
 
 	}

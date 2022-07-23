@@ -238,34 +238,34 @@ public class CodeAddFactory {
     public static CtInvocation createInvocationWithVars(CtInvocation old, CtExecutableReference newExe,
                                                         List<CtExpression<?>> vars) {
         CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();
-        if (old.getTarget() != null) {
-            CtExpression target = MutationSupporter.getFactory().Core().clone(old.getTarget());
-            newExp.setTarget(target);
-            target.setParent(newExp);
-        }
-        CtExecutableReference exe = MutationSupporter.getFactory().Core().clone(newExe);
-        newExp.setExecutable(exe);
-        exe.setParent(newExp);
-        newExp.setType(exe.getType());
-        List<CtTypeReference<?>> paras = newExe.getParameters();
-        List<CtExpression<?>> args_copy = new ArrayList<>();
-        for (CtTypeReference para :paras) {
-            Collections.shuffle(vars);
-            for (CtExpression var :vars) {
-                if (para.equals(var.getType()) || (para.isPrimitive() && var.getType().isPrimitive())) {
-                    CtExpression copy = MutationSupporter.getFactory().Core().clone(var);
-                    args_copy.add(copy);
-                    copy.setParent(newExp);
-                    break;
+            try {
+                if (old.getTarget() != null) {
+                    CtExpression target = MutationSupporter.getFactory().Core().clone(old.getTarget());
+                    newExp.setTarget(target);
+                    target.setParent(newExp);
                 }
-            }
-        }
-        if (args_copy.size() != paras.size())
-            return null;
-        newExp.setArguments(args_copy);
-        newExp.setParent(old.getParent());
-        try {
-            newExp.toString();
+                CtExecutableReference exe = MutationSupporter.getFactory().Core().clone(newExe);
+                newExp.setExecutable(exe);
+                exe.setParent(newExp);
+                newExp.setType(exe.getType());
+                List<CtTypeReference<?>> paras = newExe.getParameters();
+                List<CtExpression<?>> args_copy = new ArrayList<>();
+                for (CtTypeReference para :paras) {
+                    Collections.shuffle(vars);
+                    for (CtExpression var :vars) {
+                        if (para.equals(var.getType()) || (para.isPrimitive() && var.getType().isPrimitive())) {
+                            CtExpression copy = MutationSupporter.getFactory().Core().clone(var);
+                            args_copy.add(copy);
+                            copy.setParent(newExp);
+                            break;
+                        }
+                    }
+                }
+                if (args_copy.size() != paras.size())
+                    return null;
+                newExp.setArguments(args_copy);
+                newExp.setParent(old.getParent());
+                newExp.toString();
         } catch (Exception e) {
             return null;
         }
@@ -300,29 +300,29 @@ public class CodeAddFactory {
     public static CtConstructorCall createConstructorCall(List<String> paras,
                                                           List<CtVariable> context, CtConstructorCall old) {
         CtConstructorCall newCst = MutationSupporter.getFactory().Core().createConstructorCall();
-        newCst.setParent(old.getParent());
-        newCst.setType(old.getType());
-        CtExecutableReference exe = MutationSupporter.getFactory().Core().createExecutableReference();
-        exe.setParent(newCst);
-        exe.setType(old.getType());
-        List<CtExpression<?>> args_copy = new ArrayList<>();
-        for (String para :paras) {
-            Collections.shuffle(context);
-            for (CtVariable var :context) {
-                if (para.equals(var.getType().getQualifiedName())
-                        || (Arrays.stream(_types).anyMatch(e -> e.equals(para)) && var.getType().isPrimitive())) {
-                    CtVariableRead copy = MutationSupporter.getFactory().Core().createVariableRead();
-                    copy.setVariable(var.getReference());
-                    args_copy.add(copy);
-                    copy.setParent(newCst);
-                    break;
+        try {
+            newCst.setParent(old.getParent());
+            newCst.setType(old.getType());
+            CtExecutableReference exe = MutationSupporter.getFactory().Core().createExecutableReference();
+            exe.setParent(newCst);
+            exe.setType(old.getType());
+            List<CtExpression<?>> args_copy = new ArrayList<>();
+            for (String para :paras) {
+                Collections.shuffle(context);
+                for (CtVariable var :context) {
+                    if (para.equals(var.getType().getQualifiedName())
+                            || (Arrays.stream(_types).anyMatch(e -> e.equals(para)) && var.getType().isPrimitive())) {
+                        CtVariableRead copy = MutationSupporter.getFactory().Core().createVariableRead();
+                        copy.setVariable(var.getReference());
+                        args_copy.add(copy);
+                        copy.setParent(newCst);
+                        break;
+                    }
                 }
             }
-        }
-        if (args_copy.size() != paras.size())
-            return null;
-        newCst.setArguments(args_copy);
-        try {
+            if (args_copy.size() != paras.size())
+                return null;
+            newCst.setArguments(args_copy);
             newCst.toString();
         } catch (Exception e) {
             return null;
