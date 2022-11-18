@@ -86,7 +86,7 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 					}
 				}
 			} catch (Throwable e) {
-				log.error("Error at generation " + generationsExecuted + "\n" + e);
+				log.error("Error at generation " + generationsExecuted + "\n" + e.getMessage());
 				e.printStackTrace();
 				this.outputStatus = AstorOutputStatus.ERROR;
 				break;

@@ -10,9 +10,11 @@ import java.util.List;
 public class TestArgsUtil {
 
     private CommandSummary cs = null;
-    private String srcPathDir = ReadFileUtil.baseDir + "src_path/";//proj/version.txt
-    private String ftsDir = ReadFileUtil.baseDir + "failed_tests/";//proj/version.txt
-    private String locationDir = ReadFileUtil.outputSrc + "Defects4jProjs/";//proj_version/  //must be absolute path
+    public static final String baseDir = "/home/liu/Desktop/groundtruth/";//util files
+    public static final String outputSrc = "/home/liu/Desktop/VBAPRResult/";//working dir
+    private String srcPathDir = baseDir + "src_path/";//...proj/version.txt
+    private String ftsDir = baseDir + "failed_tests/";//...proj/version.txt
+    private String locationDir = outputSrc + "Defects4jProjs/";//proj_version/  //must be absolute path
 
     public TestArgsUtil() {
         this.cs = new CommandSummary();

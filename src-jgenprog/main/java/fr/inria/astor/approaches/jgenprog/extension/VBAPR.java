@@ -343,7 +343,7 @@ public class VBAPR  extends JGenProg {
         // We filter the solution from the rest
         String solutionId = "";
         for (ProgramVariant programVariant : temporalInstances) {
-            if (programVariant.isSolution()) {
+            if (programVariant.isSolution()) {// && programVariant.getPatchDiff().getFormattedDiff() != null
                 this.solutions.add(programVariant);
                 solutionId += programVariant.getId() + "(SOLUTION)(f=" + programVariant.getFitness() + ")" + ", ";
             }

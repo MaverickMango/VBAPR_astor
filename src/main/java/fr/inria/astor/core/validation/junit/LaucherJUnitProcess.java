@@ -67,7 +67,7 @@ public class LaucherJUnitProcess {
 			List<String> command = new ArrayList<String>();
 
 			command.add(jvmPath);
-			command.add("-Xmx256m");
+			command.add("-Xmx512m");
 
 			String[] ids = ConfigurationProperties.getProperty(MetaGenerator.METALL).split(File.pathSeparator);
 			for (String mutid : ids) {

@@ -860,7 +860,10 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 		double fitness = this.fitnessFunction.calculateFitnessValue(validationResult);
 		if (ReadFileUtil.failingActualSize != (int) fitness) {
-			throw new IllegalStateException("The Original Running of test case does not match the groundtruth file, failed "
+			log.error("The Original Running of test case does not match the groundtruth file, failed " +
+					(int)fitness + "but actually " + ReadFileUtil.failingActualSize);
+			Logger failingLog = LogManager.getLogger("FailingLog");
+			failingLog.error(ReadFileUtil.proj + "_" + ReadFileUtil.version + ": The Original Running of test case does not match the groundtruth file, failed "
 					+ (int)fitness + "but actually " + ReadFileUtil.failingActualSize);
 		}
 		originalVariant.setFitness(fitness);

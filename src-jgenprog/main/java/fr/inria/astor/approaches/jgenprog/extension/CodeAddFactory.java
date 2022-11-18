@@ -16,7 +16,7 @@ public class CodeAddFactory {
     static String[] _types = {"double", "float", "long", "int", "short", "byte"};
 
 
-    public static CtBlock createStatementsBlock(CtStatement original, CtStatement modified, boolean before) {
+    public static CtBlock createStatementsBlock(CtStatement original, CtStatement modified, boolean before) throws Exception {
         CtBlock block = MutationSupporter.getFactory().Core().createBlock();
         CtStatement root = MutationSupporter.getFactory().Core().clone(original);
         CtStatement add = MutationSupporter.getFactory().Core().clone(modified);
@@ -32,13 +32,13 @@ public class CodeAddFactory {
         return block;
     }
 
-    public static CtExpression createExpression(CtExpression exp, CtElement parent) {
+    public static CtExpression createExpression(CtExpression exp, CtElement parent) throws Exception {
         CtExpression newElement = MutationSupporter.getFactory().Core().clone(exp);
         newElement.setParent(parent);
         return newElement;
     }
 
-    public static List<CtBinaryOperator> createCondition(CtElement root, CtElement newPart) {
+    public static List<CtBinaryOperator> createCondition(CtElement root, CtElement newPart) throws Exception {
         List<CtBinaryOperator> list = new ArrayList<>();
         CtExpression left = (CtExpression) MutationSupporter.getFactory().Core().clone(root);
         CtExpression right = (CtExpression) MutationSupporter.getFactory().Core().clone(newPart);
@@ -73,14 +73,14 @@ public class CodeAddFactory {
         return list;
     }
 
-    public static CtElement deleteCondition(CtBinaryOperator old) {
+    public static CtElement deleteCondition(CtBinaryOperator old) throws Exception {
         int selection = RandomManager.nextInt(1);
         CtExpression newCond = MutationSupporter.getFactory().Core().clone(selection == 0? old.getLeftHandOperand(): old.getRightHandOperand());
         newCond.setParent(old.getParent());
         return newCond;
     }
 
-    public static CtElement createBinaryOperator(CtBinaryOperator old) {
+    public static CtElement createBinaryOperator(CtBinaryOperator old) throws Exception {
         CtExpression left = null;
         CtExpression right = null;
         CtExpression single = null;
@@ -122,11 +122,11 @@ public class CodeAddFactory {
         return wholeExp;
     }
 
-    public static CtContinue createContinue() {
+    public static CtContinue createContinue() throws Exception {
         return MutationSupporter.getFactory().Core().createContinue();
     }
 
-    public static CtVariableRead createVariableRead(CtVariable old) {
+    public static CtVariableRead createVariableRead(CtVariable old) throws Exception {
         CtVariableReference oldVariable = MutationSupporter.getFactory().Core().clone(old.getReference());
         CtVariableRead newElement =  MutationSupporter.getFactory().Core().createVariableRead();
         newElement.setVariable(oldVariable);
@@ -135,7 +135,7 @@ public class CodeAddFactory {
         return newElement;
     }
 
-    public static CtVariableRead createTypeCast(CtVariableRead root, CtTypeReference typeReference) {
+    public static CtVariableRead createTypeCast(CtVariableRead root, CtTypeReference typeReference) throws Exception {
         CtVariableRead newExp = MutationSupporter.getFactory().Core().createVariableRead();
         newExp.setVariable(MutationSupporter.getFactory().Core().clone(root.getVariable()));
         newExp.setType(MutationSupporter.getFactory().Core().clone(root.getType()));
@@ -148,7 +148,7 @@ public class CodeAddFactory {
         return newExp;
     }
 
-    public static CtUnaryOperator createTypeCast(CtUnaryOperator root, CtTypeReference typeReference) {
+    public static CtUnaryOperator createTypeCast(CtUnaryOperator root, CtTypeReference typeReference) throws Exception {
         CtUnaryOperator newExp = MutationSupporter.getFactory().Core().createUnaryOperator();
         CtUnaryOperator newroot = MutationSupporter.getFactory().Core().clone(root);
         newExp.setKind(newroot.getKind());
@@ -163,7 +163,7 @@ public class CodeAddFactory {
         return newExp;
     }
 
-    public static CtConditional createTypeCast(CtConditional root, CtTypeReference typeReference) {
+    public static CtConditional createTypeCast(CtConditional root, CtTypeReference typeReference) throws Exception {
         CtConditional newExp = MutationSupporter.getFactory().Core().createConditional();
         CtConditional newroot = MutationSupporter.getFactory().Core().clone(root);
         newExp.setCondition(newroot.getCondition());
@@ -177,7 +177,7 @@ public class CodeAddFactory {
         return newExp;
     }
 
-    public static CtBinaryOperator createTypeCast(CtBinaryOperator root, CtTypeReference typeReference) {
+    public static CtBinaryOperator createTypeCast(CtBinaryOperator root, CtTypeReference typeReference) throws Exception {
         CtBinaryOperator newExp = MutationSupporter.getFactory().Core().createBinaryOperator();
         CtBinaryOperator newroot = MutationSupporter.getFactory().Core().clone(root);
         newExp.setKind(newroot.getKind());
@@ -193,7 +193,7 @@ public class CodeAddFactory {
         return newExp;
     }
 
-    public static CtLiteral createTypeCast(CtLiteral root, CtTypeReference typeReference) {
+    public static CtLiteral createTypeCast(CtLiteral root, CtTypeReference typeReference) throws Exception {
         CtLiteral newExp = MutationSupporter.getFactory().Core().createLiteral();
         CtLiteral newroot = MutationSupporter.getFactory().Core().clone(root);
         newExp.setBase(newroot.getBase());
@@ -208,7 +208,7 @@ public class CodeAddFactory {
         return newExp;
     }
 
-    public static CtInvocation createTypeCast(CtInvocation root, CtTypeReference typeReference) {
+    public static CtInvocation createTypeCast(CtInvocation root, CtTypeReference typeReference) throws Exception {
         CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();
         CtInvocation newroot = MutationSupporter.getFactory().Core().clone(root);
         newExp.setExecutable(newroot.getExecutable());
@@ -224,7 +224,7 @@ public class CodeAddFactory {
         return newExp;
     }
 
-    public static CtExpression createTypeCast(CtExpression root, CtTypeReference typeReference) {//problem
+    public static CtExpression createTypeCast(CtExpression root, CtTypeReference typeReference) throws Exception {//problem
         CtExpression newExp = MutationSupporter.getFactory().Core().clone(root);
 
         CtTypeReference typecast = MutationSupporter.getFactory().Core().createTypeReference();
@@ -330,7 +330,7 @@ public class CodeAddFactory {
         return newCst;
     }
 
-    public static CtInvocation createInvocationSameName(CtInvocation old, CtInvocation change) {
+    public static CtInvocation createInvocationSameName(CtInvocation old, CtInvocation change) throws Exception {
         CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();
         if (old.getTarget() != null) {
             CtExpression target = MutationSupporter.getFactory().Core().clone(old.getTarget());
@@ -358,7 +358,7 @@ public class CodeAddFactory {
         return newExp;
     }
 
-    public static CtInvocation createInvocationSameArgs(CtInvocation old, CtExecutableReference change) {
+    public static CtInvocation createInvocationSameArgs(CtInvocation old, CtExecutableReference change) throws Exception {
         CtInvocation newExp = MutationSupporter.getFactory().Core().createInvocation();
         if (old.getTarget() != null) {
             CtExpression target = MutationSupporter.getFactory().Core().clone(old.getTarget());
@@ -386,7 +386,7 @@ public class CodeAddFactory {
         return newExp;
     }
 
-    public static List<Ingredient> createTypeChangeInredients(CtLocalVariable point, Map<String, Set<CtTypeReference>> base) {
+    public static List<Ingredient> createTypeChangeInredients(CtLocalVariable point, Map<String, Set<CtTypeReference>> base) throws Exception{
         List<Ingredient> list = new ArrayList<>();
         CtTypeReference oldType = point.getType();
 

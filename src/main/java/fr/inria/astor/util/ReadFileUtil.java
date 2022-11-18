@@ -10,6 +10,7 @@ import fr.inria.astor.approaches.jgenprog.extension.StatementFilter;
 import fr.inria.astor.approaches.jgenprog.extension.VBAPR;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
+import fr.inria.main.test.TestArgsUtil;
 import org.apache.log4j.Logger;
 import spoon.SpoonModelBuilder;
 import spoon.compiler.SpoonResourceHelper;
@@ -29,19 +30,20 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class ReadFileUtil {
-    public static final String baseDir = "/home/liu/Desktop/groundtruth/";
-    public static final String outputSrc = "/home/liu/Desktop/VBAPRResult/";//VBAPRResult
+    public static final String baseDir = TestArgsUtil.baseDir;//"/home/liu/Desktop/groundtruth/";//util files
+    public static final String outputSrc = TestArgsUtil.outputSrc;//"/home/liu/Desktop/VBAPRResult/";//working dir
+    private static final String buggyFileDir = baseDir + "buggyfiles/";
+    private static final String GTFileDir = baseDir + "groundtruth/";
+
+
     public static final String supsLineError = outputSrc + "NoSuspiciousLine";
     public static final String timeOutput = outputSrc + "BugStatus";
     public static final String loadError = outputSrc + "LoadError";
     public static final String buildError = outputSrc + "BuildError";
     public static final String mapping = outputSrc + "mapping";
-    private static final String buggyFileDir = baseDir + "buggyfiles/";
-    private static final String GTFileDir = baseDir + "groundtruth/";
     public static int failingActualSize = 0;
     public static List<GroundTruth> GTs = null;
     public static String proj = "", version = "";
-//    static String fileBase = "/home/liu/Desktop/groundtruth/";
 
     public static boolean hasThisVar(String name) {
         for (GroundTruth gt :GTs) {
@@ -308,7 +310,7 @@ public class ReadFileUtil {
     }
 
     public static Map<String, List<String>> removeRepetition(String projIDs, String result) throws IOException {
-        String base = "/home/liu/Desktop/VBAPRResult/";
+        String base = outputSrc;
         List<String> ids = readIDs(projIDs);
         Map<String, List<String>> map = new HashMap<>();
         String proj, version, dirPath;

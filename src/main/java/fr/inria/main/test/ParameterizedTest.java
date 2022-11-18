@@ -24,6 +24,7 @@ import spoon.support.StandardEnvironment;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
@@ -45,52 +46,13 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
         String[][] data = {
-                {"Chart" , "7"}
-//                {"Lang", "34"}
-//                ,{"Cli", "25"}
-//                ,{"Cli", "32"}
-//                ,{"Math", "26"}
-//                ,{"Math", "72"}
-//                ,{"Math", "46"}
-//                ,{"Math", "67"}
-//                ,{"Codec", "1"}
-//                ,{"Codec", "2"}
-//                ,{"Codec", "8"}
-//                ,{"Jsoup", "43"}
-//                ,{"Jsoup", "62"}
-//                ,{"Jsoup", "88"}
-//                ,{"JacksonDatabind", "37"}
-//                ,{"JacksonDatabind", "70"}
-//                ,{"JacksonDatabind", "16"}
-//                ,{"JacksonDatabind", "102"}
-//                ,{"JacksonCore", "5"}
-
-//                ,{"Lang", "6"}
-//                ,{"Math", "33"}
-//                ,{"Cli", "5"}
-//                , {"Chart", "10"}
+                {"Math" , "5"}
         };
         return Arrays.asList(data);
 
 //        String fileName = ReadFileUtil.outputSrc + "part2.txt";
 
 //        return readPVInfos(fileName);
-    }
-
-
-    @Before
-    public void setUp() throws Exception {
-//        for (Object o : System.getProperties().keySet()) {
-//            System.out.println(String.valueOf(o) + "->" + System.getProperties().get(o));
-//        }
-//        String logfile = System.getProperty("logFileName");
-//        if (logfile == null) {
-//            logfile = proj + version;
-//            System.setProperty("logFileName", logfile);
-//        }
-//        LogManager.getRootLogger().setLevel(Level.ERROR);
-//        LogManager.getLogger(VBAPR.class.getSimpleName()).setLevel(Level.INFO);
-//        LogManager.getLogger("DetailLog").setLevel(Level.INFO);
     }
 
     @BeforeClass
@@ -105,6 +67,69 @@ public class ParameterizedTest{
         AstorCoreEngine engine = main.getEngine();
         List<ProgramVariant> solutions = engine.getSolutions();
         assertEquals(true, solutions.size() > 0);
+    }
+
+    @Test
+    public void testCommand() throws IOException, InterruptedException {
+        StringBuilder stringBuilder = new StringBuilder();
+//        String cmd = "cd /home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8 && /home/liu/Desktop/defects4j/major/bin/ant -f /home/liu/Desktop/defects4j/framework/projects/defects4j.build.xml -Dd4j.home=/home/liu/Desktop/defects4j -Dd4j.dir.projects=/home/liu/Desktop/defects4j/framework/projects -Dbasedir=/home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8 -Dbuild.compiler=javac1.7 -DOUTFILE=/home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8/failing_tests -Dtest.entry.class=org.jfree.data.time.junit.TimeSeriesCollectionTests -Dtest.entry.method=testGetSurroundingItems run.dev.tests";
+//        String cmd = "java -XX:ReservedCodeCacheSize=256M -XX:MaxPermSize=1G -Djava.awt.headless=true -Xbootclasspath/a:/home/liu/Desktop/defects4j/major/bin/../config/config.jar -jar /home/liu/Desktop/defects4j/major/bin/../lib/ant-launcher.jar -f /home/liu/Desktop/defects4j/framework/projects/defects4j.build.xml -Dd4j.home=/home/liu/Desktop/defects4j -Dd4j.dir.projects=/home/liu/Desktop/defects4j/framework/projects -Dbasedir=/home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8 -Dbuild.compiler=javac1.7 -DOUTFILE=/home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8/failing_tests -Dtest.entry.class=org.jfree.data.time.junit.TimeSeriesCollectionTests -Dtest.entry.method=testGetSurroundingItems run.dev.tests";
+        String cmd = "cd /home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8 && /home/liu/Desktop/defects4j/framework/bin/defects4j test";
+        stringBuilder.append(cmd);
+        String[] strings = new String[] {"/bin/bash", "-c", stringBuilder.toString()};
+        System.out.println(execute(strings));
+//        ProcessBuilder pb = new ProcessBuilder(strings);
+//        Process p = pb.start();
+//        //
+//        if (!p.waitFor(6000, TimeUnit.MILLISECONDS)) {
+//
+//        }
+    }
+
+    public static List<String> execute(String[] command) {
+        Process process = null;
+        final List<String> message = new ArrayList<String>();
+        try {
+            ProcessBuilder builder = new ProcessBuilder(command);
+            builder.redirectErrorStream(true);
+            process = builder.start();
+            final InputStream inputStream = process.getInputStream();
+
+            Thread processReader = new Thread(){
+                public void run() {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                    String line;
+                    try {
+                        while((line = reader.readLine()) != null) {
+                            message.add(line);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        reader.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+
+            processReader.start();
+            try {
+                processReader.join();
+                process.waitFor();
+            } catch (InterruptedException e) {
+                return new LinkedList<>();
+            }
+        } catch (IOException e) {
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+            process = null;
+        }
+
+        return message;
     }
 
     public static List<String[]> readPVInfos(String fileName) {
