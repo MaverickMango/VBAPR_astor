@@ -4,13 +4,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import fr.inria.astor.core.entities.OperatorInstance;
-import fr.inria.astor.core.faultlocalization.bridgeFLSpoon.SpoonElementPointer;
 import fr.inria.astor.core.faultlocalization.bridgeFLSpoon.SpoonElementPointerLauncher;
-import fr.inria.astor.core.faultlocalization.bridgeFLSpoon.SpoonLauncher;
 import fr.inria.astor.core.setup.FinderTestCases;
 import fr.inria.astor.util.GroundTruth;
-import fr.inria.astor.util.ReadFileUtil;
-import fr.inria.astor.util.StringUtil;
+import fr.inria.astor.util.FileTools;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -30,7 +27,6 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.CodeParserLauncher;
 import spoon.reflect.code.*;
 import spoon.reflect.cu.position.NoSourcePosition;
 import spoon.reflect.declaration.*;
-import spoon.reflect.visitor.filter.TypeFilter;
 
 /**
  * Creates the initial population of program variants
@@ -81,19 +77,6 @@ public class ProgramVariantFactory {
 
 		List<ProgramVariant> variants = new ArrayList<ProgramVariant>();
 
-//		for (int ins = 1; ins <= maxNumberInstances; ins++) {
-//			// -Initial setup of directories----------
-//			idCounter = ins;
-//			ProgramVariant v_i = createProgramInstance(suspiciousList, idCounter);
-//			variants.add(v_i);
-//			log.info("Creating program variant #" + idCounter + ", " + v_i.toString());
-//
-//			if (ConfigurationProperties.getPropertyBool("saveall")) {
-//				String srcOutput = projectFacade.getInDirWithPrefix(v_i.currentMutatorIdentifier());
-//				mutatorSupporter.saveSourceCodeOnDiskProgramVariant(v_i, srcOutput);
-//			}
-//
-//		}
 		if (ConfigurationProperties.getPropertyBool("skipfaultlocalization")) {
 			//if skipfaultlocalization, we use gt variable to extract.
 			//set testcases
@@ -130,22 +113,6 @@ public class ProgramVariantFactory {
 
 		return variants;
 	}
-
-//	private boolean modifyInitialVariant(ProgramVariant variant, int pointID) throws Exception {
-//
-//		boolean oneOperationCreated = false;
-//		int genMutated = 0, notmut = 0, notapplied = 0;
-//		int nroGen = 0;
-//
-//		log.info("modifyInitialVariant at modificationPonit: " + pointID);
-//
-//		ModificationPoint modificationPoint = variant.getModificationPoints().get(pointID);
-//
-//		modificationPoint.setProgramVariant(variant);
-//		OperatorInstance modificationInstance = createOperatorInstanceForPoint(modificationPoint);
-//
-//		return oneOperationCreated;
-//	}
 
 
 	public CtClass getCtClassFromCtElement(CtElement element) {
@@ -196,7 +163,7 @@ public class ProgramVariantFactory {
 //			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance);
 //			progInstance.getModificationPoints().addAll(pointsFromAllStatements);
 
-			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance, ReadFileUtil.GTs);
+			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance, FileTools.GTs);
 			progInstance.getModificationPoints().addAll(pointsFromAllStatements);
 		}
 		log.info("Total ModPoint created: " + progInstance.getModificationPoints().size());
@@ -349,16 +316,16 @@ public class ProgramVariantFactory {
 //			if ((ctElement instanceof CtInvocation || ctElement instanceof CtAssignment)
 //					&& !ReadFileUtil.hasThisElement(ctElement))
 //				continue;
-			if (!ReadFileUtil.hasThisElement(ctElement)) {//!(ctElement instanceof CtStatement) &&
+			if (!FileTools.hasThisElement(ctElement)) {//!(ctElement instanceof CtStatement) &&
 //				if (!ReadFileUtil.hasThisElement(ctElement.getParent(CtLocalVariable.class))
 //						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class))
 //						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtOperatorAssignment.class))) {
 //					continue;
 //				}
 				if (!((ctElement.getParent(CtAssignment.class) != null
-						&& ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class)))
+						&& FileTools.hasThisElement(ctElement.getParent(CtAssignment.class)))
 					|| (ctElement.getParent(CtLocalVariable.class) != null
-						&& ReadFileUtil.hasThisElement(ctElement.getParent(CtLocalVariable.class)))))
+						&& FileTools.hasThisElement(ctElement.getParent(CtLocalVariable.class)))))
 					continue;
 			}
 			SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();

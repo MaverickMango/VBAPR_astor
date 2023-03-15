@@ -5,6 +5,8 @@ import java.util.List;
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.solutionsearch.extension.AstorExtensionPoint;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStrategy;
+
 /**
  * Strategy to Transformation an ingredient
  * @author Matias Martinez
@@ -20,4 +22,5 @@ public interface IngredientTransformationStrategy extends AstorExtensionPoint {
 	 * @return
 	 */
 	public  List<Ingredient> transform(ModificationPoint modificationPoint, Ingredient ingredient);
+
 }

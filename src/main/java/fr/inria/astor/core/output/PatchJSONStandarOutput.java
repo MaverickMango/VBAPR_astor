@@ -73,10 +73,11 @@ public class PatchJSONStandarOutput implements ReportResults {
 		String absoluteFileName = output + "/" + filename + ".json";
 		try (FileWriter file = new FileWriter(absoluteFileName)) {
 
-			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();//decode special character
 			JsonParser jp = new JsonParser();
 			JsonElement je = jp.parse(statsjsonRoot.toJSONString());
 			String prettyJsonString = gson.toJson(je);
+
 
 			file.write(prettyJsonString);
 			file.flush();

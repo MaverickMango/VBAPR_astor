@@ -1,11 +1,11 @@
 package fr.inria.main.test;
 
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import org.junit.runner.JUnitCore;
 
 public class ExecutionMain {
 
-    static String filename = ReadFileUtil.outputSrc;
+    static String filename = FileTools.outputSrc;
 
     public static void main(String[] args) {
         ParameterizedTest.fileName = filename + args[0];

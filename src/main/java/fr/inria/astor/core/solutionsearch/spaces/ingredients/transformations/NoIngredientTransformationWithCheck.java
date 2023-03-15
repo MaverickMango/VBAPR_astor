@@ -4,20 +4,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import fr.inria.astor.approaches.jgenprog.extension.CodeAddFactory;
+import fr.inria.astor.core.manipulation.filters.StatementFilterWithGT;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStrategy;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.SimpleRandomSelectionIngredientStrategy;
+import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.scopes.IngredientPoolScope;
-import spoon.reflect.code.CtLiteral;
-import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.code.*;
+import spoon.reflect.cu.position.NoSourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.support.reflect.code.CtBlockImpl;
+import spoon.support.reflect.code.CtStatementImpl;
 
 /**
  * Represents the default strategy: it does not apply any code transformation.
@@ -40,8 +45,8 @@ public class NoIngredientTransformationWithCheck implements IngredientTransforma
 		boolean fit = VariableResolver.fitInPlace(modificationPoint.getContextOfModificationPoint(),
 				elementFromIngredient);
 
-		if (!fit && ConfigurationProperties.getPropertyBool("usevariableedit")) {
-			List<CtVariable> remaining = modificationPoint.getContextOfModificationPoint();
+		if (!fit && ConfigurationProperties.getPropertyBool("useVariableEdit")) {
+			List<CtVariable> remaining = new ArrayList<>(modificationPoint.getContextOfModificationPoint());
 			List<CtVariableAccess> temp = new ArrayList<>(VariableResolver._notmapped);
 			while (!fit && !remaining.isEmpty()) {
 				for (CtVariableAccess old :VariableResolver._notmapped) {
@@ -69,6 +74,14 @@ public class NoIngredientTransformationWithCheck implements IngredientTransforma
 		}
 
 		if (fit) {
+			if ((ingredient.getCode() instanceof CtStatementImpl && ingredient.getCode().getParent() instanceof CtBlockImpl)
+					&& ConfigurationProperties.getPropertyBool("useVariableEdit")) {
+				//if ingredient does not affect variables in gt, just drop it
+				boolean isInHasGTVars = !ingredient.getCode().getElements(new StatementFilterWithGT()).isEmpty();
+				if (!isInHasGTVars)
+					return result;
+			}
+
 			IngredientPoolScope scope = VariableResolver.determineIngredientScope(modificationPoint.getCodeElement(),
 					elementFromIngredient);
 
@@ -79,9 +92,8 @@ public class NoIngredientTransformationWithCheck implements IngredientTransforma
 			}
 
 			// Only one ingredient was to be returned (the original)
-			result.add(new Ingredient(elementFromIngredient, scope));
+			result.add(new Ingredient(elementFromIngredient, scope, ingredient.getDerivedFrom()));
 		}
 		return result;
 	}
-
 }

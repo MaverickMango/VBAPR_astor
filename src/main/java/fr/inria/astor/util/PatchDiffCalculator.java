@@ -94,9 +94,10 @@ public class PatchDiffCalculator {
 		return diffResults;
 	}
 
-	public String getDiff(ProjectRepairFacade projectFacade, ProgramVariant originalVariant,
-						  ProgramVariant programVariant, MutationSupporter mutsupporter,
+	public String getDiff(ProjectRepairFacade projectFacade, List<ProgramVariant> solutions,
+						  int idx, MutationSupporter mutsupporter,
 						  boolean format, List<String> solutions_f) throws Exception {
+		ProgramVariant programVariant = solutions.get(idx);
 
 		String diffResults = "";
 
@@ -134,12 +135,15 @@ public class PatchDiffCalculator {
 			String fileRight = getPrefixPatched(difftype, t, fileName);
 
 			String diff = getDiff(foriginal, ffixed, fileLeft, fileRight);
-			if (solutions_f.contains(diff)) {
-				File del = new File(srcOutputSolutionVariant);
-				FileUtils.deleteDirectory(del);
-				return null;
+			if (format) {
+				if (solutions_f.contains(diff.replaceAll("\\s+", " ")) || diff.equals("\\s*")) {
+					File del = new File(srcOutputSolutionVariant);
+					FileUtils.deleteDirectory(del);
+					solutions.remove(idx);
+					return null;
+				}
+				solutions_f.add(diff.replaceAll("\\s+", " "));
 			}
-			solutions_f.add(diff);
 			diffResults += diff + '\n';
 		}
 

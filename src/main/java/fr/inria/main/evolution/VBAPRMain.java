@@ -13,11 +13,10 @@ import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import fr.inria.main.AbstractMain;
 import fr.inria.main.ExecutionMode;
 import org.apache.commons.cli.ParseException;
-import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import java.io.BufferedOutputStream;
@@ -87,7 +86,7 @@ public class VBAPRMain extends AbstractMain {
 			core = createEngineFromArgument(customengine, mutSupporter, projectFacade);
 
 		}
-		if (ReadFileUtil.GTs.isEmpty())
+		if (FileTools.GTs.isEmpty())
 			return null;
 
 		// Loading extension Points
@@ -139,8 +138,8 @@ public class VBAPRMain extends AbstractMain {
 			log.error("Loading custom engine: " + customEngineValue + " --" + e);
 			BufferedOutputStream buff =null;
 			try {
-				String content = ReadFileUtil.proj + "_" + ReadFileUtil.version + "\n";
-				buff = new BufferedOutputStream(new FileOutputStream(ReadFileUtil.loadError, true));
+				String content = FileTools.proj + "_" + FileTools.version + "\n";
+				buff = new BufferedOutputStream(new FileOutputStream(FileTools.loadError, true));
 				buff.write(content.getBytes(StandardCharsets.UTF_8));
 				buff.flush();
 				buff.close();

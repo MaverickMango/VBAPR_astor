@@ -65,7 +65,7 @@ public class Ingredient {
 
 	@Override
 	public String toString() {
-		return this.getCode().toString();
+		return this.getCode().toString().replaceAll("\\s+", " ");
 	}
 
 	/**
@@ -74,10 +74,10 @@ public class Ingredient {
 	 * @return
 	 */
 	public String getChacheCodeString() {
-		if (cacheString == null && this.getCode() != null) {
-			cacheString = this.getCode().toString().replaceAll("\n", "");
+		if (cacheString == null && this.getCode() != null) {//
+			cacheString = this.getCode().toString();
 		}
-		return cacheString;
+		return cacheString.replaceAll("\\s+", " ");
 	}
 
 	@Override
@@ -100,9 +100,9 @@ public class Ingredient {
 		if (ingredientCode == null) {
 			if (other.ingredientCode != null)
 				return false;
-		} else if (getChacheCodeString() != null && !cacheString.equals(other.getChacheCodeString()))//if (!ingredientCode.equals(other.ingredientCode))
-			return false;
-		return true;
+		} else if (getChacheCodeString() != null && cacheString.equals(other.getChacheCodeString()))
+			return true;
+		return false;
 	}
 
 	public Map<String, Object> getMetadata() {

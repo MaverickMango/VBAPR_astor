@@ -43,7 +43,7 @@ public class CodeLineCollector  {
     public static void getClazzElements() {
         Factory spoon = MutationSupporter.getFactory();
         clazzElements = new HashSet<>();
-        for (GroundTruth gt : ReadFileUtil.GTs) {
+        for (GroundTruth gt : FileTools.GTs) {
             String filePath = gt.getLocation();
             CtClass clazz = (CtClass) spoon.Type().get(filePath);
             clazzElements.add(clazz);
@@ -66,7 +66,7 @@ public class CodeLineCollector  {
     }
 
     public static boolean isBetweenLine(int compareStart, int compareEnd) {
-        for (GroundTruth gt : ReadFileUtil.GTs) {
+        for (GroundTruth gt : FileTools.GTs) {
             if (gt.isOnlyOneLine()) {
                 int lineNumber = gt.getLinenumber();
                 return isBetweenLine(lineNumber, compareStart, compareEnd);
@@ -87,10 +87,10 @@ public class CodeLineCollector  {
     }
 
     public static boolean isInScope(int lineNumber) {
-        if (ReadFileUtil.GTs.size() == 0)
+        if (FileTools.GTs.size() == 0)
             return true;
         boolean flag = false;
-        for (GroundTruth gt : ReadFileUtil.GTs) {
+        for (GroundTruth gt : FileTools.GTs) {
             if (gt.isOnlyOneLine()) {
                 flag = lineNumber == gt.getLinenumber();
             } else {

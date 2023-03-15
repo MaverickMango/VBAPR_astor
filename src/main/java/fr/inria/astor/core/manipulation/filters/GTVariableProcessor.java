@@ -1,7 +1,7 @@
 package fr.inria.astor.core.manipulation.filters;
 
 import fr.inria.astor.util.GroundTruth;
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.reference.CtVariableReference;
 
@@ -10,7 +10,7 @@ import java.util.Set;
 
 public class GTVariableProcessor extends AbstractProcessor<CtVariableReference> {
     public Set<String> varList = new HashSet<>();
-    private String location;
+    private String location = "";
 
     public GTVariableProcessor(String location) {
         this.location = location;
@@ -22,7 +22,7 @@ public class GTVariableProcessor extends AbstractProcessor<CtVariableReference> 
     @Override
     public void process(CtVariableReference ctVariableReference) {
 //        .getElements(new TypeFilter<>(CtStatement.class))
-        for (GroundTruth gt : ReadFileUtil.GTs) {
+        for (GroundTruth gt : FileTools.GTs) {
             if (!gt.getLocation().endsWith(location))
                 continue;
             if (!gt.isExp()) {

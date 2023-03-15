@@ -1,6 +1,6 @@
 package fr.inria.main.test;
 
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.junit.runner.Description;
@@ -31,7 +31,7 @@ public class TestExecutionListener extends RunListener {
         infoLog.info("total time : " + result.getRunTime());
         infoLog.info("total tests : " + result.getRunCount());
         infoLog.info("failed tests : " + result.getFailureCount());
-        ParameterizedTest.writeInfo(recorder.toString(), ReadFileUtil.outputSrc + "testResults");
+        ParameterizedTest.writeInfo(recorder.toString(), FileTools.outputSrc + "testResults");
     }
 
     public void testStarted(Description description) throws Exception {

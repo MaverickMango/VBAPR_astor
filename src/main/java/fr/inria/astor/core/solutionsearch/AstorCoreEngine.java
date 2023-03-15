@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import fr.inria.astor.core.manipulation.filters.*;
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
@@ -165,8 +165,8 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	public abstract void startEvolution() throws Exception;
 
 	public void filterSolutions() {
-		String[] info = ReadFileUtil.getInfos();
-		ReadFileUtil.getGTs(info);
+		String[] info = FileTools.getInfos();
+		FileTools.getGTs(info);
 	}
 
 	public void atEnd() {
@@ -270,8 +270,11 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 			String output = ConfigurationProperties.getProperty("folderDiff");
 			if (output == null) {
-				log.error("can not save patch, folderDiff is null");
-				return;
+				output = this.projectFacade.getProperties().getWorkingDirRoot() + File.separator + solutionVariant.getId();
+				if (output == null) {
+					log.error("can not save patch, folderDiff is null");
+					return;
+				}
 			}
 			File f = new File(output);
 			if (!f.exists())
@@ -281,7 +284,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 			try (FileWriter file = new FileWriter(absoluteFileName)) {
 
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
+				Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();//
 				JsonParser jp = new JsonParser();
 				JsonElement je = jp.parse(ob.toJSONString());
 				String prettyJsonString = gson.toJson(je);
@@ -753,7 +756,9 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 			}
 		}
-		line += "\nvalidation=" + solutionVariant.getValidationResult().toString();
+		if (solutionVariant.getValidationResult() != null) {
+			line += "\nvalidation=" + solutionVariant.getValidationResult().toString();
+		}
 		if (solutionVariant.getPatchDiff() != null) {
 			String diffPatch = solutionVariant.getPatchDiff().getFormattedDiff();
 			line += "\ndiffpatch=" + diffPatch;
@@ -859,12 +864,12 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		}
 
 		double fitness = this.fitnessFunction.calculateFitnessValue(validationResult);
-		if (ReadFileUtil.failingActualSize != (int) fitness) {
+		if (FileTools.failingActualSize != (int) fitness) {
 			log.error("The Original Running of test case does not match the groundtruth file, failed " +
-					(int)fitness + "but actually " + ReadFileUtil.failingActualSize);
+					(int)fitness + "but actually " + FileTools.failingActualSize);
 			Logger failingLog = LogManager.getLogger("FailingLog");
-			failingLog.error(ReadFileUtil.proj + "_" + ReadFileUtil.version + ": The Original Running of test case does not match the groundtruth file, failed "
-					+ (int)fitness + "but actually " + ReadFileUtil.failingActualSize);
+			failingLog.error(FileTools.proj + "_" + FileTools.version + ": The Original Running of test case does not match the groundtruth file, failed "
+					+ (int)fitness + "but actually " + FileTools.failingActualSize);
 		}
 		originalVariant.setFitness(fitness);
 
@@ -1351,10 +1356,10 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 				TimeUtil.getDateDiff(dateInitEvolution, solutionVariant.getBornDate(), TimeUnit.SECONDS));
 		patch_i.addStat(PatchStatEnum.VARIANT_ID, solutionVariant.getId());
 
-		patch_i.addStat(PatchStatEnum.VALIDATION, solutionVariant.getValidationResult().toString());
+		patch_i.addStat(PatchStatEnum.VALIDATION, solutionVariant.getValidationResult() == null ? "null" : solutionVariant.getValidationResult().toString());
 
-		patch_i.addStat(PatchStatEnum.PATCH_DIFF_ORIG,
-				solutionVariant.getPatchDiff().getOriginalStatementAlignmentDiff());
+		patch_i.addStat(PatchStatEnum.PATCH_DIFF_FORMAT,
+				solutionVariant.getPatchDiff() == null ? "null" : solutionVariant.getPatchDiff().getOriginalStatementAlignmentDiff());
 
 //		patch_i.addStat(PatchStatEnum.FOLDER_SOLUTION_CODE,
 //				projectFacade.getInDirWithPrefix(solutionVariant.currentMutatorIdentifier()));

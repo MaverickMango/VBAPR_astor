@@ -9,25 +9,32 @@ import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor;
 import fr.inria.astor.core.manipulation.filters.SingleStatementFixSpaceProcessor;
 import fr.inria.astor.core.manipulation.filters.TargetElementProcessor;
+import fr.inria.astor.core.output.ReportResults;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.navigation.ForceOrderSuspiciousNavitation;
 import fr.inria.astor.core.solutionsearch.population.ProgramVariantFactory;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.SimpleRandomSelectionIngredientStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.solutionsearch.spaces.operators.IngredientBasedOperator;
 import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.util.EditDistanceWithTokens;
 import fr.inria.astor.util.PatchDiffCalculator;
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import fr.inria.astor.util.StringUtil;
+import fr.inria.main.AstorOutputStatus;
 import fr.inria.main.evolution.ExtensionPoints;
+import org.apache.commons.io.FileUtils;
+import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtElement;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 public class VBAPR  extends JGenProg {
@@ -37,42 +44,67 @@ public class VBAPR  extends JGenProg {
 
     public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
-        ReadFileUtil.getGTs(ReadFileUtil.getInfos());
-        ReadFileUtil.setGTElements();
-        log.error("vbapr error log");
+        FileTools.getGTs(FileTools.getInfos());
+        FileTools.setGTElements();
+//        log.error("vbapr error log");
+    }
+
+    boolean isOpInstanceUsed(ModificationPoint modifPoint, AstorOperator astorOperator, CtElement modified) {
+        boolean flag = false;
+        if (this.ingredientSearchStrategy instanceof SimpleRandomSelectionIngredientStrategy) {
+            String key = ((SimpleRandomSelectionIngredientStrategy) this.ingredientSearchStrategy).getKey(modifPoint, astorOperator);
+            String value = astorOperator.name();
+            if (astorOperator.needIngredient()) {
+                value = modified.toString();
+            }
+            if (!((SimpleRandomSelectionIngredientStrategy) this.ingredientSearchStrategy).cache.containsKey(key)) {
+                ((SimpleRandomSelectionIngredientStrategy) this.ingredientSearchStrategy).cache.put(key, new ArrayList<>());
+            } else if (((SimpleRandomSelectionIngredientStrategy) this.ingredientSearchStrategy).cache.get(key).contains(value)){
+                flag = true;
+            }
+            ((SimpleRandomSelectionIngredientStrategy) this.ingredientSearchStrategy).cache.get(key).add(value);
+        }
+        return flag;
     }
 
     @Override
     public OperatorInstance createOperatorInstanceForPoint(ModificationPoint modificationPoint) throws IllegalAccessException {
 
         SuspiciousModificationPoint suspModificationPoint = (SuspiciousModificationPoint) modificationPoint;
-        AstorOperator operatorSelected = operatorSelectionStrategy.getNextOperator(suspModificationPoint);
-
-        if (operatorSelected == null) {
-            log.debug("Operation Null");
-            return null;
-        }
-
+        AstorOperator operatorSelected = null;
         List<OperatorInstance> operatorInstances = null;
-        if (operatorSelected.canBeAppliedToPoint(modificationPoint)) {
-            if (operatorSelected.needIngredient()) {
-                IngredientBasedOperator ingbasedapproach = (IngredientBasedOperator) operatorSelected;
+        for (int i = 0; i < operatorSpace.size(); i ++) {
+            operatorSelected = operatorSelectionStrategy.getNextOperator(suspModificationPoint);
+            if (operatorSelected == null)
+                continue;
+            if (operatorSelected.canBeAppliedToPoint(modificationPoint)) {
+                if (!operatorSelected.needIngredient()) {
+                    if (isOpInstanceUsed(modificationPoint, operatorSelected, null))
+                        continue;
+                    operatorInstances = operatorSelected.createOperatorInstances(modificationPoint);
+                } else {
+                    IngredientBasedOperator ingbasedapproach = (IngredientBasedOperator) operatorSelected;
 
-                Ingredient ingredient = this.ingredientSearchStrategy.getFixIngredient(modificationPoint,
-                        operatorSelected);
+                    Ingredient ingredient = this.ingredientSearchStrategy.getFixIngredient(modificationPoint,
+                            operatorSelected);
+                    if (ingredient == null)
+                        continue;
 
-                if (ingredient == null) {
-                    return null;
+                    List<OperatorInstance> instances = ingbasedapproach.createOperatorInstances(modificationPoint, ingredient,
+                            this.ingredientTransformationStrategy);
+                    operatorInstances = new ArrayList<>();
+                    for (OperatorInstance op : instances) {
+                        if (!isOpInstanceUsed(modificationPoint, operatorSelected, op.getModified()))
+                            operatorInstances.add(op);
+                    }
                 }
-                operatorInstances = ingbasedapproach.createOperatorInstances(modificationPoint, ingredient,
-                        this.ingredientTransformationStrategy);
-
-            } else {
-                operatorInstances = operatorSelected.createOperatorInstances(modificationPoint);
+                if (operatorInstances != null && !operatorInstances.isEmpty())
+                    break;
             }
-
+        }
+        if (operatorInstances != null && !operatorInstances.isEmpty())
             return selectRandomly(operatorInstances);
-        }else {
+        else {
             log.debug("Operation Null");
             return null;
         }
@@ -174,45 +206,53 @@ public class VBAPR  extends JGenProg {
             }
             this.saveModifVariant(newVariant);//
 
-            boolean solution = false;
+            if (!ConfigurationProperties.getPropertyBool("skipvalidation")){
+                boolean solution = false;
 
-            if (ConfigurationProperties.getPropertyBool("antipattern")) {
-                if (!AntiPattern.isAntiPattern(newVariant, generation)) {
-                    temporalInstances.add(newVariant);
+                if (ConfigurationProperties.getPropertyBool("antipattern")) {
+                    if (!AntiPattern.isAntiPattern(newVariant, generation)) {
+                        temporalInstances.add(newVariant);
+                        solution = processCreatedVariant(newVariant, generation);
+                    }
+                } else {
                     solution = processCreatedVariant(newVariant, generation);
+                    temporalInstances.add(newVariant);
+                    if (newVariant.getFitness() == Double.MAX_VALUE) {
+                        detailLog.debug("variant can not compile or an error happened in testing process(such as do not terminate within wait time or out of memory");
+                    }
+                }
+
+                HashMap<String, List<String>> affectedMap = null;
+                if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
+//                setSimilarityForPV(newVariant);//ForPV
+                    affectedMap = newVariant.computeAffectedStringOfClassesAndBlocks(false);
+                }
+
+                if (solution) {
+                    foundSolution = true;
+                    newVariant.setBornDate(new Date());
+                    saveVariant(newVariant);
+                }
+                foundOneVariant = true;
+                // Finally, reverse the changes done by the child
+                reverseOperationInModel(newVariant, generation);
+                boolean validation = this.validateReversedOriginalVariant(newVariant);
+                assert validation;
+
+                if (affectedMap != null) {
+                    setSimilarityForSnippets(newVariant, affectedMap);
+                    fitASim.info(newVariant.getFitness() + "," + newVariant.getSimilarity());
+                }
+
+                if (solution) {
+                    this.savePatch(newVariant);
                 }
             } else {
-                solution = processCreatedVariant(newVariant, generation);
                 temporalInstances.add(newVariant);
-                if (newVariant.getFitness() == Double.MAX_VALUE) {
-                    detailLog.debug("variant can not compile or an error happened in testing process(such as do not terminate within wait time or out of memory");
-                }
-            }
-
-            HashMap<String, List<String>> affectedMap = null;
-            if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
-//                setSimilarityForPV(newVariant);//ForPV
-                affectedMap = newVariant.computeAffectedStringOfClassesAndBlocks(false);
-            }
-
-            if (solution) {
-                foundSolution = true;
-                newVariant.setBornDate(new Date());
-				saveVariant(newVariant);
-            }
-            foundOneVariant = true;
-            // Finally, reverse the changes done by the child
-            reverseOperationInModel(newVariant, generation);
-            boolean validation = this.validateReversedOriginalVariant(newVariant);
-            assert validation;
-
-            if (affectedMap != null) {
-                setSimilarityForSnippets(newVariant, affectedMap);
-                fitASim.info(newVariant.getFitness() + "," + newVariant.getSimilarity());
-            }
-
-            if (solution) {
-                this.savePatch(newVariant);
+                saveVariant(newVariant);
+                reverseOperationInModel(newVariant, generation);
+                boolean validation = this.validateReversedOriginalVariant(newVariant);
+                assert validation;
             }
 
             if (foundSolution && ConfigurationProperties.getPropertyBool("stopfirst")) {
@@ -534,7 +574,9 @@ public class VBAPR  extends JGenProg {
     }
 
     private void updatePVAfterCrossover(ProgramVariant variant) {
-        setFitnessForVariant(variant);
+        if (!ConfigurationProperties.getPropertyBool("skipvalidation")) {
+            setFitnessForVariant(variant);
+        }
 //        variant.setModificationPoints(originalVariant.getModificationPoints());
 //        for (Integer gen : variant.getOperations().keySet()) {
 //            updateVariantGenList(variant, gen);
@@ -611,27 +653,28 @@ public class VBAPR  extends JGenProg {
         final boolean codeFormated = true;
         savePatchDiff(programVariant, !codeFormated);
         savePatchDiff(programVariant, codeFormated);
-        computePatchDiff(new PatchDiffCalculator(), programVariant, solutions_f);
+        computePatchDiff(new PatchDiffCalculator(), this.solutions.indexOf(programVariant), solutions_f);
     }
 
-    private void computePatchDiff(PatchDiffCalculator cdiff, ProgramVariant solutionVariant,
+    private void computePatchDiff(PatchDiffCalculator cdiff, int idx,
                                   List<String> solutions_f) throws Exception {
+        ProgramVariant solutionVariant = this.solutions.get(idx);
 
         if (solutionVariant.getPatchDiff() != null) {
             return;
         }
 
         PatchDiff pdiff = new PatchDiff();
-        boolean format = true;
+        boolean format = false;
 
-        String diffPatchFormated = cdiff.getDiff(getProjectFacade(), this.originalVariant, solutionVariant,
+        String diffPatchFormated = cdiff.getDiff(getProjectFacade(), this.solutions, idx,
                 this.mutatorSupporter, format, solutions_f);
 
         pdiff.setFormattedDiff(diffPatchFormated);
 
-        format = false;
+        format = true;
 
-        String diffPatchOriginalAlign = cdiff.getDiff(getProjectFacade(), this.originalVariant, solutionVariant,
+        String diffPatchOriginalAlign = cdiff.getDiff(getProjectFacade(), this.solutions, idx,
                 this.mutatorSupporter, format, solutions_f);
 
         pdiff.setOriginalStatementAlignmentDiff(diffPatchOriginalAlign);
@@ -639,4 +682,97 @@ public class VBAPR  extends JGenProg {
         solutionVariant.setPatchDiff(pdiff);
     }
 
+    @Override
+    public void atEnd() {
+        Logger infolog = LogManager.getLogger("InfoLog");
+        long engineStartT = dateEngineCreation.getTime();
+        long startT = dateInitEvolution.getTime();
+        long endT = System.currentTimeMillis();
+        infolog.info("Time Engine Creation(s): " + (startT - engineStartT) / 1000d);
+        currentStat.getGeneralStats().put(Stats.GeneralStatEnum.ENGINE_CREATION_TIME, (startT - engineStartT) / 1000d);
+        infolog.info("Time Repair Loop (s): " + (endT - startT) / 1000d);
+        currentStat.getGeneralStats().put(Stats.GeneralStatEnum.TOTAL_TIME, ((endT - startT)) / 1000d);
+        infolog.info("generationsexecuted: " + this.generationsExecuted);
+
+        currentStat.getGeneralStats().put(Stats.GeneralStatEnum.OUTPUT_STATUS, this.getOutputStatus());
+//		currentStat.getGeneralStats().put(GeneralStatEnum.EXECUTION_IDENTIFIER,
+//				ConfigurationProperties.getProperty("projectIdentifier"));
+        //
+        if (!ConfigurationProperties.getPropertyBool("skipfaultlocalization"))
+            currentStat.getGeneralStats().put(Stats.GeneralStatEnum.FAULT_LOCALIZATION,
+                    ConfigurationProperties.getProperty("faultlocalization").toString());
+
+        this.printFinalStatus();
+
+
+        boolean flag = true;
+        List<ProgramVariant> outputs = new ArrayList<>();
+        if (!ConfigurationProperties.getPropertyBool("skipvalidation")) {
+            flag = this.solutions.size() > 0;
+            outputs = this.solutions;
+            this.sortPatches();
+        } else {
+            outputs = this.solutions;
+//			try {
+//
+//				this.computePatchDiff(outputs);
+//
+//			} catch (Exception e) {
+//				log.error("Problem at computing diff" + e);
+//			}
+        }
+        if (flag) {
+            infolog.info(this.getSolutionData(outputs, this.generationsExecuted) + "\n");
+            patchInfo = createStatsForPatches(outputs, generationsExecuted, dateInitEvolution);
+        } else {
+            patchInfo = new ArrayList<>();
+        }
+        // Reporting results
+        String output = this.projectFacade.getProperties().getWorkingDirRoot();
+        if (ConfigurationProperties.getPropertyBool("removeworkingfolder")) {
+            String[] deldirs = new String[2];
+            deldirs[0] = output + File.separator + "bin";
+            deldirs[1] = output + File.separator + "src" + File.separator + ProgramVariant.DEFAULT_ORIGINAL_VARIANT;
+            for (String deldir: deldirs) {
+                File fout = new File(deldir);
+                try {
+                    FileUtils.deleteDirectory(fout);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    log.error(e);
+                }
+            }
+        }
+        for (ReportResults out : this.getOutputResults()) {
+            out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
+        }
+        try {
+            List<SuspiciousCode> susp = new ArrayList<>();
+            for (ModificationPoint mpi : originalVariant.getModificationPoints()) {
+                SuspiciousModificationPoint smpi = (SuspiciousModificationPoint) mpi;
+                if (!susp.contains(smpi.getSuspicious())) {
+                    susp.add(smpi.getSuspicious());
+                    String noout = (ConfigurationProperties.hasProperty("outfl")
+                            ? ConfigurationProperties.getProperty("outfl")
+                            : output);
+                    File f = (new File(noout));
+                    if (!f.exists()) {
+                        f.mkdirs();
+                    }
+
+                    FileWriter fw = new FileWriter(noout + File.separator + "suspicious_"
+                            + this.projectFacade.getProperties().getFixid() + ".json");
+                    for (SuspiciousCode suspiciousCode : susp) {
+                        fw.append(suspiciousCode.getClassName() + "," + suspiciousCode.getLineNumber() + ","
+                                + suspiciousCode.getSuspiciousValueString());
+                        fw.append("\n");
+                    }
+                    fw.flush();
+                    fw.close();
+                }
+            }
+        } catch (Exception e1) {
+            e1.printStackTrace();
+        }
+    }
 }

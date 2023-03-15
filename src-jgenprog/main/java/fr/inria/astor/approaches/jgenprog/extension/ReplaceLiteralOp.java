@@ -15,7 +15,7 @@ public class ReplaceLiteralOp extends ReplaceOp {
     }
 
     @Override
-    public boolean applyChangesInModel(OperatorInstance operation, ProgramVariant p) {//todo
+    public boolean applyChangesInModel(OperatorInstance operation, ProgramVariant p) {
         StatementOperatorInstance stmtoperator = (StatementOperatorInstance) operation;
         boolean successful = false;
         CtLiteralImpl ctst = (CtLiteralImpl) operation.getOriginal();

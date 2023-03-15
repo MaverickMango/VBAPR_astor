@@ -338,7 +338,7 @@ public class VariableResolver {
 			return false;
 		List<CtVariableAccess> notmapped = checkMapping(matched);
 
-		if (ConfigurationProperties.getPropertyBool("usevariableedit")) {
+		if (ConfigurationProperties.getPropertyBool("useVariableEdit")) {
 			_notmapped = notmapped;
 		}
 

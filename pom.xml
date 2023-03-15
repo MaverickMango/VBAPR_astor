@@ -44,7 +44,6 @@
 	</properties>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>com.github.spoonlabs</groupId>
 			<artifactId>flacoco</artifactId>

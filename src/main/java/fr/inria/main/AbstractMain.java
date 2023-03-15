@@ -297,6 +297,10 @@ public abstract class AbstractMain {
 		options.addOption("antipattern", true,
 				"(Optional) Indicates whether to apply anti-patterns when running jGenProg2 (default: false)");
 
+		options.addOption("useVariableEdit", true, "whether use Variable in fault localization to exchange the ingredients");
+
+		options.addOption("useGTsizeAsPopSize", true, "whether use the groundtruth size as the initial population size.");
+
 	}
 
 	public abstract void run(String location, String projectName, String dependencies, String packageToInstrument,
@@ -460,8 +464,8 @@ public abstract class AbstractMain {
 		if (cmd.hasOption("deleteParentMP"))
 			ConfigurationProperties.properties.setProperty("deleteParentMP", cmd.getOptionValue("deleteParentMP"));
 
-		if (cmd.hasOption("usevariableedit"))
-			ConfigurationProperties.properties.setProperty("usevariableedit", cmd.getOptionValue("usevariableedit"));
+		if (cmd.hasOption("useVariableEdit"))
+			ConfigurationProperties.properties.setProperty("useVariableEdit", cmd.getOptionValue("useVariableEdit"));
 
 		if (cmd.hasOption("addnewModificationpoints"))
 			ConfigurationProperties.properties.setProperty("addnewModificationpoints", cmd.getOptionValue("addnewModificationpoints"));

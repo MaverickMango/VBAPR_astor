@@ -17,7 +17,7 @@ import spoon.support.QueueProcessingManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BinaryExpressionMutOp extends ExpresionMutOp {
+public class BinaryExpressionMutOp extends ExpressionMutOp {
     @Override
     protected OperatorInstance createModificationInstance(ModificationPoint point, MutantCtElement fix) throws IllegalAccessException {
         CtElement element = point.getCodeElement();
@@ -42,13 +42,14 @@ public class BinaryExpressionMutOp extends ExpresionMutOp {
      */
     @Override
     public List<MutantCtElement> getMutants(CtElement element) {
-        List<CtBinaryOperator> list1 = element.getElements(new TypeFilter<>(CtBinaryOperator.class));
-        List<CtUnaryOperator> list2 = element.getElements(new TypeFilter<>(CtUnaryOperator.class));
         List<MutantCtElement> mutations = null;
-        if (list1.size() > 0)
-            mutations = this.mutatorBinary.execute(list1.get(0));
-        else if (list2.size() > 0)
-            mutations = this.mutatorBinary.execute(list2.get(0));
+        mutations = this.mutatorBinary.execute(element);
+//        List<CtBinaryOperator> list1 = element.getElements(new TypeFilter<>(CtBinaryOperator.class));
+//        List<CtUnaryOperator> list2 = element.getElements(new TypeFilter<>(CtUnaryOperator.class));
+//        if (list1.size() > 0)
+//            mutations = this.mutatorBinary.execute(list1.get(0));
+//        else if (list2.size() > 0)
+//            mutations = this.mutatorBinary.execute(list2.get(0));
         return mutations;
     }
 
@@ -64,8 +65,10 @@ public class BinaryExpressionMutOp extends ExpresionMutOp {
      */
     @Override
     public boolean canBeAppliedToPoint(ModificationPoint point) {
-        boolean flag = (point.getCodeElement().getElements(new TypeFilter(CtBinaryOperator.class)).size() > 0
-                || point.getCodeElement().getElements(new TypeFilter(CtUnaryOperator.class)).size() > 0);
+        //due to the modificationpoint selection strategy selects all elements of different levels, here is a redundancy to filter all sub-elements of itself.
+//        boolean flag = (point.getCodeElement().getElements(new TypeFilter(CtBinaryOperator.class)).size() > 0
+//                || point.getCodeElement().getElements(new TypeFilter(CtUnaryOperator.class)).size() > 0);
+        boolean flag = point.getCodeElement() instanceof CtBinaryOperator || point.getCodeElement() instanceof CtUnaryOperator;
         return flag;
     }
 }

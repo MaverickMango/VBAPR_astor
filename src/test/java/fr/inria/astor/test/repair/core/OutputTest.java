@@ -10,6 +10,8 @@ import java.io.FileReader;
 import java.util.Arrays;
 import java.util.List;
 
+import fr.inria.main.evolution.VBAPRMain;
+import fr.inria.main.test.TestArgsUtil;
 import org.apache.log4j.Level;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -39,7 +41,7 @@ import fr.inria.main.evolution.AstorMain;
  * @author Matias Martinez
  *
  */
-public class OutputTest {
+public class   OutputTest {
 
 	/**
 	 * Math 70 bug can be fixed by replacing a method invocation inside a return

@@ -5,6 +5,9 @@ import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.solutionsearch.extension.AstorExtensionPoint;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Abstract class that represent a strategy to pick an ingredient from the
  * search space. Astor interacts using this interface for demanding ingredients.
@@ -41,6 +44,12 @@ public abstract class IngredientSearchStrategy implements  AstorExtensionPoint {
 
 	public IngredientPool getIngredientSpace() {
 		return ingredientSpace;
+	}
+
+	public List<Ingredient> getFixIngredients(ModificationPoint modificationPoint, AstorOperator operationType) {
+		List<Ingredient> fixIngredients =  new ArrayList<>();
+		fixIngredients.add(this.getFixIngredient(modificationPoint, operationType));
+		return fixIngredients;
 	}
 
 }

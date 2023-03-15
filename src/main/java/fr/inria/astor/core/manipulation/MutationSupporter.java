@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import org.apache.log4j.Logger;
 
 import fr.inria.astor.core.entities.OperatorInstance;
@@ -262,8 +262,8 @@ public class MutationSupporter {
 				logger.error("Error compiling: " + e2.getMessage());
 					BufferedOutputStream buff =null;
 					try {
-						String content = ReadFileUtil.proj + "_" + ReadFileUtil.version + "\n";
-						buff = new BufferedOutputStream(new FileOutputStream(ReadFileUtil.buildError, true));
+						String content = FileTools.proj + "_" + FileTools.version + "\n";
+						buff = new BufferedOutputStream(new FileOutputStream(FileTools.buildError, true));
 						buff.write(content.getBytes(StandardCharsets.UTF_8));
 						buff.flush();
 						buff.close();

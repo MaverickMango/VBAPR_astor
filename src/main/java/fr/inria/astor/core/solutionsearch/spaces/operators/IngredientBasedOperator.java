@@ -11,7 +11,9 @@ import fr.inria.astor.core.entities.OperatorInstance;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientSearchStrategy;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.IngredientTransformationStrategy;
+import fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.NoIngredientTransformationWithCheck;
 import org.apache.log4j.LogManager;
 import org.codehaus.plexus.logging.LoggerManager;
 import spoon.reflect.code.CtLiteral;
@@ -75,7 +77,7 @@ public abstract class IngredientBasedOperator extends AstorOperator {
 			}
 			opInstance.setModified(modifed);
 			opInstance.setIngredient(ingredient);
-			operatorIntances.add(opInstance);//todo
+			operatorIntances.add(opInstance);
 		}
 		return operatorIntances;
 	}

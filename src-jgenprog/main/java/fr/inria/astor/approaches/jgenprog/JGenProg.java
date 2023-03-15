@@ -15,7 +15,7 @@ import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.setup.RandomManager;
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import fr.inria.main.evolution.ExtensionPoints;
 import spoon.processing.ProcessingManager;
 import spoon.reflect.code.CtStatement;
@@ -35,7 +35,7 @@ public class JGenProg extends IngredientBasedEvolutionaryRepairApproachImpl {
 
 	public JGenProg(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException {
 		super(mutatorExecutor, projFacade);
-		ReadFileUtil.getInfos();
+		FileTools.getInfos();
 		setPropertyIfNotDefined(ExtensionPoints.OPERATORS_SPACE.identifier, "irr-statements");
 		setPropertyIfNotDefined(ExtensionPoints.TARGET_CODE_PROCESSOR.identifier, "statements");
 	}
@@ -43,7 +43,7 @@ public class JGenProg extends IngredientBasedEvolutionaryRepairApproachImpl {
 	@Override
 	public void filterSolutions() {
 		super.filterSolutions();
-		String[] info = ReadFileUtil.getInfos();
+		String[] info = FileTools.getInfos();
 //		List<GroundTruth> gts = ReadFileUtil.getGTs(info[0], Integer.parseInt(info[1]));
 //		List<ProgramVariant> filteredSolutions = new ArrayList<>();
 		List<Integer> filteredSolutions = new ArrayList<>();
@@ -73,20 +73,20 @@ public class JGenProg extends IngredientBasedEvolutionaryRepairApproachImpl {
 									continue;
 								}
 								//
-								filtered = ReadFileUtil.considerVariableReference(location, original, this.mutatorSupporter.getFactory());
+								filtered = FileTools.considerVariableReference(location, original, this.mutatorSupporter.getFactory());
 							}
 							continue;
 						}
 						if (!original.getClass().getSimpleName().equals("CtAssignmentImpl"))
 							continue;
 						//
-						filtered = ReadFileUtil.considerVariableReference(location, original, this.mutatorSupporter.getFactory());
+						filtered = FileTools.considerVariableReference(location, original, this.mutatorSupporter.getFactory());
 					}
 					if (op.equals("InsertStatementOp")) {
 						if (genOperationInstance.getModified() != null) {
 							CtElement modified = genOperationInstance.getModified();
 							//
-							filtered = ReadFileUtil.considerVariableReference(location, modified, this.mutatorSupporter.getFactory());
+							filtered = FileTools.considerVariableReference(location, modified, this.mutatorSupporter.getFactory());
 						}
 					}
 					if (op.equals("ReplaceOp")) {
@@ -103,7 +103,7 @@ public class JGenProg extends IngredientBasedEvolutionaryRepairApproachImpl {
 							processingManager.process(modified);
 							modiVars = new HashSet<>(localVariableProcessor.varList);
 							modiVars.addAll(referenceProcessor.varList);
-							filtered = ReadFileUtil.filtered(oriVars, modiVars);
+							filtered = FileTools.filtered(oriVars, modiVars);
 						}
 					}
 				}
@@ -124,7 +124,7 @@ public class JGenProg extends IngredientBasedEvolutionaryRepairApproachImpl {
 		}
 		stringBuilder.append("\n");
 		try {
-			ReadFileUtil.outputFiltered(stringBuilder.toString());
+			FileTools.outputFiltered(stringBuilder.toString());
 		} catch (IOException e) {
 			System.out.println(stringBuilder.toString());
 		}

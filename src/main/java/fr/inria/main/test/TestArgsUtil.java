@@ -1,6 +1,6 @@
 package fr.inria.main.test;
 
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import fr.inria.main.CommandSummary;
 
 import java.io.File;
@@ -10,8 +10,9 @@ import java.util.List;
 public class TestArgsUtil {
 
     private CommandSummary cs = null;
-    public static final String baseDir = "/home/liu/Desktop/groundtruth/";//util files
-    public static final String outputSrc = "/home/liu/Desktop/VBAPRResult/";//working dir
+    public static final String root = "/home/liumengjiao/Desktop/";
+    public static final String baseDir = root + "vbaprinfo/d4j_bug_info/";//util files
+    public static final String outputSrc = root + "VBAPRResult/";//working dir
     private String srcPathDir = baseDir + "src_path/";//...proj/version.txt
     private String ftsDir = baseDir + "failed_tests/";//...proj/version.txt
     private String locationDir = outputSrc + "Defects4jProjs/";//proj_version/  //must be absolute path
@@ -22,6 +23,8 @@ public class TestArgsUtil {
         cs.command.put("-maxgen", "500");
 //        cs.command.put("-scope", "file");
         cs.command.put("-skipfaultlocalization", "true");
+        cs.command.put("-useGTsizeAsPopSize", "true");
+        cs.command.put("-useVariableEdit", "true");
 //        cs.command.put("-stopfirst", "true");
         cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");
 //        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
@@ -46,10 +49,12 @@ public class TestArgsUtil {
             stringBuilder.append(args.get(i)).append(":");
         }
         cs.command.put("-failing", stringBuilder.toString().substring(0, stringBuilder.length() - 1));
-        cs.command.put("-out", ReadFileUtil.outputSrc + proj + "/");
+        cs.command.put("-out", FileTools.outputSrc + proj + "/");
         String[] compilanceLevel = getCompilanceLevel(proj);
         cs.command.put("-javacompliancelevel", compilanceLevel[0]);
         cs.command.put("-alternativecompliancelevel", compilanceLevel[1]);
+
+        System.setProperty("log.base", FileTools.outputSrc + proj + "/log/" + version + "/");
         return cs.flat();
     }
 
@@ -103,7 +108,7 @@ public class TestArgsUtil {
 
     private List<String> readArgs(String proj, String verison) {
         List<String> args = new ArrayList<>();
-        List<String> list = ReadFileUtil.readFileByLineToList(srcPathDir + proj.toLowerCase() + "/" + verison + ".txt");
+        List<String> list = FileTools.readFileByLineToList(srcPathDir + proj.toLowerCase() + "/" + verison + ".txt");
         assert list.size() == 4;
         args.add("/" + list.get(0) + "/");
         args.add("/" + list.get(1) + "/");
@@ -115,9 +120,9 @@ public class TestArgsUtil {
             args.add(projPath + "target/dependency/");
         else
             args.add(projPath + "/lib/");
-        list = ReadFileUtil.readFileByLineToList(ftsDir + proj.toLowerCase() + "/" + verison + ".txt");
+        list = FileTools.readFileByLineToList(ftsDir + proj.toLowerCase() + "/" + verison + ".txt");
         assert list.size() >= 1;
-        ReadFileUtil.failingActualSize = list.size();
+        FileTools.failingActualSize = list.size();
         for (String str :list) {
             str = str.substring(0, str.indexOf("::"));
             if (!args.contains(str))

@@ -1,37 +1,26 @@
 package fr.inria.main.test;
 
-import fr.inria.astor.approaches.jgenprog.extension.VBAPR;
 import fr.inria.astor.core.entities.ProgramVariant;
-import fr.inria.astor.core.manipulation.MutationSupporter;
-import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.solutionsearch.AstorCoreEngine;
-import fr.inria.astor.core.solutionsearch.EvolutionarySearchEngine;
-import fr.inria.astor.util.ReadFileUtil;
+import fr.inria.astor.util.FileTools;
 import fr.inria.main.evolution.VBAPRMain;
-import org.apache.log4j.Appender;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import spoon.support.StandardEnvironment;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class ParameterizedTest{
-
-    public static Logger log = Logger.getLogger(Thread.currentThread().getName());
+//    static {
+//        System.setProperty("log.base", "./log");
+//    }
+//    public static Logger log = Logger.getLogger(Thread.currentThread().getName());
     static VBAPRMain main;
     static TestArgsUtil argsUtil;
     static String fileName = "";
@@ -45,27 +34,37 @@ public class ParameterizedTest{
 
     @Parameterized.Parameters
     public static Collection<String[]> data() {
-        String[][] data = {
-                {"Math" , "5"}
-        };
-        return Arrays.asList(data);
+//        String[][] data = {
+//                {"Math" , "11"}
+//        };
+//        return Arrays.asList(data);
 
-//        String fileName = ReadFileUtil.outputSrc + "part2.txt";
-
+//        String fileName = FileTools.baseDir + "../" + "bugs4.txt";
 //        return readPVInfos(fileName);
+
+        List<String> mapping = FileTools.readFileByLineToList(FileTools.mapping);
+        List<String> success = Arrays.asList(FileTools.readFileByLines(FileTools.outputSrc + "/success_bugs").split(","));
+        List<String[]> proj_ids = new ArrayList<>();
+        for (String map :mapping) {
+            String[] temp = map.split(",");
+            if (success.contains(temp[0]))//successful bugs condition: success.contains(temp[0])；failed bugs condition: !success.contains(temp[0])
+                proj_ids.add(new String[]{temp[1],temp[2]});
+        }
+        return proj_ids;
     }
 
     @BeforeClass
     public static void setUpBeforeClass() {
-        main = new VBAPRMain();
         argsUtil = new TestArgsUtil();
     }
 
-    @Test
+    @Test(timeout = 10800000)
     public void testSoulutionFound() throws Exception {
-        main.execute(argsUtil.getArgs(proj, version));
+        String[] args = argsUtil.getArgs(proj, version);
+        main = new VBAPRMain();
+        main.execute(args);
         AstorCoreEngine engine = main.getEngine();
-        List<ProgramVariant> solutions = engine.getSolutions();
+        List<ProgramVariant> solutions = engine.getVariants();
         assertEquals(true, solutions.size() > 0);
     }
 
@@ -155,7 +154,7 @@ public class ParameterizedTest{
                     stringBuilder.append("\n");
                 }
             }
-            writeInfo(stringBuilder.toString(), ReadFileUtil.mapping);
+            writeInfo(stringBuilder.toString(), FileTools.mapping);
             reader.close();
         } catch (IOException var13) {
             var13.printStackTrace();

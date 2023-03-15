@@ -15,28 +15,27 @@ import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
 import fr.inria.astor.core.solutionsearch.spaces.operators.AstorOperator;
 import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.util.MapList;
-import fr.inria.astor.util.ReadFileUtil;
 import fr.inria.astor.util.StringUtil;
 import org.apache.log4j.Logger;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.*;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.support.reflect.code.CtBlockImpl;
 import spoon.support.reflect.code.CtBreakImpl;
 import spoon.support.reflect.code.CtInvocationImpl;
 
 import java.lang.reflect.Constructor;
 import java.util.*;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionIngredientStrategy {
 
     private static final Boolean DESACTIVATE_CACHE = ConfigurationProperties
             .getPropertyBool("desactivateingredientcache");
     protected Logger log = Logger.getLogger(this.getClass().getName());
+
+    MapList<String, Ingredient> baseIngredientsCache = new MapList<>();
 
     public GTBSelectionIngredientSearchStrategy(IngredientPool space) {
         super(space);
@@ -60,7 +59,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         return index;
     }
 
-    List<Ingredient> getstmts(List<Ingredient> base, AstorOperator operationType) {//context
+    List<Ingredient> getstmts(List<Ingredient> base, AstorOperator operationType) {
         if (base == null || base.isEmpty()) {
             return null;
         }
@@ -74,17 +73,18 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             }
             if (operationType instanceof InsertBeforeOp && in.getCode() instanceof CtReturn)//
                 continue;
-            if (in.getCode().getParent() instanceof CtBlock && ( (in.getCode() instanceof CtInvocation)
+            if (in.getCode().getParent() instanceof CtBlockImpl && ( (in.getCode() instanceof CtInvocation)
                     || (in.getCode() instanceof CtAssignment) || (in.getCode() instanceof CtOperatorAssignment)
                     || (in.getCode() instanceof CtIf) || (in.getCode() instanceof CtReturn)
                     || (in.getCode() instanceof CtBreak)) ) {
+                in.setDerivedFrom(in.getCode().getParent());
                 stmts.add(in);
             }
         }
         return stmts;
     }
 
-    List<Ingredient> getExpIngredients(List<Ingredient> base, ModificationPoint point) throws Exception {
+    List<Ingredient> getExpIngredientsSameType(List<Ingredient> base, ModificationPoint point) throws Exception {
         if (base == null || base.isEmpty()) {
             return null;
         }
@@ -95,7 +95,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             return exps;
         }
         for (Ingredient in :base) {
-            if (in.getChacheCodeString().equals(point.getCodeElement().toString().replaceAll("\n","")))
+            if (in.getChacheCodeString().equals(point.getCodeElement().toString().replaceAll("\\s+"," ")))
                 continue;
             if ((in.getCode() instanceof CtStatement && !(in.getCode() instanceof CtExpression) )|| in.getCode() instanceof CtAssignment) {//discard super&this mthcall
                 continue;
@@ -103,12 +103,14 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             if (in.getCode() instanceof CtExpression && point.getCodeElement() instanceof CtExpression) {
                 CtTypeReference a = ((CtExpression) in.getCode()).getType();
                 CtTypeReference b = ((CtExpression) point.getCodeElement()).getType();
-                if (a.equals(b) || (a.isPrimitive() && b.isPrimitive())) {
+                if (a.equals(b) || isCompatiblePrimitive((CtTypedElement) in.getCode(), (CtTypedElement) point.getCodeElement())) {
+                    in.setDerivedFrom(in.getCode().getParent());
                     exps.add(in);
                 }
                 continue;
             }
             if (in.getCode().getClass().equals(point.getCodeElement().getClass())) {
+                in.setDerivedFrom(in.getCode().getParent());
                 exps.add(in);
             }
         }
@@ -134,17 +136,22 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         return CodeAddFactory.createTypeChangeInredients((CtLocalVariable) point.getCodeElement(), typeMap);
     }
 
-    List<Ingredient> limitIngredients(List<Ingredient> base, ModificationPoint point) throws Exception {
+    List<Ingredient> limitIngredientsByElementType(List<Ingredient> base, ModificationPoint point) throws Exception {
         List<Ingredient> exps = new ArrayList<>();
         CtElement parent = point.getCodeElement().getParent();
-        if (parent instanceof CtAssignment) {
-            exps.addAll(base);
+        if (point.getCodeElement() instanceof CtBreakImpl) {
+            Ingredient ingredient = new Ingredient(CodeAddFactory.createContinue());
+            ingredient.setDerivedFrom(point.getCodeElement());
+            exps.add(ingredient);
+            return exps;
         }
         if (point.getCodeElement() instanceof CtConditional) {
             CtConditional cond = (CtConditional) point.getCodeElement();
             Ingredient in = new Ingredient(CodeAddFactory.createExpression(cond.getThenExpression(), cond.getParent()));
+            in.setDerivedFrom(point.getCodeElement());
             exps.add(in);
             in = new Ingredient(CodeAddFactory.createExpression(cond.getElseExpression(), cond.getParent()));
+            in.setDerivedFrom(point.getCodeElement());
             exps.add(in);
         }
         if (point.getCodeElement() instanceof CtConstructorCall) {
@@ -161,8 +168,10 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                     Ingredient ingredient = new Ingredient(
                             CodeAddFactory.createConstructorCall(paras,
                                     contexts, (CtConstructorCall) point.getCodeElement()));
-                    if (ingredient.getCode() != null)// && !contains(exps, ingredient)
+                    if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
+                        ingredient.setDerivedFrom(point.getCodeElement());
                         exps.add(ingredient);
+                    }
                 }
             } catch (ClassNotFoundException ignored) {
 
@@ -174,44 +183,55 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             for (CtVariable context : contexts) {//target
                 if (context.getSimpleName().equals(point.getCodeElement().toString()))
                     continue;
-                if (!mpvar.getType().isPrimitive() && !mpvar.getType().equals(context.getType()))
+                if (!isCompatiblePrimitive(mpvar, context) && !mpvar.getType().equals(context.getType()))//[poi]check special type
                     continue;
                 Ingredient ingredient = new Ingredient(CodeAddFactory.createVariableRead(context));
+                ingredient.setDerivedFrom(context);
                 exps.add(ingredient);
             }
         }
-        if (point.getCodeElement() instanceof CtVariableRead && ((CtVariableRead<?>) point.getCodeElement()).getType().isPrimitive()) {//
+        if (point.getCodeElement() instanceof CtVariableRead &&
+                (((CtVariableRead<?>) point.getCodeElement()).getType().isPrimitive()
+                        && !((CtVariableRead<?>) point.getCodeElement()).getType().getSimpleName().equalsIgnoreCase("boolean"))) {
             CtTypeReference typeReference = MutationSupporter.getFactory().Core().createTypeReference();
             typeReference.setSimpleName("double");
             Ingredient ingredient = new Ingredient(CodeAddFactory.createTypeCast((CtVariableRead) point.getCodeElement(), typeReference));
+            ingredient.setDerivedFrom(point.getCodeElement());
             exps.add(ingredient);
         }
-        if (point.getCodeElement() instanceof CtUnaryOperator && ((CtUnaryOperator) point.getCodeElement()).getType().isPrimitive()) {//
+        if (point.getCodeElement() instanceof CtUnaryOperator &&
+                ((CtUnaryOperator) point.getCodeElement()).getType().isPrimitive()
+                    && ((CtUnaryOperator<?>) point.getCodeElement()).getType().getSimpleName().equalsIgnoreCase("boolean")) {//
             CtTypeReference typeReference = MutationSupporter.getFactory().Core().createTypeReference();
             typeReference.setSimpleName("double");
             Ingredient ingredient = new Ingredient(CodeAddFactory.createTypeCast((CtUnaryOperator) point.getCodeElement(), typeReference));
+            ingredient.setDerivedFrom(point.getCodeElement());
             exps.add(ingredient);
         }
         if (parent instanceof CtIf && point.getCodeElement() instanceof CtBinaryOperator
                 && (((CtBinaryOperator<?>) point.getCodeElement()).getKind().equals(BinaryOperatorKind.AND)
                     ||((CtBinaryOperator<?>) point.getCodeElement()).getKind().equals(BinaryOperatorKind.OR) )) {
             Ingredient ingredient = new Ingredient(CodeAddFactory.deleteCondition((CtBinaryOperator) point.getCodeElement()));
+            ingredient.setDerivedFrom(point.getCodeElement());
             exps.add(ingredient);
         }
         if (point.getCodeElement() instanceof CtBinaryOperator &&
                 (((CtBinaryOperator<?>) point.getCodeElement()).getLeftHandOperand() instanceof CtBinaryOperator
                     ||((CtBinaryOperator<?>) point.getCodeElement()).getRightHandOperand() instanceof CtBinaryOperator)) {
             Ingredient ingredient = new Ingredient(CodeAddFactory.createBinaryOperator((CtBinaryOperator) point.getCodeElement()));
+            ingredient.setDerivedFrom(point.getCodeElement());
             exps.add(ingredient);
         }
         if (parent instanceof CtAssignment) {
             CtTypeReference typeReference = ((CtAssignment)parent).getAssigned().getType();
             Ingredient ingredient = new Ingredient(CodeAddFactory.createTypeCast((CtExpression) point.getCodeElement(), typeReference));
+            ingredient.setDerivedFrom(typeReference);
             exps.add(ingredient);
         }
         if (parent instanceof CtReturn) {
             CtTypeReference typeReference = ((CtReturn)parent).getParent(CtMethod.class).getType();
             Ingredient ingredient = new Ingredient(CodeAddFactory.createTypeCast((CtExpression) point.getCodeElement(), typeReference));
+            ingredient.setDerivedFrom(typeReference);
             exps.add(ingredient);
         }
         if (point.getCodeElement() instanceof CtInvocation) {
@@ -221,34 +241,54 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             for (CtExecutableReference exe :methods) {
                 List<CtTypeReference<?>> paras = exe.getParameters();
                 if (exe.getSimpleName().equals(pexe.getSimpleName())) {
-                    List<CtExpression<?>> args = new ArrayList<>(((CtInvocation)point.getCodeElement()).getArguments());
-                    Ingredient ingredient = new Ingredient(
-                            CodeAddFactory.createInvocationWithVars((CtInvocation) point.getCodeElement()
-                                    , exe, args));
-                    if (ingredient.getCode() != null)// && !contains(exps, ingredient)
-                        exps.add(ingredient);
+                    continue;
+//                    List<CtExpression<?>> args = new ArrayList<>(((CtInvocation)point.getCodeElement()).getArguments());
+//                    Ingredient ingredient = new Ingredient(
+//                            CodeAddFactory.createInvocationWithVars((CtInvocation) point.getCodeElement()
+//                                    , exe, args));
+//                    if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
+//                        ingredient.setDerivedFrom(exe);
+//                        exps.add(ingredient);
+//                    }
                 } else if (isParasSame(paras, argsType) &&
                         ((CtInvocation<?>) point.getCodeElement()).getExecutable().getType().equals(exe.getType())) {
                     Ingredient ingredient = new Ingredient(CodeAddFactory.createInvocationSameArgs((CtInvocation) point.getCodeElement(), exe));
-                    if (ingredient.getCode() != null)// && !contains(exps, ingredient)
+                    if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
+                        ingredient.setDerivedFrom(exe);
                         exps.add(ingredient);
+                    }
                 }
             }
             if (((CtInvocation<?>) point.getCodeElement()).getArguments() != null) {
                 for (CtExpression arg :((CtInvocation<?>) point.getCodeElement()).getArguments()) {
                     if (!(arg.getType().equals(point.getCodeElement()))
-                            && (!arg.getType().isPrimitive()
-                                || !((CtInvocation<?>) point.getCodeElement()).getType().isPrimitive())) {
+                            && !isCompatiblePrimitive(arg, (CtTypedElement) point.getCodeElement())) {
                         continue;
                     }
                     Ingredient ingredient = new Ingredient(CodeAddFactory.createExpression(arg, point.getCodeElement().getParent()));
-                    if (ingredient.getCode() != null)// && !contains(exps, ingredient)
+                    if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
+                        ingredient.setDerivedFrom(arg);
                         exps.add(ingredient);
+                    }
                 }
             }
         }
 
         for (Ingredient in :base) {
+            if (in.getChacheCodeString().equals(point.getCodeElement().toString().replaceAll("\\s+"," ")))
+                continue;
+            if ((in.getCode() instanceof CtStatement && !(in.getCode() instanceof CtExpression) )|| in.getCode() instanceof CtAssignment) {//discard super&this mthcall
+                continue;
+            }
+            if (in.getCode() instanceof CtExpression && point.getCodeElement() instanceof CtExpression) {
+                CtTypeReference a = ((CtExpression) in.getCode()).getType();
+                CtTypeReference b = ((CtExpression) point.getCodeElement()).getType();
+                if (!a.equals(b) || !isCompatiblePrimitive((CtTypedElement) in.getCode(), (CtTypedElement) point.getCodeElement())) {
+                    continue;
+                }
+            } else if (!in.getCode().getClass().equals(point.getCodeElement().getClass())) {
+                continue;
+            }
             if ((point.getCodeElement() instanceof CtVariableRead || point.getCodeElement() instanceof CtLiteral)
                     && in.getCode() instanceof CtInvocation) {
                 CtInvocation ininv = (CtInvocation) in.getCode();
@@ -256,11 +296,13 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                     CtTypeReference intype = (CtTypeReference) ininv
                             .getExecutable().getParameters().get(0);
                     if (intype.equals(((CtExpression<?>) point.getCodeElement()).getType())
-                            || (intype.isPrimitive() && ((CtExpression<?>) point.getCodeElement()).getType().isPrimitive())) {
+                            || isCompatiblePrimitive(ininv, (CtTypedElement) point.getCodeElement())) {//
                         Ingredient ingredient = new Ingredient(
                                 CodeAddFactory.createInvocationWithVar(ininv, (CtExpression) point.getCodeElement()));
-                        if (ingredient.getCode() != null)// && !contains(exps, ingredient)
+                        if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
+                            ingredient.setDerivedFrom(ininv);
                             exps.add(ingredient);
+                        }
                     }
                 }
             }
@@ -270,42 +312,29 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 CtInvocation ininv = (CtInvocation) in.getCode();
                 if (pinv.getExecutable().getSimpleName().equals(ininv.getExecutable().getSimpleName()))
                     continue;
-                if (ininv.getExecutable().getType().equals(pinv.getExecutable().getType())) {
+                if (ininv.getExecutable().getType().equals(pinv.getExecutable().getType())) {//
                     String fixName = ((CtInvocation) in.getCode()).getExecutable().getSimpleName();
                     if (pinv.getExecutable().getSimpleName().equals(fixName)) {
                         if (!pinv.toString().equals(ininv.toString())) {
                             Ingredient ingredient = new Ingredient(CodeAddFactory.createInvocationSameName(pinv, ininv));
-                            if (ingredient.getCode() != null)// && !contains(exps, ingredient)
+                            if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
+                                ingredient.setDerivedFrom(ininv);
                                 exps.add(ingredient);
+                            }
                         }
                     } else {
                         CtExecutableReference ine = ininv.getExecutable();
                         CtExecutableReference pe = pinv.getExecutable();
                         if (isParasSame(ine.getParameters(), pe.getParameters())) {
                             Ingredient ingredient = new Ingredient(CodeAddFactory.createInvocationSameArgs(pinv, ininv.getExecutable()));
-                            if (ingredient.getCode() != null)// && !contains(exps, ingredient)
+                            if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
+                                ingredient.setDerivedFrom(ininv);
                                 exps.add(ingredient);
+                            }
                         }
                     }
                 }
             }
-
-            if ((parent instanceof CtIf || parent instanceof CtReturn)) {// && !contains(exps, in)
-                exps.add(in);
-            } else if (!(in.getCode() instanceof CtVariableRead)) {
-                if ("target".equalsIgnoreCase(String.valueOf(point.getCodeElement().getRoleInParent()))
-                        && in.getCode() instanceof CtLiteral)
-                    continue;
-                exps.add(in);
-            }
-
-//            if (!(point.getCodeElement() instanceof CtVariableRead
-//                    || point.getCodeElement() instanceof CtVariableReference
-//                    || point.getCodeElement() instanceof CtLiteral)) {
-//                if (in.getCode() instanceof CtVariableRead || in.getCode() instanceof CtVariableReference)
-//                    continue;
-//                exps.add(in);
-//            } else
 
             if (parent instanceof CtIf) {
                 if (in.getCode() instanceof CtInvocation) {
@@ -317,13 +346,34 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 List<CtBinaryOperator> list = CodeAddFactory.createCondition(point.getCodeElement(), in.getCode());
                 for (CtBinaryOperator ctb :list) {
                     Ingredient ingredient = new Ingredient(ctb);
-                    if (ingredient.getCode() != null)// && !contains(exps, ingredient)
+                    if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
+                        ingredient.setDerivedFrom(in.getCode());
                         exps.add(ingredient);
+                    }
                 }
             }
 
+            if ((parent instanceof CtIf || parent instanceof CtReturn || parent instanceof CtAssignment)) {
+                in.setDerivedFrom(in.getCode().getParent());
+                exps.add(in);//?
+            } else if (!(in.getCode() instanceof CtVariableRead)) {
+                if ("target".equalsIgnoreCase(String.valueOf(point.getCodeElement().getRoleInParent()))
+                        && in.getCode() instanceof CtLiteral)
+                    continue;
+                in.setDerivedFrom(in.getCode().getParent());
+                exps.add(in);
+            }
         }
         return deduplicate(exps);
+    }
+
+    boolean isCompatiblePrimitive(CtTypedElement element1, CtTypedElement element2) {
+        boolean isCompatiblePrimitive = element1.getType().isPrimitive() && element2.getType().isPrimitive() &&
+                ((element1.getType().getSimpleName().equalsIgnoreCase("boolean")
+                        && element2.getType().getSimpleName().equalsIgnoreCase("boolean")) ||
+                        (!element1.getType().getSimpleName().equalsIgnoreCase("boolean") &&
+                                !element2.getType().getSimpleName().equalsIgnoreCase("boolean")));
+        return isCompatiblePrimitive;
     }
 
     boolean isArgsSame(List<CtExpression> args1, List<CtExpression> args2) {
@@ -368,8 +418,44 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         return bases;
     }
 
-    private Map<String, List<String>> elementSet = new HashMap();
+    List<Ingredient> shrinkBaseElements(ModificationPoint modificationPoint, AstorOperator operationType) {
+        String key = getKey(modificationPoint, operationType);
+        List<Ingredient> baseElements = baseIngredientsCache.get(key);
+        if (baseElements != null)
+            return baseElements;
+        try {
+            if (ConfigurationProperties.getPropertyBool("duplicateingredientsinspace"))
+                baseElements = deduplicate(geIngredientsFromSpace(modificationPoint, operationType));
+            else
+                baseElements = geIngredientsFromSpace(modificationPoint, operationType);
 
+            if (operationType instanceof InsertBeforeOp || operationType instanceof InsertAfterOp)
+                baseElements = getstmts(baseElements, operationType);
+
+            if (operationType instanceof ReplaceTypeOp) //extract typereference
+                baseElements = getTypeChangeIngredients(baseElements, modificationPoint);
+
+//            if (operationType instanceof ReplaceExpressionOp)//same return type
+//                baseElements = getExpIngredientsSameType(baseElements, modificationPoint);
+            CtElement parent = modificationPoint.getCodeElement().getParent();
+            if (operationType instanceof ReplaceExpressionOp/* &&
+                    (modificationPoint.getCodeElement() instanceof CtInvocation
+                            || modificationPoint.getCodeElement() instanceof CtVariableRead
+                            || modificationPoint.getCodeElement() instanceof CtBinaryOperator
+                            || modificationPoint.getCodeElement() instanceof CtUnaryOperator
+                            || modificationPoint.getCodeElement() instanceof CtConditional
+                            || modificationPoint.getCodeElement() instanceof CtConstructorCall
+                            || parent instanceof CtIf || parent instanceof CtAssignment
+                            || parent instanceof CtReturn)*/)
+                baseElements = limitIngredientsByElementType(baseElements, modificationPoint);
+
+            baseIngredientsCache.put(key, new ArrayList<>(baseElements));
+        } catch (Exception e) {
+            log.error("error in create ingredient bases : " + e.getMessage());
+            e.printStackTrace();
+        }
+        return baseElements;
+    }
 
     /**
      * Method that returns an Ingredient from the ingredient space given a
@@ -384,39 +470,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
         int attemptsBaseIngredients = 0;
 
-        List<Ingredient> baseElements = null;
-        try {
-            if (ConfigurationProperties.getPropertyBool("duplicateingredientsinspace"))
-                baseElements = deduplicate(geIngredientsFromSpace(modificationPoint, operationType));
-            else
-                baseElements = geIngredientsFromSpace(modificationPoint, operationType);
-
-            if (operationType instanceof InsertBeforeOp || operationType instanceof InsertAfterOp)
-                baseElements = getstmts(baseElements, operationType);
-
-            if (operationType instanceof ReplaceExpressionOp)//same return type
-                baseElements = getExpIngredients(baseElements, modificationPoint);
-
-            if (operationType instanceof ReplaceTypeOp) //extract typereference
-                baseElements = getTypeChangeIngredients(baseElements, modificationPoint);
-
-
-            CtElement parent = modificationPoint.getCodeElement().getParent();
-            if (operationType instanceof ReplaceExpressionOp &&
-                    (modificationPoint.getCodeElement() instanceof CtInvocation
-                            || modificationPoint.getCodeElement() instanceof CtVariableRead
-                            || modificationPoint.getCodeElement() instanceof CtBinaryOperator
-                            || modificationPoint.getCodeElement() instanceof CtUnaryOperator
-                            || modificationPoint.getCodeElement() instanceof CtConditional
-                            || modificationPoint.getCodeElement() instanceof CtConstructorCall
-                            || parent instanceof CtIf || parent instanceof CtAssignment
-                            || parent instanceof CtReturn))
-                baseElements = limitIngredients(baseElements, modificationPoint);
-
-        } catch (Exception e) {
-            log.error("error in create ingredient bases : " + e.getMessage());
-            e.printStackTrace();
-        }
+        List<Ingredient> baseElements = shrinkBaseElements(modificationPoint, operationType);
 
         if (baseElements == null || baseElements.isEmpty()) {
             log.debug("Any element available for mp " + modificationPoint);
@@ -425,19 +479,21 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
         Logger detailLog = Logger.getLogger("DetailLog");
         String eleKey = getKey(modificationPoint, operationType);
-        if (!elementSet.containsKey(eleKey)) {
-            elementSet.put(eleKey, new ArrayList<>());
+        if (!this.cache.containsKey(eleKey)) {
+            this.cache.put(eleKey, new ArrayList<>());
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("BaseElements for ").append(eleKey).append(" : ").append(modificationPoint).append(": ");
-            stringBuilder.append("size: ").append(baseElements.size()).append(" [");
+            stringBuilder.append("BaseElements for ").append(eleKey).append(" : ").append(modificationPoint).append(": \n");
+            stringBuilder.append("size: ").append(baseElements.size()).append("\n")
+                    .append(" [");
             for (Ingredient in :baseElements) {
                 stringBuilder.append("\"").append(in.getChacheCodeString()).append("\",");
             }
-            stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(),"]");
+            stringBuilder.replace(stringBuilder.length() - 1, stringBuilder.length(),"]\n");
+            stringBuilder.append("BaseElements End.");
             detailLog.debug(stringBuilder);
         }
 
-        if (!elementSet.get(eleKey).isEmpty()) {
+        if (!this.cache.get(eleKey).isEmpty()) {
             removeUsed(baseElements, eleKey);
         }
 
@@ -457,26 +513,26 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             if (idx == -1)
                 continue;
             Ingredient baseIngredient = baseElements.get(idx);
-            detailLog.debug("choose ingredient: " + baseIngredient);
+//            detailLog.debug("choose ingredient: " + baseIngredient);
 
-            boolean flag = false;
-            for (ModificationPoint mp :modificationPoint.getProgramVariant().getModificationPoints()) {
-                if (mp == modificationPoint) {
-                    String orig = modificationPoint.getCodeElement().toString().replaceAll("\\n", "");
-                    String modi = baseIngredient.getChacheCodeString();
-                    flag = flag || orig.equals(modi);
-                }
-                flag = flag || mp.getCodeElement() == baseIngredient.getCode();
-            }
-            if (flag)
-                continue;
+//            boolean flag = false;
+//            for (ModificationPoint mp :modificationPoint.getProgramVariant().getModificationPoints()) {
+//                if (mp == modificationPoint) {
+//                    String orig = modificationPoint.getCodeElement().toString().replaceAll("\\s+", " ");
+//                    String modi = baseIngredient.getChacheCodeString();
+//                    flag = flag || orig.equals(modi);
+//                }
+//                flag = flag || mp.getCodeElement() == baseIngredient.getCode();
+//            }
+//            if (flag)
+//                continue;
 
 //            String newingredientkey = getKey(modificationPoint, operationType);
 
             if (baseIngredient != null && baseIngredient.getCode() != null) {
 
-                elementSet.get(eleKey).add(baseIngredient.getChacheCodeString());
-                detailLog.debug("add used element: " + baseIngredient);
+//                this.cache.get(eleKey).add(baseIngredient.getChacheCodeString());
+//                detailLog.debug("add used element: " + baseIngredient);
                 return baseIngredient;
 //                // check if the element was already used
 //                if (DESACTIVATE_CACHE || !this.cache.containsKey(newingredientkey)
@@ -499,25 +555,25 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         String lockey = null;
         if (modPoint instanceof SuspiciousModificationPoint)
             lockey = ((SuspiciousModificationPoint)modPoint).getSuspicious().getLineNumber() + "-"
-                + modPoint.getCodeElement().toString().replaceAll("\n", "") + "-"
+                + modPoint.getCodeElement().toString().replaceAll("\\s+", " ") + "-"
 //                + modPoint.getCodeElement().getParent() + "-"
                 + operator.toString();
         else
             lockey = modPoint.getCodeElement().getPosition().toString() + "-"
-                + modPoint.getCodeElement().toString().replaceAll("\n", "") + "-"
+                + modPoint.getCodeElement().toString().replaceAll("\\s+", " ") + "-"
 //                + modPoint.getCodeElement().getParent() + "-"
                 + operator.toString();
         return lockey;
     }
 
-    private void removeUsed(List<Ingredient> bases, String eleKey) {
-        if (bases.size() == elementSet.get(eleKey).size()) {
-            elementSet.get(eleKey).clear();
+    void removeUsed(List<Ingredient> bases, String eleKey) {
+        if (bases.size() == this.cache.get(eleKey).size()) {
+            bases.clear();
             return;
         }
-        for (String used: elementSet.get(eleKey)) {
+        for (String used: this.cache.get(eleKey)) {
             for (Ingredient in :bases) {
-                if (used.equals(in.getChacheCodeString())) {
+                if (used.replaceAll("\\s+", " ").equals(in.getChacheCodeString().replaceAll("\\s+", " "))) {
                     bases.remove(in);
                     break;
                 }
