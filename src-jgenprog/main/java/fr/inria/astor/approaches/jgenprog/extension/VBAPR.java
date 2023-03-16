@@ -23,7 +23,6 @@ import fr.inria.astor.util.EditDistanceWithTokens;
 import fr.inria.astor.util.PatchDiffCalculator;
 import fr.inria.astor.util.FileTools;
 import fr.inria.astor.util.StringUtil;
-import fr.inria.main.AstorOutputStatus;
 import fr.inria.main.evolution.ExtensionPoints;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.LogManager;
@@ -206,7 +205,7 @@ public class VBAPR  extends JGenProg {
             }
             this.saveModifVariant(newVariant);//
 
-            if (!ConfigurationProperties.getPropertyBool("skipvalidation")){
+            if (!ConfigurationProperties.getPropertyBool("skipValidation")){
                 boolean solution = false;
 
                 if (ConfigurationProperties.getPropertyBool("antipattern")) {
@@ -223,15 +222,16 @@ public class VBAPR  extends JGenProg {
                 }
 
                 HashMap<String, List<String>> affectedMap = null;
-                if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
+                if (ConfigurationProperties.getPropertyBool("addSimilarityComparasion")) {
 //                setSimilarityForPV(newVariant);//ForPV
                     affectedMap = newVariant.computeAffectedStringOfClassesAndBlocks(false);
                 }
 
+                boolean succ = false;
                 if (solution) {
                     foundSolution = true;
                     newVariant.setBornDate(new Date());
-                    saveVariant(newVariant);
+                    succ = saveVariantWithCheck(newVariant);
                 }
                 foundOneVariant = true;
                 // Finally, reverse the changes done by the child
@@ -244,15 +244,18 @@ public class VBAPR  extends JGenProg {
                     fitASim.info(newVariant.getFitness() + "," + newVariant.getSimilarity());
                 }
 
-                if (solution) {
+                if (solution && succ) {
+//                    temporalInstances.add(newVariant);
                     this.savePatch(newVariant);
                 }
             } else {
-                temporalInstances.add(newVariant);
-                saveVariant(newVariant);
+                boolean succ = saveVariantWithCheck(newVariant);
                 reverseOperationInModel(newVariant, generation);
                 boolean validation = this.validateReversedOriginalVariant(newVariant);
                 assert validation;
+                if (!succ)
+                    continue;
+                temporalInstances.add(newVariant);
             }
 
             if (foundSolution && ConfigurationProperties.getPropertyBool("stopfirst")) {
@@ -574,7 +577,7 @@ public class VBAPR  extends JGenProg {
     }
 
     private void updatePVAfterCrossover(ProgramVariant variant) {
-        if (!ConfigurationProperties.getPropertyBool("skipvalidation")) {
+        if (!ConfigurationProperties.getPropertyBool("skipValidation")) {
             setFitnessForVariant(variant);
         }
 //        variant.setModificationPoints(originalVariant.getModificationPoints());
@@ -649,37 +652,41 @@ public class VBAPR  extends JGenProg {
 
     List<String> solutions_f = new ArrayList<>();
 
-    public void saveVariant(ProgramVariant programVariant) throws Exception {
+    public boolean saveVariantWithCheck(ProgramVariant programVariant) throws Exception {
         final boolean codeFormated = true;
-        savePatchDiff(programVariant, !codeFormated);
         savePatchDiff(programVariant, codeFormated);
-        computePatchDiff(new PatchDiffCalculator(), this.solutions.indexOf(programVariant), solutions_f);
+        savePatchDiff(programVariant, !codeFormated);
+        return computePatchDiff(new PatchDiffCalculator(), programVariant, solutions_f);
     }
 
-    private void computePatchDiff(PatchDiffCalculator cdiff, int idx,
-                                  List<String> solutions_f) throws Exception {
-        ProgramVariant solutionVariant = this.solutions.get(idx);
-
+    private boolean computePatchDiff(PatchDiffCalculator cdiff, ProgramVariant solutionVariant, List<String> solutions_f) throws Exception {
         if (solutionVariant.getPatchDiff() != null) {
-            return;
+            return true;
         }
+        this.solutions.add(solutionVariant);
 
         PatchDiff pdiff = new PatchDiff();
         boolean format = false;
 
-        String diffPatchFormated = cdiff.getDiff(getProjectFacade(), this.solutions, idx,
-                this.mutatorSupporter, format, solutions_f);
-
-        pdiff.setFormattedDiff(diffPatchFormated);
-
-        format = true;
-
-        String diffPatchOriginalAlign = cdiff.getDiff(getProjectFacade(), this.solutions, idx,
-                this.mutatorSupporter, format, solutions_f);
+        String diffPatchOriginalAlign = cdiff.getDiff(getProjectFacade(), this.solutions, this.solutions.indexOf(solutionVariant),
+                    this.mutatorSupporter, format, solutions_f);
 
         pdiff.setOriginalStatementAlignmentDiff(diffPatchOriginalAlign);
 
+        format = true;
+
+        String diffPatchFormated = cdiff.getDiff(getProjectFacade(), this.solutions, this.solutions.indexOf(solutionVariant),
+                    this.mutatorSupporter, format, solutions_f);
+        if (diffPatchFormated == null) {
+            this.solutions.remove(solutionVariant);
+            return false;
+        }
+
+        pdiff.setFormattedDiff(diffPatchFormated);
+
         solutionVariant.setPatchDiff(pdiff);
+        this.solutions.remove(solutionVariant);
+        return true;
     }
 
     @Override
@@ -707,7 +714,7 @@ public class VBAPR  extends JGenProg {
 
         boolean flag = true;
         List<ProgramVariant> outputs = new ArrayList<>();
-        if (!ConfigurationProperties.getPropertyBool("skipvalidation")) {
+        if (!ConfigurationProperties.getPropertyBool("skipValidation")) {
             flag = this.solutions.size() > 0;
             outputs = this.solutions;
             this.sortPatches();
@@ -743,9 +750,9 @@ public class VBAPR  extends JGenProg {
                 }
             }
         }
-        for (ReportResults out : this.getOutputResults()) {
-            out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
-        }
+//        for (ReportResults out : this.getOutputResults()) {
+//            out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
+//        }
         try {
             List<SuspiciousCode> susp = new ArrayList<>();
             for (ModificationPoint mpi : originalVariant.getModificationPoints()) {

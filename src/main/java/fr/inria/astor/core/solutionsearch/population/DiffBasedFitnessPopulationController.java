@@ -62,7 +62,7 @@ public class DiffBasedFitnessPopulationController implements PopulationControlle
 //            while (nextVariants.size() < populationSize) {}
 
             //3. for all left
-            if (ConfigurationProperties.getPropertyBool("addsimilaritycomparasion")) {
+            if (ConfigurationProperties.getPropertyBool("addSimilarityComparasion")) {
                 nextVariants.addAll(rouletteWheelSelection(newPopulation, populationSize - nextVariants.size()));
             } else {
                 try {

@@ -301,6 +301,10 @@ public abstract class AbstractMain {
 
 		options.addOption("useGTsizeAsPopSize", true, "whether use the groundtruth size as the initial population size.");
 
+		options.addOption("addSimilarityComparasion", true, "whether add similarity comparison when calculate fitness.");
+
+		options.addOption("skipValidation", true, "whether skip the validation process to get all possible patches");
+
 	}
 
 	public abstract void run(String location, String projectName, String dependencies, String packageToInstrument,
@@ -470,8 +474,8 @@ public abstract class AbstractMain {
 		if (cmd.hasOption("addnewModificationpoints"))
 			ConfigurationProperties.properties.setProperty("addnewModificationpoints", cmd.getOptionValue("addnewModificationpoints"));
 
-		if (cmd.hasOption("addsimilaritycomparasion"))
-			ConfigurationProperties.properties.setProperty("addsimilaritycomparasion", cmd.getOptionValue("addsimilaritycomparasion"));
+		if (cmd.hasOption("addSimilarityComparasion"))
+			ConfigurationProperties.properties.setProperty("addSimilarityComparasion", cmd.getOptionValue("addSimilarityComparasion"));
 
 		if (cmd.hasOption("validation"))
 			ConfigurationProperties.properties.setProperty("validation", cmd.getOptionValue("validation"));

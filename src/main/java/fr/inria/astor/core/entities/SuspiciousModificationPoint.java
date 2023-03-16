@@ -1,6 +1,7 @@
 package fr.inria.astor.core.entities;
 
 import java.util.List;
+import java.util.Objects;
 
 import fr.inria.astor.core.faultlocalization.entity.SuspiciousCode;
 import spoon.reflect.declaration.CtClass;
@@ -50,6 +51,16 @@ public class SuspiciousModificationPoint extends ModificationPoint {
 		sp.generation = this.generation;
 		sp.programVariant = this.programVariant;
 		return sp;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		SuspiciousModificationPoint that = (SuspiciousModificationPoint) o;
+
+		return Objects.equals(this.toString(), that.toString());
 	}
 
 }

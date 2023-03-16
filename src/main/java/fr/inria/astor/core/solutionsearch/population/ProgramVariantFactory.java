@@ -489,6 +489,9 @@ public class ProgramVariantFactory {
 		CtClass ctClass = existingGen.getCtClass();
 		List<CtVariable> context = existingGen.getContextOfModificationPoint();
 		SuspiciousModificationPoint newGen = new SuspiciousModificationPoint(suspicious, modified, ctClass, context);
+		newGen.identified = existingGen.identified;
+		newGen.generation = existingGen.generation;
+		newGen.setProgramVariant(existingGen.getProgramVariant());
 		return newGen;
 
 	}
@@ -507,7 +510,7 @@ public class ProgramVariantFactory {
 		try {
 			List<CtElement> eles = retrieveCtElement(modified);
 			for (CtElement e :eles) {
-				ModificationPoint modifPoint = null;
+				ModificationPoint modifPoint = null;//existingGen.clone();
 				if (existingGen instanceof SuspiciousModificationPoint)
 					modifPoint = clonePoint((SuspiciousModificationPoint) existingGen, e);
 				else

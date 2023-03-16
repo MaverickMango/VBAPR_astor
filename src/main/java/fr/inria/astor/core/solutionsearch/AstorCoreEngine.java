@@ -270,7 +270,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 			String output = ConfigurationProperties.getProperty("folderDiff");
 			if (output == null) {
-				output = this.projectFacade.getProperties().getWorkingDirRoot() + File.separator + solutionVariant.getId();
+				output = determineSourceFolderInWorkspace(solutionVariant, true);
 				if (output == null) {
 					log.error("can not save patch, folderDiff is null");
 					return;

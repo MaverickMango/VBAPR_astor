@@ -45,7 +45,7 @@ public class PatchDiffCalculator {
 	public String getDiff(ProjectRepairFacade projectFacade, ProgramVariant originalVariant,
 			ProgramVariant programVariant, boolean format, MutationSupporter mutsupporter) throws Exception {
 
-		String diffResults = "";
+		StringBuilder diffResults = new StringBuilder();
 
 		String difftype = ConfigurationProperties.getProperty("diff_type");
 
@@ -82,16 +82,16 @@ public class PatchDiffCalculator {
 			String fileRight = getPrefixPatched(difftype, t, fileName);
 
 			String diff = getDiff(foriginal, ffixed, fileLeft, fileRight);
-			diffResults += diff + '\n';
+			diffResults.append(diff).append('\n');
 		}
 
 		// save the default variant according to the format
 		FileWriter patchWriter = new FileWriter(srcOutputSolutionVariant + File.separator + PATCH_DIFF_FILE_NAME);
-		patchWriter.write(diffResults);
+		patchWriter.write(diffResults.toString());
 		patchWriter.flush();
 		patchWriter.close();
 
-		return diffResults;
+		return diffResults.toString();
 	}
 
 	public String getDiff(ProjectRepairFacade projectFacade, List<ProgramVariant> solutions,
@@ -99,7 +99,7 @@ public class PatchDiffCalculator {
 						  boolean format, List<String> solutions_f) throws Exception {
 		ProgramVariant programVariant = solutions.get(idx);
 
-		String diffResults = "";
+		StringBuilder diffResults = new StringBuilder();
 
 		String difftype = ConfigurationProperties.getProperty("diff_type");
 
@@ -144,16 +144,16 @@ public class PatchDiffCalculator {
 				}
 				solutions_f.add(diff.replaceAll("\\s+", " "));
 			}
-			diffResults += diff + '\n';
+			diffResults.append(diff).append('\n');
 		}
 
 		// save the default variant according to the format
 		FileWriter patchWriter = new FileWriter(srcOutputSolutionVariant + File.separator + PATCH_DIFF_FILE_NAME);
-		patchWriter.write(diffResults);
+		patchWriter.write(diffResults.toString());
 		patchWriter.flush();
 		patchWriter.close();
 
-		return diffResults;
+		return diffResults.toString();
 	}
 
 

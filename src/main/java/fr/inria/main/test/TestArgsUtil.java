@@ -22,9 +22,11 @@ public class TestArgsUtil {
         cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR");
         cs.command.put("-maxgen", "500");
 //        cs.command.put("-scope", "file");
+//        cs.command.put("-skipValidation", "false");
         cs.command.put("-skipfaultlocalization", "true");
         cs.command.put("-useGTsizeAsPopSize", "true");
         cs.command.put("-useVariableEdit", "true");
+//        cs.command.put("-addSimilarityComparasion", "true");
 //        cs.command.put("-stopfirst", "true");
         cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");
 //        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");

@@ -25,7 +25,7 @@ public class ModificationPoint implements Comparable {
 
 	public int identified = 0;
 
-	protected int generation = -1;
+	public int generation = -1;
 
 	public ModificationPoint() {
 	}

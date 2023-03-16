@@ -3,6 +3,7 @@ package fr.inria.astor.core.solutionsearch.spaces.operators;
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.inria.astor.approaches.jgenprog.operators.RemoveOp;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import org.apache.log4j.Logger;
@@ -120,8 +121,10 @@ public abstract class AstorOperator implements AstorExtensionPoint {
 		if (!ConfigurationProperties.getPropertyBool("addnewModificationpoints"))
 			return modifPoints.add(newPoint);
 		else {
-//			modifPoints.add(newPoint);
 			List<ModificationPoint> newPoints = ProgramVariantFactory.createPointsFormNewPoint(existingPoints, operation.getModified());
+			newPoints.remove(newPoint);
+			if (newPoints.isEmpty())
+				return true;
 			return modifPoints.addAll(newPoints);
 		}
 	}
@@ -137,7 +140,7 @@ public abstract class AstorOperator implements AstorExtensionPoint {
 	 */
 	protected boolean removePoint(ProgramVariant variant, OperatorInstance operation) {
 		List<ModificationPoint> modifPoints = variant.getModificationPoints();
-		boolean removed = modifPoints.remove(operation.getModificationPoint());
+		boolean removed = this instanceof RemoveOp ? modifPoints.remove(operation.getModificationPoint()) : true;
 		if (ConfigurationProperties.getPropertyBool("deleteParentMP")) {
 			List<ModificationPoint> remaining = new ArrayList<>(modifPoints);
 			for (ModificationPoint mp : modifPoints) {

@@ -76,10 +76,8 @@ public class StatementOperatorInstance extends OperatorInstance {
 				this.setLocationInParent(location);
 				return true;
 			}
-
-		} else {
-			log.error("Parent null or it is not a block");
 		}
+		log.error("Parent null or it is not a block");
 		return false;
 	}
 
