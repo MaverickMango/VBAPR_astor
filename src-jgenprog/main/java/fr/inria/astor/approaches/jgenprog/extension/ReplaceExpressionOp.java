@@ -9,6 +9,7 @@ import fr.inria.astor.core.manipulation.MutationSupporter;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.reference.CtVariableReference;
+import spoon.support.reflect.code.CtBlockImpl;
 
 public class ReplaceExpressionOp extends ExpressionIngredientOperator implements IExpressionLevelOperator {
 
@@ -88,6 +89,6 @@ public class ReplaceExpressionOp extends ExpressionIngredientOperator implements
      */
     @Override
     public boolean canBeAppliedToPoint(ModificationPoint point) {
-        return (point.getCodeElement() instanceof CtExpression);
+        return (point.getCodeElement() instanceof CtExpression) && !(point.getCodeElement().getParent() instanceof CtBlock);
     }
 }
