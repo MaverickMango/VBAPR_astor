@@ -750,9 +750,9 @@ public class VBAPR  extends JGenProg {
                 }
             }
         }
-//        for (ReportResults out : this.getOutputResults()) {
-//            out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
-//        }
+        for (ReportResults out : this.getOutputResults()) {
+            out.produceOutput(patchInfo, this.currentStat.getGeneralStats(), output);
+        }
         try {
             List<SuspiciousCode> susp = new ArrayList<>();
             for (ModificationPoint mpi : originalVariant.getModificationPoints()) {

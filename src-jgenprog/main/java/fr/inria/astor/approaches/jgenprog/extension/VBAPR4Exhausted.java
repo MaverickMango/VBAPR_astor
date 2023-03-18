@@ -57,33 +57,29 @@ public class VBAPR4Exhausted extends VBAPR {
                     try {
                         log.info("mod_point " + modifPoint);
                         log.info("-->op: " + pointOperation);
+
+                        // We validate the variant after applying the operator
+                        ProgramVariant solutionVariant = variantFactory.createProgramVariantFromAnother(parentVariant,
+                                generationsExecuted);
+                        solutionVariant.getOperations().put(generationsExecuted, Arrays.asList(pointOperation));
+
+                        applyNewMutationOperationToSpoonElement(pointOperation);
+
+                        boolean solution = processCreatedVariant(solutionVariant, generationsExecuted);
+
+                        if (solution) {
+                            this.solutions.add(solutionVariant);
+
+                            saveVariantWithCheck(solutionVariant);
+                            //this.savePatch(solutionVariant);
+
+                            if (ConfigurationProperties.getPropertyBool("stopfirst")) {
+                                this.setOutputStatus(AstorOutputStatus.STOP_BY_PATCH_FOUND);
+                                return;
+                            }
+                        }
                     } catch (Exception e) {
                         log.error(e);
-                    }
-
-                    // We validate the variant after applying the operator
-                    ProgramVariant solutionVariant = variantFactory.createProgramVariantFromAnother(parentVariant,
-                            generationsExecuted);
-                    solutionVariant.getOperations().put(generationsExecuted, Arrays.asList(pointOperation));
-
-                    applyNewMutationOperationToSpoonElement(pointOperation);
-
-                    boolean solution = true;
-
-                    if (!ConfigurationProperties.getPropertyBool("skipValidation")) {
-                        solution = processCreatedVariant(solutionVariant, generationsExecuted);
-                    }
-
-                    if (solution) {
-                        this.solutions.add(solutionVariant);
-
-                        saveVariantWithCheck(solutionVariant);
-                        //this.savePatch(solutionVariant);
-
-                        if (ConfigurationProperties.getPropertyBool("stopfirst")) {
-                            this.setOutputStatus(AstorOutputStatus.STOP_BY_PATCH_FOUND);
-                            return;
-                        }
                     }
 
                     // We undo the operator (for try the next one)

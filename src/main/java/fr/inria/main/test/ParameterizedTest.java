@@ -35,7 +35,7 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
 //        String[][] data = {
-//                {"Math" , "11"}
+//                {"Chart" , "8"}
 //        };
 //        return Arrays.asList(data);
 
