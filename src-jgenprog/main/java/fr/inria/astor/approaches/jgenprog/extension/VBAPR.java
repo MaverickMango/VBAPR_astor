@@ -205,7 +205,7 @@ public class VBAPR  extends JGenProg {
             }
             this.saveModifVariant(newVariant);//
 
-            if (!ConfigurationProperties.getPropertyBool("skipValidation")){
+            if (!ConfigurationProperties.getPropertyBool("skipCompilation")){
                 boolean solution = false;
 
                 if (ConfigurationProperties.getPropertyBool("antipattern")) {

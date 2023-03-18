@@ -545,14 +545,14 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		if (ConfigurationProperties.getPropertyBool("saveall")) {
 			this.saveVariant(programVariant);
 		}
-		if (!ConfigurationProperties.getPropertyBool("skipValidation")) {
-			return childCompiles;
-		}
 		if (childCompiles) {
 
 			log.debug("-The child compiles: id " + programVariant.getId());
 			currentStat.increment(GeneralStatEnum.NR_RIGHT_COMPILATIONS);
 
+			if (ConfigurationProperties.getPropertyBool("skipValidation")) {
+				return childCompiles;
+			}
 			VariantValidationResult validationResult = setFitnessForVariant(programVariant);
 
 			log.debug("-Valid?: " + validationResult + ", fitness " + programVariant.getFitness());

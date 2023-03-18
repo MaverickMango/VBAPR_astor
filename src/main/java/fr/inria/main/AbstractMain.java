@@ -305,6 +305,8 @@ public abstract class AbstractMain {
 
 		options.addOption("skipValidation", true, "whether skip the validation process to get all possible patches");
 
+		options.addOption("skipCompilation", true, "whether skip to evaluate if the patch is compilable.");
+
 	}
 
 	public abstract void run(String location, String projectName, String dependencies, String packageToInstrument,
@@ -598,6 +600,12 @@ public abstract class AbstractMain {
 
 		if (cmd.hasOption("skipfaultlocalization"))
 			ConfigurationProperties.properties.setProperty("skipfaultlocalization", "true");
+
+		if (cmd.hasOption("skipValidation"))
+			ConfigurationProperties.properties.setProperty("skipValidation", cmd.getOptionValue("skipValidation"));
+
+		if (cmd.hasOption("skipCompilation"))
+			ConfigurationProperties.properties.setProperty("skipCompilation", cmd.getOptionValue("skipCompilation"));
 
 		if (cmd.hasOption("uniqueoptogen"))
 			ConfigurationProperties.properties.setProperty("uniqueoptogen", cmd.getOptionValue("uniqueoptogen"));

@@ -65,7 +65,11 @@ public class VBAPR4Exhausted extends VBAPR {
 
                         applyNewMutationOperationToSpoonElement(pointOperation);
 
-                        boolean solution = processCreatedVariant(solutionVariant, generationsExecuted);
+                        boolean solution = false;
+
+                        if (!ConfigurationProperties.getPropertyBool("skipCompilation")) {
+                            solution = processCreatedVariant(solutionVariant, generationsExecuted);
+                        }
 
                         if (solution) {
                             this.solutions.add(solutionVariant);
