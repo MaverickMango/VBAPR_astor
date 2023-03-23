@@ -24,7 +24,7 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
         return operators.get(RandomManager.nextInt(operators.size()));
     }
 
-    public AstorOperator getNextOperator(int type) {
+    public List<AstorOperator> getNextOperator(int type) {
         List<AstorOperator> operators = new ArrayList<>();
         switch (type) {
             case 1:
@@ -36,13 +36,9 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
                 operators.add(getNextOperator("BinaryExpressionMutOp"));
                 break;
             case 3:
-                operators.add(getNextOperator("InsertAfterOp"));
-                operators.add(getNextOperator("InsertBeforeOp"));
                 operators.add(getNextOperator("RemoveOp"));
                 break;
             case 4:
-                operators.add(getNextOperator("InsertAfterOp"));
-                operators.add(getNextOperator("InsertBeforeOp"));
                 operators.add(getNextOperator("ReplaceTypeOp"));
                 break;
             case 5:
@@ -51,7 +47,7 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
                 break;
             default:break;
         }
-        return operators.get(RandomManager.nextInt(operators.size()));
+        return operators;
     }
 
     public AstorOperator getNextOperator(String name) {
@@ -73,17 +69,20 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
     @Override
     public AstorOperator getNextOperator(SuspiciousModificationPoint modificationPoint) {
         CtElement element = modificationPoint.getCodeElement();
-        if ((element instanceof CtInvocation && element.getParent() instanceof CtBlock)
-                || element instanceof CtIf || element instanceof CtWhile) {
-            return this.getNextOperator(3);
-        } else if (element instanceof CtExpression && !(element instanceof CtAssignment)) {//CtAssignment CtInvocation are both exp and stmt
-            return this.getNextOperator(2);
-        } else if (element instanceof CtLocalVariable) {
-            return this.getNextOperator(4);
-        } else if (element instanceof CtBreak) {
-            return this.getNextOperator(5);
-        } else if (element instanceof CtStatement) {
-            return this.getNextOperator(1);
+        List<AstorOperator> operators = new ArrayList<>();
+        if (element instanceof CtStatement) {
+            operators.addAll(this.getNextOperator(1));
+        }
+        if ((((element instanceof CtInvocation || element instanceof CtAssignment)
+                && element.getParent() instanceof CtBlock))
+                    || element instanceof CtIf || element instanceof CtWhile || element instanceof CtFor) {
+            operators.addAll(this.getNextOperator(3));
+        }
+        if (element instanceof CtExpression || element instanceof CtBreak) {
+            operators.addAll(this.getNextOperator(2));
+        }
+        if (element instanceof CtLocalVariable) {
+            operators.addAll(this.getNextOperator(4));
         }
         return null;
     }

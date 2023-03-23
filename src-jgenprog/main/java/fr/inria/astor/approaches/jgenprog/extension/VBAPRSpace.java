@@ -14,8 +14,5 @@ public class VBAPRSpace extends OperatorSpace {
         super.register(new InsertBeforeOp());
         super.register(new ReplaceTypeOp());
         super.register(new RemoveOp());
-//        super.register(new ReplaceVarOp());
-//        super.register(new ReplaceLiteralOp());
-//        super.register(new ReplaceInvocationOp());
     }
 }

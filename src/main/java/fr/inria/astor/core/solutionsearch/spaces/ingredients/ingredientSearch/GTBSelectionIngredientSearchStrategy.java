@@ -73,10 +73,11 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             }
             if (operationType instanceof InsertBeforeOp && in.getCode() instanceof CtReturn)//
                 continue;
-            if (in.getCode().getParent() instanceof CtBlockImpl && ( (in.getCode() instanceof CtInvocation)
+            /* && ( (in.getCode() instanceof CtInvocation)
                     || (in.getCode() instanceof CtAssignment) || (in.getCode() instanceof CtOperatorAssignment)
                     || (in.getCode() instanceof CtIf) || (in.getCode() instanceof CtReturn)
-                    || (in.getCode() instanceof CtBreak)) ) {
+                    || (in.getCode() instanceof CtBreak)) */
+            if (in.getCode().getParent() instanceof CtBlockImpl) {
                 in.setDerivedFrom(in.getCode().getParent());
                 stmts.add(in);
             }
@@ -143,6 +144,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             Ingredient ingredient = new Ingredient(CodeAddFactory.createContinue());
             ingredient.setDerivedFrom(point.getCodeElement());
             exps.add(ingredient);
+            exps.addAll(getstmts(base, null));
             return exps;
         }
         if (point.getCodeElement() instanceof CtConditional) {
@@ -277,8 +279,9 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         for (Ingredient in :base) {
             if (in.getChacheCodeString().equals(point.getCodeElement().toString().replaceAll("\\s+"," ")))
                 continue;
-            if ((in.getCode() instanceof CtStatement && !(in.getCode() instanceof CtExpression) )|| in.getCode() instanceof CtAssignment) {//discard super&this mthcall
-                continue;
+            if ((in.getCode() instanceof CtStatement && in.getCode().getParent() instanceof CtBlock
+                    && (parent instanceof CtAssignment) || parent instanceof CtInvocation)) {//discard super&this mthcall
+                exps.add(in);
             }
             if (in.getCode() instanceof CtExpression && point.getCodeElement() instanceof CtExpression) {
                 CtTypeReference a = ((CtExpression) in.getCode()).getType();

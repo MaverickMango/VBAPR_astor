@@ -89,6 +89,6 @@ public class ReplaceExpressionOp extends ExpressionIngredientOperator implements
      */
     @Override
     public boolean canBeAppliedToPoint(ModificationPoint point) {
-        return (point.getCodeElement() instanceof CtExpression) && !(point.getCodeElement().getParent() instanceof CtBlock);
+        return (point.getCodeElement() instanceof CtExpression) || point.getCodeElement() instanceof CtBreak;
     }
 }

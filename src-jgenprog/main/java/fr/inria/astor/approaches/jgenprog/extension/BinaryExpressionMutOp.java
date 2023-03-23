@@ -68,7 +68,6 @@ public class BinaryExpressionMutOp extends ExpressionMutOp {
         //due to the modificationpoint selection strategy selects all elements of different levels, here is a redundancy to filter all sub-elements of itself.
 //        boolean flag = (point.getCodeElement().getElements(new TypeFilter(CtBinaryOperator.class)).size() > 0
 //                || point.getCodeElement().getElements(new TypeFilter(CtUnaryOperator.class)).size() > 0);
-        boolean flag = point.getCodeElement() instanceof CtBinaryOperator || point.getCodeElement() instanceof CtUnaryOperator;
-        return flag;
+        return point.getCodeElement() instanceof CtBinaryOperator || point.getCodeElement() instanceof CtUnaryOperator;
     }
 }

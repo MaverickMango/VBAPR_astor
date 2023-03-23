@@ -25,7 +25,7 @@ public class TestArgsUtil {
         cs.command.put("-skipValidation", "true");
         cs.command.put("-skipfaultlocalization", "true");
 //        cs.command.put("-useGTsizeAsPopSize", "true");
-//        cs.command.put("-useVariableEdit", "true");
+        cs.command.put("-useVariableEdit", "true");
 //        cs.command.put("-addSimilarityComparasion", "true");
 //        cs.command.put("-stopfirst", "true");
         cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");

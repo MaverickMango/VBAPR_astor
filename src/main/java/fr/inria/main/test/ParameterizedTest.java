@@ -35,10 +35,10 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
 //        String[][] data = {
-//                {"Chart" , "8"}
+//                {"Chart" , "1"}
 //        };
 //        return Arrays.asList(data);
-
+//
 //        String fileName = FileTools.baseDir + "../" + "bugs4.txt";
 //        return readPVInfos(fileName);
 
@@ -47,7 +47,7 @@ public class ParameterizedTest{
         List<String[]> proj_ids = new ArrayList<>();
         for (String map :mapping) {
             String[] temp = map.split(",");
-            if (success.contains(temp[0]))//successful bugs condition: success.contains(temp[0])；failed bugs condition: !success.contains(temp[0])
+            if (!success.contains(temp[0]))//successful bugs condition: success.contains(temp[0])；failed bugs condition: !success.contains(temp[0])
                 proj_ids.add(new String[]{temp[1],temp[2]});
         }
         return proj_ids;

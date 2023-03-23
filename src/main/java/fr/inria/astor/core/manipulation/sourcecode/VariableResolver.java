@@ -384,7 +384,7 @@ public class VariableResolver {
 		// Now, we check there is not name conflict with the induction variable.
 		boolean nameConflict = nameConflict(varContext, varInductionCollected);
 		if (nameConflict) {
-			logger.debug("Name Conflict " + varAccessCollected);
+			logger.debug("Name Conflict " );//+ varAccessCollected
 			return null;
 		}
 
