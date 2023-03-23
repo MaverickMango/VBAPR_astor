@@ -959,10 +959,14 @@ public class VariableResolver {
 					// We replace the Write by a Var writter
 					newVarAccessDestination = MutationSupporter.getFactory().Core().createVariableWrite();
 					newVarAccessDestination.setVariable(newVarReference);
+					newVarAccessDestination.setType(newVarReference.getType());
+					newVarAccessDestination.setParent(varNew);
 
 				} else { // read
 					newVarAccessDestination = MutationSupporter.getFactory().Code().createVariableRead(newVarReference,
 							varNew.hasModifier(ModifierKind.STATIC));
+					newVarAccessDestination.setType(newVarReference.getType());
+					newVarAccessDestination.setParent(varNew);
 				}
 
 			} else
@@ -978,6 +982,8 @@ public class VariableResolver {
 
 				}
 				newVarAccessDestination.setVariable(newVarReference);
+				newVarAccessDestination.setType(newVarReference.getType());
+				newVarAccessDestination.setParent(varNew);
 			}
 			// At the end, for all cases:
 			if (newVarAccessDestination != null) {

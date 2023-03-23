@@ -51,13 +51,8 @@ public abstract class IngredientBasedOperator extends AstorOperator {
 
 			if (ingredientsAfterTransformation == null) {
 				log.debug("Empty transformations mp " + modificationPoint + " " + ingredient);
-
-				if (!(this instanceof InsertStatementOp)) {
 					return operatorIntances;
-				}
-
 			}
-
 			for (Ingredient ingredientTransformed : ingredientsAfterTransformation) {
 
 				OperatorInstance operatorInstance = this.createOperatorInstance(modificationPoint,

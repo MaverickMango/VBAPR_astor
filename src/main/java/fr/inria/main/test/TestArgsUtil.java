@@ -35,6 +35,7 @@ public class TestArgsUtil {
         cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
         cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");//ReplaceExpOperatorSpace Type
         cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelecIngreSearchStrategy4Exhausted");
+        cs.command.put("-ingredienttransformstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.GTBIngredientTransformationStrategy");
     }
 
     public String[] getArgs(String proj, String version) {

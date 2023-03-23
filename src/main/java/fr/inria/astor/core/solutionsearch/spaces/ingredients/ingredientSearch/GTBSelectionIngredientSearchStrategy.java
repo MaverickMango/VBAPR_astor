@@ -9,6 +9,7 @@ import fr.inria.astor.core.entities.Ingredient;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.entities.SuspiciousModificationPoint;
 import fr.inria.astor.core.manipulation.MutationSupporter;
+import fr.inria.astor.core.manipulation.sourcecode.VariableResolver;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.RandomManager;
 import fr.inria.astor.core.solutionsearch.spaces.ingredients.IngredientPool;
@@ -78,7 +79,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                     || (in.getCode() instanceof CtIf) || (in.getCode() instanceof CtReturn)
                     || (in.getCode() instanceof CtBreak)) */
             if (in.getCode().getParent() instanceof CtBlockImpl) {
-                in.setDerivedFrom(in.getCode().getParent());
+                in.setDerivedFrom(in.getCode());
                 stmts.add(in);
             }
         }
@@ -104,14 +105,14 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             if (in.getCode() instanceof CtExpression && point.getCodeElement() instanceof CtExpression) {
                 CtTypeReference a = ((CtExpression) in.getCode()).getType();
                 CtTypeReference b = ((CtExpression) point.getCodeElement()).getType();
-                if (a.equals(b) || isCompatiblePrimitive((CtTypedElement) in.getCode(), (CtTypedElement) point.getCodeElement())) {
-                    in.setDerivedFrom(in.getCode().getParent());
+                if (VariableResolver.areTypesCompatible(a, b)) {
+                    in.setDerivedFrom(in.getCode());
                     exps.add(in);
                 }
                 continue;
             }
             if (in.getCode().getClass().equals(point.getCodeElement().getClass())) {
-                in.setDerivedFrom(in.getCode().getParent());
+                in.setDerivedFrom(in.getCode());
                 exps.add(in);
             }
         }
@@ -185,7 +186,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             for (CtVariable context : contexts) {//target
                 if (context.getSimpleName().equals(point.getCodeElement().toString()))
                     continue;
-                if (!isCompatiblePrimitive(mpvar, context) && !mpvar.getType().equals(context.getType()))//[poi]check special type
+                if (!VariableResolver.areTypesCompatible(mpvar.getType(), context.getType()))//[poi]check special type
                     continue;
                 Ingredient ingredient = new Ingredient(CodeAddFactory.createVariableRead(context));
                 ingredient.setDerivedFrom(context);
@@ -263,8 +264,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
             }
             if (((CtInvocation<?>) point.getCodeElement()).getArguments() != null) {
                 for (CtExpression arg :((CtInvocation<?>) point.getCodeElement()).getArguments()) {
-                    if (!(arg.getType().equals(point.getCodeElement()))
-                            && !isCompatiblePrimitive(arg, (CtTypedElement) point.getCodeElement())) {
+                    if (!VariableResolver.areTypesCompatible(arg.getType(), ((CtInvocation<?>) point.getCodeElement()).getType())) {
                         continue;
                     }
                     Ingredient ingredient = new Ingredient(CodeAddFactory.createExpression(arg, point.getCodeElement().getParent()));
@@ -279,18 +279,18 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         for (Ingredient in :base) {
             if (in.getChacheCodeString().equals(point.getCodeElement().toString().replaceAll("\\s+"," ")))
                 continue;
-            if ((in.getCode() instanceof CtStatement && in.getCode().getParent() instanceof CtBlock
-                    && (parent instanceof CtAssignment) || parent instanceof CtInvocation)) {//discard super&this mthcall
-                exps.add(in);
-            }
             if (in.getCode() instanceof CtExpression && point.getCodeElement() instanceof CtExpression) {
                 CtTypeReference a = ((CtExpression) in.getCode()).getType();
                 CtTypeReference b = ((CtExpression) point.getCodeElement()).getType();
-                if (!a.equals(b) || !isCompatiblePrimitive((CtTypedElement) in.getCode(), (CtTypedElement) point.getCodeElement())) {
+                if (!VariableResolver.areTypesCompatible(a, b)) {
                     continue;
                 }
             } else if (!in.getCode().getClass().equals(point.getCodeElement().getClass())) {
                 continue;
+            }
+            if ((in.getCode() instanceof CtStatement && in.getCode().getParent() instanceof CtBlock) && parent instanceof CtBlock) {//discard super&this mthcall
+                in.setDerivedFrom(in.getCode());
+                exps.add(in);
             }
             if ((point.getCodeElement() instanceof CtVariableRead || point.getCodeElement() instanceof CtLiteral)
                     && in.getCode() instanceof CtInvocation) {
@@ -298,8 +298,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 if (ininv.getExecutable().getParameters().size() == 1) {
                     CtTypeReference intype = (CtTypeReference) ininv
                             .getExecutable().getParameters().get(0);
-                    if (intype.equals(((CtExpression<?>) point.getCodeElement()).getType())
-                            || isCompatiblePrimitive(ininv, (CtTypedElement) point.getCodeElement())) {//
+                    if (VariableResolver.areTypesCompatible(intype, ((CtExpression<?>) point.getCodeElement()).getType())) {//
                         Ingredient ingredient = new Ingredient(
                                 CodeAddFactory.createInvocationWithVar(ininv, (CtExpression) point.getCodeElement()));
                         if (ingredient.getCode() != null) {// && !contains(exps, ingredient)
@@ -356,14 +355,11 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 }
             }
 
-            if ((parent instanceof CtIf || parent instanceof CtReturn || parent instanceof CtAssignment)) {
-                in.setDerivedFrom(in.getCode().getParent());
-                exps.add(in);//?
-            } else if (!(in.getCode() instanceof CtVariableRead)) {
+            if (!(in.getCode() instanceof CtVariableRead)) {
                 if ("target".equalsIgnoreCase(String.valueOf(point.getCodeElement().getRoleInParent()))
                         && in.getCode() instanceof CtLiteral)
                     continue;
-                in.setDerivedFrom(in.getCode().getParent());
+                in.setDerivedFrom(in.getCode());
                 exps.add(in);
             }
         }

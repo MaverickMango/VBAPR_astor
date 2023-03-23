@@ -28,7 +28,7 @@ public abstract class CacheTransformationStrategy implements IngredientTransform
 	}
 
 	private String getBaseIngredientKey(ModificationPoint modificationPoint, Ingredient baseIngredient) {
-		return getKey(modificationPoint) + baseIngredient.toString();
+		return this.getKey(modificationPoint) + baseIngredient.toString();
 	}
 
 	public boolean alreadyTransformed(ModificationPoint modificationPoint, Ingredient baseIngredient) {

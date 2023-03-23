@@ -46,29 +46,32 @@ public class NoIngredientTransformationWithCheck implements IngredientTransforma
 				elementFromIngredient);
 
 		if (!fit && ConfigurationProperties.getPropertyBool("useVariableEdit")) {
-			List<CtVariable> remaining = new ArrayList<>(modificationPoint.getContextOfModificationPoint());
-			List<CtVariableAccess> temp = new ArrayList<>(VariableResolver._notmapped);
-			while (!fit && !remaining.isEmpty()) {
-				for (CtVariableAccess old :VariableResolver._notmapped) {
-					try {
-						CtVariable variable = remaining.remove((int)RandomManager.nextInt(remaining.size()));//typecheck
-						if (variable.getReference().getType().equals(old.getType())
-								|| (variable.getReference().getType().isPrimitive() && old.getType().isPrimitive())) {
-							CtVariableRead repalceone = CodeAddFactory.createVariableRead(variable);
-							old.replace(repalceone);
-							temp.remove(old);
+			if (!((elementFromIngredient instanceof CtStatementImpl && elementFromIngredient.getParent() instanceof CtBlockImpl)
+					&& ConfigurationProperties.getPropertyBool("skipStmtVariableEdit"))) {
+				List<CtVariable> remaining = new ArrayList<>(modificationPoint.getContextOfModificationPoint());
+				List<CtVariableAccess> temp = new ArrayList<>(VariableResolver._notmapped);
+				while (!fit && !remaining.isEmpty()) {
+					for (CtVariableAccess old : VariableResolver._notmapped) {
+						try {
+							CtVariable variable = remaining.remove((int) RandomManager.nextInt(remaining.size()));//typecheck
+							if (variable.getReference().getType().equals(old.getType())
+									|| (variable.getReference().getType().isPrimitive() && old.getType().isPrimitive())) {
+								CtVariableRead repalceone = CodeAddFactory.createVariableRead(variable);
+								old.replace(repalceone);
+								temp.remove(old);
+							}
+						} catch (Exception e) {
+							log.warn("variable replace error in transform");
+							e.printStackTrace();
 						}
-					} catch (Exception e) {
-						log.warn("variable replace error in transform");
-						e.printStackTrace();
+						if (remaining.isEmpty())
+							break;
 					}
-					if (remaining.isEmpty())
-						break;
-				}
-				if (temp.isEmpty()) {
-					fit = VariableResolver.fitInPlace(modificationPoint.getContextOfModificationPoint(),
-							elementFromIngredient);
-					temp = new ArrayList<>(VariableResolver._notmapped);
+					if (temp.isEmpty()) {
+						fit = VariableResolver.fitInPlace(modificationPoint.getContextOfModificationPoint(),
+								elementFromIngredient);
+						temp = new ArrayList<>(VariableResolver._notmapped);
+					}
 				}
 			}
 		}
