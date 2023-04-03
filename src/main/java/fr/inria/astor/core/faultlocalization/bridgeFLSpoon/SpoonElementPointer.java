@@ -5,15 +5,16 @@ import spoon.reflect.code.*;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtAnnotation;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtTypedElement;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpoonElementPointer extends AbstractProcessor<CtExpression> {
+public class SpoonElementPointer extends AbstractProcessor<CtTypedElement> {
     public static List<CtElement> children = new ArrayList<>();
 
 
-    public void process(CtExpression element) {
+    public void process(CtTypedElement element) {
         if (element instanceof CtNewArray || element instanceof CtTypeAccess
                 || element instanceof CtSuperAccess || element instanceof CtAnnotation
                 //|| element instanceof CtThisAccess //|| element instanceof CtFieldAccess//add field&this

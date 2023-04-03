@@ -3,12 +3,13 @@ package fr.inria.astor.approaches.jgenprog.extension;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.filter.AbstractFilter;
 import spoon.support.reflect.code.CtVariableReadImpl;
 
-public class ExpressionFilter extends AbstractFilter<CtElement> {
+public class ExpressionFilter extends AbstractFilter<CtTypedElement> {
     private String _name;
 
     public ExpressionFilter() {
@@ -49,8 +50,8 @@ public class ExpressionFilter extends AbstractFilter<CtElement> {
     }
 
     @Override
-    public boolean matches(CtElement element) {
-        if (element instanceof CtExpression || element instanceof CtVariable) {
+    public boolean matches(CtTypedElement element) {
+//        if (element instanceof CtExpression || element instanceof CtVariable) {
             if (element instanceof CtSuperAccess
             )//|| element instanceof CtTypeAccess element instanceof CtThisAccess ||
                 return false;
@@ -69,7 +70,7 @@ public class ExpressionFilter extends AbstractFilter<CtElement> {
             if (!res && element instanceof CtVariableRead)
                 res = compare(((CtVariableRead) element).getVariable().getSimpleName());
             return res;
-        }
-        return false;
+//        }
+//        return false;
     }
 }

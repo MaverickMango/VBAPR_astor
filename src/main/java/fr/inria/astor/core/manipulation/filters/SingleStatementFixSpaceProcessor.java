@@ -7,6 +7,7 @@ import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTry;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
+import spoon.support.reflect.code.CtCommentImpl;
 
 /**
  * Processor that retrieves Statements, but excludes blocks, class method and
@@ -25,9 +26,9 @@ public class SingleStatementFixSpaceProcessor extends TargetElementProcessor<CtS
 	}
 
 	@Override
-	public void process(CtStatement element) {
+	public void process(CtStatement element) {//|| element instanceof CtTry || element instanceof CtCatch
 		if (!(element instanceof CtBlock || element instanceof CtClass || element instanceof CtMethod
-				|| element instanceof CtTry || element instanceof CtCatch) && 
+				|| element instanceof CtCommentImpl) &&
 
 				(!(element.toString().startsWith("super"))//(element.getParent() instanceof CtBlock) &&
 				|| ConfigurationProperties.getPropertyBool("manipulatesuper"))) {

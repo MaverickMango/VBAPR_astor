@@ -72,7 +72,7 @@ public class FileTools {
                     nameSet.add(str);
                 else
                     continue;
-                List<CtElement> temp = element.getElements(new ExpressionFilter(str));
+                List<CtTypedElement> temp = element.getElements(new ExpressionFilter(str));
                 flag = flag || temp.size() != 0;
             }
         }
@@ -518,13 +518,13 @@ public class FileTools {
         filter.set_name(name);
         List<CtElement> list = new ArrayList<>();
         for (CtStatement stmt :stmts) {
-            List<CtElement> t = stmt.getElements(filter);
+            List<CtTypedElement> t = stmt.getElements(filter);
             list.addAll(t);
         }
         return list;
     }
 
-    public static boolean setGTElements() throws FileNotFoundException {
+    public static boolean setGTElements(MutationSupporter mutatorExecutor) throws FileNotFoundException {
         String lowerP = proj.toLowerCase();
         String buggyFileDir = FileTools.buggyFileDir + lowerP + "/" + lowerP + "_" + version + "_buggy";
         List<String> buggyFilePath = getFilePaths(buggyFileDir, ".java");
@@ -541,12 +541,13 @@ public class FileTools {
             if (factory.Type().getAll().size() == 0) {
                 continue;
             }
-            CtType type = factory.Type().getAll().get(0);
+            CtType type = factory.Type().getAll().get(0);//
             for (GroundTruth gt :gts) {
                 if (!str.replace(".java", "")
                         .replace("/", ".").endsWith(gt.getLocation())) {
                     continue;
                 }
+                CtType type1 = MutationSupporter.getFactory().Type().get(gt.getLocation());//[poi]todo: why not?
                 List<Integer> poses = new ArrayList<>();
                 if (gt.isOnlyOneLine()) {
                     poses.add(gt.getLinenumber());
@@ -583,12 +584,13 @@ public class FileTools {
                 }
 
                 gt.setNodes(nodes);
-                gt.setClazz(gt.getLocation());
+//                gt.setClazz(gt.getLocation());
 //                gt.setClazz(nodes.get(0).getParent(CtClass.class).getSimpleName());//
                 CtTypeMember parentMth = nodes.get(0).getParent(CtMethod.class);
                 if (parentMth == null)
                     parentMth = nodes.get(0).getParent(CtConstructor.class);
-                gt.setMethod(parentMth.getSimpleName());
+                gt.setMethod(parentMth);
+                gt.setClazz(parentMth.getParent(CtClass.class));
             }
         }
         return true;

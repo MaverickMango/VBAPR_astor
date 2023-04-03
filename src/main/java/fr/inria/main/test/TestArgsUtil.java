@@ -17,6 +17,9 @@ public class TestArgsUtil {
     private String ftsDir = baseDir + "failed_tests/";//...proj/version.txt
     private String locationDir = outputSrc + "Defects4jProjs/";//proj_version/  //must be absolute path
 
+    public TestArgsUtil(CommandSummary cs){
+        this.cs = cs;
+    }
     public TestArgsUtil() {
         this.cs = new CommandSummary();
         cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR4Exhausted");

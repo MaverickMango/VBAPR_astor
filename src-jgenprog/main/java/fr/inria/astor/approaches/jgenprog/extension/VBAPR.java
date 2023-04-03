@@ -41,11 +41,42 @@ public class VBAPR  extends JGenProg {
     protected static Logger detailLog = Logger.getLogger("DetailLog");
     protected static Logger fitASim = Logger.getLogger("FitASim");
 
+    private Map<String, List<OperatorInstance>> cache;
+
     public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
         FileTools.getGTs(FileTools.getInfos());
-        FileTools.setGTElements();
+        FileTools.setGTElements(mutatorExecutor);
+        cache = new HashMap<>();
 //        log.error("vbapr error log");
+    }
+
+    private String getKey(ModificationPoint modifPoint, AstorOperator astorOperator) {
+        return modifPoint.identified + "-" + modifPoint.getCodeElement().toString() + "-" + astorOperator.toString();
+    }
+
+    boolean isOpInstanceUsed(OperatorInstance operatorInstance) {
+        String key = getKey(operatorInstance.getModificationPoint(), operatorInstance.getOperationApplied());
+        if (!cache.containsKey(key)) {
+            cache.put(key, new ArrayList<>());
+        }
+        boolean flag = cache.get(key).contains(operatorInstance);
+        if (!flag) {
+            cache.get(key).add(operatorInstance);
+        }
+        return flag;
+    }
+
+    boolean isOpInstanceUsed(ModificationPoint modifPoint, AstorOperator astorOperator) {
+        String key = getKey(modifPoint, astorOperator);
+        if (!cache.containsKey(key)) {
+            cache.put(key, new ArrayList<>());
+        }
+        boolean flag = cache.get(key).contains(new OperatorInstance(modifPoint, astorOperator, null, null));
+        if (!flag) {
+            cache.get(key).add(new OperatorInstance(modifPoint, astorOperator, null, null));
+        }
+        return flag;
     }
 
     boolean isOpInstanceUsed(ModificationPoint modifPoint, AstorOperator astorOperator, CtElement modified) {
@@ -78,7 +109,7 @@ public class VBAPR  extends JGenProg {
                 continue;
             if (operatorSelected.canBeAppliedToPoint(modificationPoint)) {
                 if (!operatorSelected.needIngredient()) {
-                    if (isOpInstanceUsed(modificationPoint, operatorSelected, null))
+                    if (isOpInstanceUsed(modificationPoint, operatorSelected))
                         continue;
                     operatorInstances = operatorSelected.createOperatorInstances(modificationPoint);
                 } else {
@@ -93,7 +124,7 @@ public class VBAPR  extends JGenProg {
                             this.ingredientTransformationStrategy);
                     operatorInstances = new ArrayList<>();
                     for (OperatorInstance op : instances) {
-                        if (!isOpInstanceUsed(modificationPoint, operatorSelected, op.getModified()))
+                        if (!isOpInstanceUsed(op))
                             operatorInstances.add(op);
                     }
                 }

@@ -1,6 +1,9 @@
 package fr.inria.astor.util;
 
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtTypeMember;
 
 import java.util.List;
 
@@ -13,8 +16,8 @@ public class GroundTruth {
     private boolean onlyOneLine = false;
     private int linenumber;
     private boolean isExp = false;
-    private String clazz = "";
-    private String method = "";
+    private CtClass clazz = null;
+    private CtTypeMember method = null;
 
     public GroundTruth(String location) {
         this.location = location;
@@ -34,19 +37,19 @@ public class GroundTruth {
         setExp(name);
     }
 
-    public String getClazz() {
+    public CtClass getClazz() {
         return clazz;
     }
 
-    public void setClazz(String clazz) {
+    public void setClazz(CtClass clazz) {
         this.clazz = clazz;
     }
 
-    public String getMethod() {
+    public CtTypeMember getMethod() {
         return method;
     }
 
-    public void setMethod(String method) {
+    public void setMethod(CtTypeMember method) {
         this.method = method;
     }
 

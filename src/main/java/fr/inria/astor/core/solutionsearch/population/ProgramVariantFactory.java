@@ -160,11 +160,13 @@ public class ProgramVariantFactory {
 		} else {
 //			 //We do not have suspicious, so, we create modification for each
 //			 //statement
-//			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance);
-//			progInstance.getModificationPoints().addAll(pointsFromAllStatements);
-
-			List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance, FileTools.GTs);
-			progInstance.getModificationPoints().addAll(pointsFromAllStatements);
+			if (FileTools.GTs == null) {
+				List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance);
+				progInstance.getModificationPoints().addAll(pointsFromAllStatements);
+			} else {
+				List<SuspiciousModificationPoint> pointsFromAllStatements = createModificationPoints(progInstance, FileTools.GTs);
+				progInstance.getModificationPoints().addAll(pointsFromAllStatements);
+			}
 		}
 		log.info("Total ModPoint created: " + progInstance.getModificationPoints().size());
 
@@ -177,23 +179,71 @@ public class ProgramVariantFactory {
 	}
 
 	private List<SuspiciousModificationPoint> createModificationPoints(ProgramVariant progInstance, List<GroundTruth> gts) {
-
 		List<SuspiciousModificationPoint> suspGen = new ArrayList<>();
 		List<Integer> lines = new ArrayList<>();
 		for (GroundTruth gt :gts) {
 			List<CtElement> nodes = gt.getNodes();
+			List<CtVariable> contextOfPoint = null;
 			for (CtElement element :nodes) {
-				SuspiciousCode sus = new SuspiciousCode(gt.getClazz(), gt.getMethod(), 1.0);
+				SuspiciousCode sus = new SuspiciousCode(gt.getClazz().getQualifiedName(), gt.getMethod().getReference().getSimpleName(), 1.0);
+				progInstance.getBuiltClasses().put(gt.getClazz().getQualifiedName(), gt.getClazz());
 				int line = element.getPosition().getLine();
-				if (lines.contains(line))
-					continue;
-				lines.add(line);
 				sus.setLineNumber(line);
-				List<SuspiciousModificationPoint> temp = this.createModificationPoints(sus, progInstance);
-				if (temp != null) {
-					suspGen.addAll(temp);
-				} else {
+				List<CtElement> ctSuspects = null;
+				try {
+					if (element.getParent() instanceof CtBlock && !lines.contains(line)) {
+						ctSuspects = new ArrayList<>();
+						ctSuspects.add(element);
+						lines.add(line);
+					} else {
+						if (ConfigurationProperties.getPropertyBool("extractSubVar")) {
+							ctSuspects = retrieveCtElement(element);
+							// The parent first, so I inverse the order
+							Collections.reverse(ctSuspects);
+						} else {
+							ctSuspects = new ArrayList<>();
+							ctSuspects.add(element);
+						}
+						if (!lines.contains(line)) {
+							CtStatement stmt = element.getParent(CtStatement.class);
+							while (!(stmt.getParent() instanceof CtBlock)){
+								stmt = stmt.getParent(CtStatement.class);
+							}
+							ctSuspects.add(stmt);
+							lines.add(line);
+						}
+					}
+				} catch (Exception e) {
 					detailLog.error("class of sus " + sus + "can not be resolved. May be gt path error.");
+					e.printStackTrace();
+					continue;
+				}
+				// if we are not able to retrieve suspicious CtElements, we return
+				if (ctSuspects.isEmpty()) {
+					continue;
+				}
+				// We take the first element for getting the context (as the remaining
+				// have the same location, it's not necessary)
+				if (contextOfPoint == null) {
+					contextOfPoint = VariableResolver.searchVariablesInScope(ctSuspects.get(ctSuspects.size() - 1));
+				}
+				List<CtElement> filteredTypeByLine = ctSuspects;
+				// remove the elements that are instance of NoSourcePosition
+				filteredTypeByLine = filteredTypeByLine.stream().filter(ctElement ->
+								!(ctElement.getPosition() instanceof NoSourcePosition))
+						.collect(Collectors.toList());
+				// For each filtered element, we create a ModificationPoint.
+				for (CtElement ctElement : filteredTypeByLine) {
+					SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
+					modifPoint.setSuspicious(sus);
+					modifPoint.setCtClass(gt.getClazz());
+					modifPoint.setCodeElement(ctElement);
+					modifPoint.setContextOfModificationPoint(contextOfPoint);
+					suspGen.add(modifPoint);
+					log.debug("--ModifPoint:" + ctElement.getClass().getSimpleName() + ", suspValue "
+							+ sus.getSuspiciousValue() + ", line " + ctElement.getPosition().getLine() + ", file "
+							+ ((ctElement.getPosition().getFile() == null) ? "-null-file-"
+							: ctElement.getPosition().getFile().getName()));
 				}
 			}
 		}
@@ -313,21 +363,6 @@ public class ProgramVariantFactory {
 				.collect(Collectors.toList());
 		// For each filtered element, we create a ModificationPoint.
 		for (CtElement ctElement : filteredTypeByLine) {
-//			if ((ctElement instanceof CtInvocation || ctElement instanceof CtAssignment)
-//					&& !ReadFileUtil.hasThisElement(ctElement))
-//				continue;
-			if (!FileTools.hasThisElement(ctElement)) {//!(ctElement instanceof CtStatement) &&
-//				if (!ReadFileUtil.hasThisElement(ctElement.getParent(CtLocalVariable.class))
-//						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtAssignment.class))
-//						&& !ReadFileUtil.hasThisElement(ctElement.getParent(CtOperatorAssignment.class))) {
-//					continue;
-//				}
-				if (!((ctElement.getParent(CtAssignment.class) != null
-						&& FileTools.hasThisElement(ctElement.getParent(CtAssignment.class)))
-					|| (ctElement.getParent(CtLocalVariable.class) != null
-						&& FileTools.hasThisElement(ctElement.getParent(CtLocalVariable.class)))))
-					continue;
-			}
 			SuspiciousModificationPoint modifPoint = new SuspiciousModificationPoint();
 			modifPoint.setSuspicious(suspiciousCode);
 			modifPoint.setCtClass(ctclasspointed);

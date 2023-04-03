@@ -140,10 +140,10 @@ public class CodeAddFactory {
         newExp.setVariable(MutationSupporter.getFactory().Core().clone(root.getVariable()));
         newExp.setType(MutationSupporter.getFactory().Core().clone(root.getType()));
 
-        CtTypeReference typecast = MutationSupporter.getFactory().Core().createTypeReference();
-        typecast.setDeclaringType(MutationSupporter.getFactory().Core().clone(typeReference));
-        newExp.addTypeCast(typecast);
-        typecast.setParent(newExp);
+//        CtTypeReference typecast = MutationSupporter.getFactory().Core().createTypeReference();
+//        typecast.setDeclaringType(MutationSupporter.getFactory().Core().clone(typeReference));
+        newExp.addTypeCast(typeReference);
+//        typecast.setParent(newExp);
         newExp.setParent(root.getParent());
         return newExp;
     }

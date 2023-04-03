@@ -22,6 +22,7 @@ public class GTBIngredientTransformationStrategy extends RandomTransformationStr
     @Override
     public List<Ingredient> transform(ModificationPoint modificationPoint, Ingredient baseIngredient) {
 
+//        add this condition may lead to outofmemoery exception(java heap space)
         if (this.alreadyTransformed(modificationPoint, baseIngredient)) {
             return getCachedTransformations(modificationPoint, baseIngredient);
         }
@@ -42,7 +43,7 @@ public class GTBIngredientTransformationStrategy extends RandomTransformationStr
         if (mapping.getNotMappedVariables().isEmpty()) {
             if (mapping.getMappedVariables().isEmpty()) {
                 if ((codeElementToModifyFromBase instanceof CtStatementImpl && codeElementToModifyFromBase.getParent() instanceof CtBlockImpl)
-                        && ConfigurationProperties.getPropertyBool("useVariableEdit")) {
+                        /*&& ConfigurationProperties.getPropertyBool("useVariableEdit")*/) {
                     //if ingredient does not affect variables in gt, just drop it
                     boolean isInHasGTVars = !codeElementToModifyFromBase.getElements(new StatementFilterWithGT()).isEmpty();
                     if (!isInHasGTVars)
@@ -80,5 +81,10 @@ public class GTBIngredientTransformationStrategy extends RandomTransformationStr
         this.storingIngredients(modificationPoint, baseIngredient, result);
 
         return result;
+    }
+
+    public String getKey(ModificationPoint modPoint) {
+        String lockey = modPoint.getCodeElement().toString();
+        return lockey;
     }
 }

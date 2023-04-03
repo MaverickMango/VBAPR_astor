@@ -30,12 +30,12 @@ public class GTBSelecIngreSearchStrategy4Exhausted extends GTBSelectionIngredien
             return null;
         }
         String eleKey = getKey(modificationPoint, operationType);
-        if (!this.cache.containsKey(eleKey)) {
-            this.cache.put(eleKey, new ArrayList<>());
-        }
-        if (!this.cache.get(eleKey).isEmpty()) {
-            removeUsed(baseElements, eleKey);
-        }
+//        if (!this.cache.containsKey(eleKey)) {
+//            this.cache.put(eleKey, new ArrayList<>());
+//        }
+//        if (!this.cache.get(eleKey).isEmpty()) {
+//            removeUsed(baseElements, eleKey);
+//        }
 
         int elementsFromFixSpace = baseElements.size();
         log.debug("Templates availables" + elementsFromFixSpace);

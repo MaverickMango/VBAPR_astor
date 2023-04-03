@@ -4,10 +4,7 @@ import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.entities.OperatorInstance;
 import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.entities.StatementOperatorInstance;
-import spoon.reflect.code.CtBlock;
-import spoon.reflect.code.CtConstructorCall;
-import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.*;
 import spoon.reflect.reference.CtExecutableReference;
 
 /**
@@ -82,8 +79,12 @@ public class InsertBeforeOp extends InsertStatementOp {
 		if (!apply)
 			return apply;
 
-		// do not insert after a return
+		// do not insert before this or super
 		if (point.getCodeElement() instanceof CtConstructorCall) {
+			return false;
+		}
+		if (point.getCodeElement() instanceof CtInvocation &&
+				(point.getCodeElement().toString().startsWith("this") || point.getCodeElement().toString().startsWith("super"))) {
 			return false;
 		}
 
