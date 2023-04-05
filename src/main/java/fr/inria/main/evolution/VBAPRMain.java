@@ -86,13 +86,16 @@ public class VBAPRMain extends AbstractMain {
 			core = createEngineFromArgument(customengine, mutSupporter, projectFacade);
 
 		}
-		if (FileTools.GTs.isEmpty())
-			return null;
 
 		// Loading extension Points
 		core.loadExtensionPoints();
 
 		core.initModel();
+
+		FileTools.getInfos();
+		FileTools.getGTs(FileTools.getInfos());
+		if (!FileTools.setGTElements())
+			return null;
 
 		try {
 			if (ConfigurationProperties.getPropertyBool("skipfaultlocalization")) {
