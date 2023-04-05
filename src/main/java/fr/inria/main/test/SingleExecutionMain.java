@@ -17,8 +17,8 @@ public class SingleExecutionMain {
     public static void main(String[] args) throws Exception {
         proj = args[0];
         version = args[1];
-        main = new VBAPRMain();
         argsUtil = new TestArgsUtil();
+        main = new VBAPRMain();
         main.execute(argsUtil.getArgs(proj, version));
         AstorCoreEngine engine = main.getEngine();
         List<ProgramVariant> solutions = engine.getSolutions();

@@ -729,7 +729,7 @@ public class VBAPR  extends JGenProg {
 //			}
         }
         if (flag) {
-            infolog.info(this.getSolutionData(outputs, this.generationsExecuted) + "\n");
+            log.info(this.getSolutionData(outputs, this.generationsExecuted) + "\n");
             patchInfo = createStatsForPatches(outputs, generationsExecuted, dateInitEvolution);
         } else {
             patchInfo = new ArrayList<>();

@@ -5,10 +5,7 @@ import org.junit.runner.JUnitCore;
 
 public class ExecutionMain {
 
-    static String filename = FileTools.outputSrc;
-
     public static void main(String[] args) {
-        ParameterizedTest.fileName = filename + args[0];
         run(ParameterizedTest.class);
     }
 
