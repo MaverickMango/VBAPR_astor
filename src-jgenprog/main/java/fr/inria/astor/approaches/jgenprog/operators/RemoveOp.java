@@ -9,10 +9,7 @@ import fr.inria.astor.core.entities.ProgramVariant;
 import fr.inria.astor.core.entities.StatementOperatorInstance;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.util.MapList;
-import spoon.reflect.code.CtBlock;
-import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtReturn;
-import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
@@ -99,6 +96,11 @@ public class RemoveOp extends StatatementIngredientOperator implements Statement
 		if (point.getCodeElement() instanceof CtReturn
 				&& parentMethd.getBody().getLastStatement().equals(point.getCodeElement())) {
 			return false;
+		}
+		//do not remove constructor call
+		if (point.getCodeElement() instanceof CtInvocation) {
+			if (((CtInvocation<?>) point.getCodeElement()).getExecutable().isConstructor())
+				return false;
 		}
 
 		// Otherwise, accept the element// add parent block check! invocation in stmt dame!

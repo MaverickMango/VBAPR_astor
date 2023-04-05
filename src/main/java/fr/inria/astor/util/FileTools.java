@@ -524,7 +524,7 @@ public class FileTools {
         return list;
     }
 
-    public static boolean setGTElements(MutationSupporter mutatorExecutor) throws FileNotFoundException {
+    public static boolean setGTElements() throws FileNotFoundException {
         String lowerP = proj.toLowerCase();
         String buggyFileDir = FileTools.buggyFileDir + lowerP + "/" + lowerP + "_" + version + "_buggy";
         List<String> buggyFilePath = getFilePaths(buggyFileDir, ".java");
@@ -535,7 +535,6 @@ public class FileTools {
         for (String str :buggyFilePath) {
             Factory factory = MutationSupporter.createFactory();
             SpoonModelBuilder compiler = new JDTBasedSpoonCompiler(factory);
-//            compiler.getFactory().getEnvironment().setLevel("OFF");
             compiler.addInputSource(SpoonResourceHelper.createResource(new File(str)));
             compiler.build();
             if (factory.Type().getAll().size() == 0) {
@@ -547,7 +546,6 @@ public class FileTools {
                         .replace("/", ".").endsWith(gt.getLocation())) {
                     continue;
                 }
-                CtType type1 = MutationSupporter.getFactory().Type().get(gt.getLocation());//[poi]todo: why not?
                 List<Integer> poses = new ArrayList<>();
                 if (gt.isOnlyOneLine()) {
                     poses.add(gt.getLinenumber());

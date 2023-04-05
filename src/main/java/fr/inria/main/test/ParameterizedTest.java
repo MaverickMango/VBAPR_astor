@@ -34,23 +34,24 @@ public class ParameterizedTest{
 
     @Parameterized.Parameters
     public static Collection<String[]> data() {
-//        String[][] data = {
-//                {"Math" , "11"}
-//        };
-//        return Arrays.asList(data);
-//
+        String[][] data = {
+                {"Math" , "11"}
+        };
+        return Arrays.asList(data);
+
 //        String fileName = FileTools.baseDir + "../" + "bugs4.txt";
 //        return readPVInfos(fileName);
 
-        List<String> mapping = FileTools.readFileByLineToList(FileTools.mapping);
-        List<String> success = Arrays.asList(FileTools.readFileByLines(FileTools.outputSrc + "/success_bugs").split(","));
-        List<String[]> proj_ids = new ArrayList<>();
-        for (String map :mapping) {
-            String[] temp = map.split(",");
-            if (!success.contains(temp[0]))//successful bugs condition: success.contains(temp[0])；failed bugs condition: !success.contains(temp[0])
-                proj_ids.add(new String[]{temp[1],temp[2]});
-        }
-        return proj_ids;
+//        List<String> mapping = FileTools.readFileByLineToList(FileTools.mapping);
+//        List<String> success = Arrays.asList(FileTools.readFileByLines(FileTools.outputSrc + "/success_bugs").split(","));
+//        List<String[]> proj_ids = new ArrayList<>();
+//        for (String map :mapping) {
+//            String[] temp = map.split(",");
+//            if (success.contains(temp[0]))//successful bugs condition: success.contains(temp[0])；failed bugs condition: !success.contains(temp[0])
+//                proj_ids.add(new String[]{temp[1],temp[2]});
+//        }
+//        proj_ids = proj_ids.subList(22, proj_ids.size());
+//        return proj_ids;
     }
 
     @BeforeClass
@@ -64,6 +65,7 @@ public class ParameterizedTest{
         main = new VBAPRMain();
         main.execute(args);
         AstorCoreEngine engine = main.getEngine();
+        assertEquals(true, engine.getOriginalVariant().getModificationPoints().size() > 0);
         List<ProgramVariant> solutions = engine.getVariants();
         assertEquals(true, solutions.size() > 0);
     }

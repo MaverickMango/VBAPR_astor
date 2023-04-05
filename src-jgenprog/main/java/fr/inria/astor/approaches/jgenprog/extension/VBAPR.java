@@ -45,8 +45,8 @@ public class VBAPR  extends JGenProg {
 
     public VBAPR(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
-        FileTools.getGTs(FileTools.getInfos());
-        FileTools.setGTElements(mutatorExecutor);
+        setPropertyIfNotDefined(ExtensionPoints.OPERATORS_SPACE.identifier, "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
+        setPropertyIfNotDefined(ExtensionPoints.TARGET_CODE_PROCESSOR.identifier, "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
         cache = new HashMap<>();
 //        log.error("vbapr error log");
     }
