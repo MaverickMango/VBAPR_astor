@@ -249,20 +249,13 @@ public class CodeAddFactory {
                 exe.setParent(newExp);
                 newExp.setType(exe.getType());
                 List<CtTypeReference<?>> paras = newExe.getParameters();
+                assert paras.size() == vars.size();
                 List<CtExpression<?>> args_copy = new ArrayList<>();
-                for (CtTypeReference para :paras) {
-                    Collections.shuffle(vars);
-                    for (CtExpression var :vars) {
-                        if (para.equals(var.getType()) || (para.isPrimitive() && var.getType().isPrimitive())) {
-                            CtExpression copy = MutationSupporter.getFactory().Core().clone(var);
-                            args_copy.add(copy);
-                            copy.setParent(newExp);
-                            break;
-                        }
-                    }
+                for (CtExpression var :vars) {
+                    CtExpression copy = MutationSupporter.getFactory().Core().clone(var);
+                    args_copy.add(copy);
+                    copy.setParent(newExp);
                 }
-                if (args_copy.size() != paras.size())
-                    return null;
                 newExp.setArguments(args_copy);
                 newExp.setParent(old.getParent());
                 newExp.toString();
