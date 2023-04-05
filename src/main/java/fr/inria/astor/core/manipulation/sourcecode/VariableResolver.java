@@ -556,7 +556,7 @@ public class VariableResolver {
 				return true;
 			}
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error("Type Comparison Error: " + e.getMessage());
 		}
 		return false;
 	}
@@ -839,6 +839,9 @@ public class VariableResolver {
 		// the element under analysis
 		CtBlock parentblock = element.getParent(CtBlock.class);
 		CtElement currentElement = element;
+		while (!(currentElement.getParent() instanceof CtBlock)) {
+			currentElement = currentElement.getParent(CtStatement.class);
+		}
 		if (parentblock != null) {
 			int positionEl = parentblock.getStatements().indexOf(currentElement);
 			variables.addAll(VariableResolver.retrieveLocalVariables(positionEl, parentblock));

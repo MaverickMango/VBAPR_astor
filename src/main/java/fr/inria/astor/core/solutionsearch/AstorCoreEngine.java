@@ -136,6 +136,10 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 
 	protected List<ProgramVariant> solutions = new ArrayList<ProgramVariant>();
 
+	public ProgramVariant getOriginalVariant() {
+		return originalVariant;
+	}
+
 	protected ProgramVariant originalVariant = null;
 
 	protected Date dateInitEvolution = new Date();
