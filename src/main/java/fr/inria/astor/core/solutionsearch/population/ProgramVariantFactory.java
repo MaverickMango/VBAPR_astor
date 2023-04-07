@@ -204,7 +204,7 @@ public class ProgramVariantFactory {
 							ctSuspects = new ArrayList<>();
 							ctSuspects.add(element);
 						}
-						if (!lines.contains(line)) {
+						if (ConfigurationProperties.getPropertyBool("extractStmt") && !lines.contains(line)) {
 							CtStatement stmt = element.getParent(CtStatement.class);
 							while (!(stmt.getParent() instanceof CtBlock)){
 								stmt = stmt.getParent(CtStatement.class);

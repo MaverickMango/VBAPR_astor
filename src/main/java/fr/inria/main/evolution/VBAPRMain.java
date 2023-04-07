@@ -187,6 +187,11 @@ public class VBAPRMain extends AbstractMain {
 			return;
 		}
 
+		if (!core.isCompilable) {
+			System.err.println("error project configuration");
+			return;
+		}
+
 		ConfigurationProperties.print();
 
 		core.startEvolution();

@@ -44,7 +44,8 @@ public class ConsistenceTest extends BaseEvolutionaryTest {
                 {"Chart", "20"},
                 {"Math", "11"},
                 {"Math", "58"},
-                {"Math", "85"}
+                {"Math", "85"},
+                {"Lang", "27"}
         };
         return Arrays.asList(data);
     }
@@ -63,10 +64,10 @@ public class ConsistenceTest extends BaseEvolutionaryTest {
         assertEquals(true, engine.getOriginalVariant().getModificationPoints().size() > 0);
         List<ProgramVariant> solutions = engine.getVariants();
         assertEquals(true, solutions.size() > 0);
-        testResult(engine);
+        testResult4exhausted_Edit4Exp_compiled_extractStmt(engine);
     }
 
-    boolean testResult(AstorCoreEngine engine) {
+    boolean testResult4exhausted_Edit4Exp_compiled_extractStmt(AstorCoreEngine engine) {
         if (proj.equals("Lang") && version.equals("27")) {
             PatchHunkStats hunkSolution = getHunkSolution(engine.getPatchInfo(), "(expPos < decPos) || (str.length() > 0)", "CtBinaryOperatorImpl|CtIfImpl");
             Assert.assertNotNull(hunkSolution);

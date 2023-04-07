@@ -141,6 +141,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 	}
 
 	protected ProgramVariant originalVariant = null;
+	public boolean isCompilable = true;
 
 	protected Date dateInitEvolution = new Date();
 	protected Date dateEngineCreation = new Date();
@@ -950,6 +951,14 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		getMutatorSupporter().saveSourceCodeOnDiskProgramVariant(originalVariant, srcOutputfDefaultOriginal);
 		ConfigurationProperties.setProperty("preservelinenumbers", "true");
 
+		URL[] originalURL = projectFacade.getClassPathURLforProgramVariant(ProgramVariant.DEFAULT_ORIGINAL_VARIANT);
+
+		CompilationResult compilation = compiler.compile(this.originalVariant, originalURL);
+		boolean isCompilable = compilation.compiles();
+		if (!isCompilable) {
+			this.isCompilable = false;
+			throw new IllegalArgumentException("Compilation Failed! Some arguments for this project might not be introduced!\n" + compilation.getErrorList());
+		}
 		if (originalVariant.getModificationPoints().isEmpty()) {
 			// throw new IllegalStateException("Variant without any modification point. It
 			// must have at least one.");
