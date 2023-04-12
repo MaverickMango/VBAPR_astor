@@ -11,10 +11,10 @@ import java.util.*;
 
 public class PatchCorrectnessTest {
     String[] projsConsidered = {"Chart", "Math", "Time", "Lang"};
+    String baseDir = "/home/liumengjiao/Desktop/";
 
     @Test
     public void testSolutionFound() {
-        String baseDir = "/mnt/workspace/";
         String srcBase = baseDir + "vbaprinfo/d4j_bug_info/src_path/";
         String groundtruthBase = baseDir + "VBAPRResult/Defects4jProjs_fix/";
         String buggyBase = baseDir + "VBAPRResult/Defects4jProjs/";

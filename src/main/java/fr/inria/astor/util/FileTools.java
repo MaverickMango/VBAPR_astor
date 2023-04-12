@@ -537,6 +537,12 @@ public class FileTools {
         return type;
     }
 
+    public static CtType getCtTypeFromLocate(String qualifiedName) throws FileNotFoundException{
+        Factory factory = MutationSupporter.getFactory();
+        CtType type = factory.Type().get(qualifiedName);
+        return type;
+    }
+
     public static boolean setGTElements() throws FileNotFoundException {
         String lowerP = proj.toLowerCase();
         String buggyFileDir = FileTools.buggyFileDir + lowerP + "/" + lowerP + "_" + version + "_buggy";
@@ -546,13 +552,13 @@ public class FileTools {
             return false;
         }
         for (String str :buggyFilePath) {
-            CtType type = getCtTypeFromFile(str);//
-            if (type == null) {
-                continue;
-            }
             for (GroundTruth gt :gts) {
                 if (!str.replace(".java", "")
                         .replace("/", ".").endsWith(gt.getLocation())) {
+                    continue;
+                }
+                CtType type = getCtTypeFromLocate(gt.getLocation());
+                if (type == null) {
                     continue;
                 }
                 List<Integer> poses = new ArrayList<>();
@@ -910,5 +916,18 @@ public class FileTools {
         }
 
         return message;
+    }
+
+    public static String firstToUpperCase(String root) {
+        char[] target = root.toCharArray();
+        target[0] = toUpperCase(target[0]);
+        return String.valueOf(target);
+    }
+
+    private static char toUpperCase(char root) {
+        if (97 <= root && root <= 122) {
+            root ^= 32;
+        }
+        return root;
     }
 }

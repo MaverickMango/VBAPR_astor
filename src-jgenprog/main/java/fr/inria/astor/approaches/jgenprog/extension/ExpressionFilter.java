@@ -52,7 +52,7 @@ public class ExpressionFilter extends AbstractFilter<CtTypedElement> {
     @Override
     public boolean matches(CtTypedElement element) {
 //        if (element instanceof CtExpression || element instanceof CtVariable) {
-            if (element instanceof CtSuperAccess
+            if (element instanceof CtSuperAccess || element instanceof CtComment
             )//|| element instanceof CtTypeAccess element instanceof CtThisAccess ||
                 return false;
             String str = "";

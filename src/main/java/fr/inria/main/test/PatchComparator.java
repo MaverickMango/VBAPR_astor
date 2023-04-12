@@ -4,6 +4,7 @@ import fr.inria.astor.util.FileTools;
 import gumtree.spoon.AstComparator;
 import gumtree.spoon.diff.Diff;
 import gumtree.spoon.diff.operations.Operation;
+import org.apache.commons.lang3.StringUtils;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
@@ -29,6 +30,11 @@ public class PatchComparator {
 
     public static boolean sameComparedByDiff(Diff diff) {
         return diff.getRootOperations().isEmpty();
+    }
+
+    public static boolean sameComparedByStr(CtType type1, CtType type2) {
+        String diff = StringUtils.difference(type1.toString().replaceAll("\\s+", " "), type2.toString().replaceAll("\\s+", " "));
+        return diff == null || "".equals(diff);
     }
 
     public static List<Operation> getActionsWithFile(File buggyFilePath, File repairFilePath) throws Exception {

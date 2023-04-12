@@ -64,7 +64,7 @@ public class TestArgsUtil {
         return cs.flat();
     }
 
-    private String[] getCompilanceLevel(String proj) {
+    public String[] getCompilanceLevel(String proj) {
         String[] levels = new String[2];
         levels[0] = "8";
         switch (proj) {

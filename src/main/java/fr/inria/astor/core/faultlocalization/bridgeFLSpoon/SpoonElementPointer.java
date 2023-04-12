@@ -18,7 +18,7 @@ public class SpoonElementPointer extends AbstractProcessor<CtTypedElement> {
         if (element instanceof CtNewArray || element instanceof CtTypeAccess
                 || element instanceof CtSuperAccess || element instanceof CtAnnotation
                 //|| element instanceof CtThisAccess //|| element instanceof CtFieldAccess//add field&this
-                || element instanceof CtVariableWrite)//|| element instanceof CtLiteral
+                || element instanceof CtComment)//|| element instanceof CtLiteral
             return;
         if (element.getType() != null) {
 //            if (element instanceof CtLiteralImpl && !(element.getType().toString().equals("boolean")))

@@ -34,13 +34,13 @@ public class ParameterizedTest{
 
     @Parameterized.Parameters
     public static Collection<String[]> data() {
-        String[][] data = {
-                {"Math" , "11"}
-        };
-        return Arrays.asList(data);
+//        String[][] data = {
+//                {"Math" , "11"}
+//        };
+//        return Arrays.asList(data);
 
-//        String fileName = FileTools.baseDir + "../" + "bugs4.txt";
-//        return readPVInfos(fileName);
+        String fileName = FileTools.baseDir + "../" + "bugs4.txt";
+        return readPVInfos(fileName);
 
 //        List<String> mapping = FileTools.readFileByLineToList(FileTools.mapping);
 //        List<String> success = Arrays.asList(FileTools.readFileByLines(FileTools.outputSrc + "/success_bugs").split(","));
@@ -70,7 +70,7 @@ public class ParameterizedTest{
         assertEquals(true, solutions.size() > 0);
     }
 
-    @Test
+//    @Test
     public void testCommand() throws IOException, InterruptedException {
         StringBuilder stringBuilder = new StringBuilder();
 //        String cmd = "cd /home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8 && /home/liu/Desktop/defects4j/major/bin/ant -f /home/liu/Desktop/defects4j/framework/projects/defects4j.build.xml -Dd4j.home=/home/liu/Desktop/defects4j -Dd4j.dir.projects=/home/liu/Desktop/defects4j/framework/projects -Dbasedir=/home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8 -Dbuild.compiler=javac1.7 -DOUTFILE=/home/liu/Desktop/VBAPRResult/Defects4jProjs/Chart/Chart_8/failing_tests -Dtest.entry.class=org.jfree.data.time.junit.TimeSeriesCollectionTests -Dtest.entry.method=testGetSurroundingItems run.dev.tests";

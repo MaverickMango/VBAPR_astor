@@ -29,7 +29,7 @@ public class VBAPR4ExhaustedGA extends VBAPR4Exhausted {
 
     public VBAPR4ExhaustedGA(MutationSupporter mutatorExecutor, ProjectRepairFacade projFacade) throws JSAPException, FileNotFoundException {
         super(mutatorExecutor, projFacade);
-        String fixFileDir = TestArgsUtil.baseDir + "/fixfiles4spoon/" + FileTools.proj.toLowerCase() + "/" + FileTools.proj.toLowerCase() + "_" + FileTools.version;
+        String fixFileDir = TestArgsUtil.baseDir + "/fixfiles4Astor/" + FileTools.proj.toLowerCase() + "/" + FileTools.proj.toLowerCase() + "_" + FileTools.version;
         List<String> paths = FileTools.getFilePaths(fixFileDir, ".java");
         fixedCtType = new ArrayList<>();
         for (String fixedPath :paths) {
@@ -204,8 +204,7 @@ public class VBAPR4ExhaustedGA extends VBAPR4Exhausted {
             for (CtType fixed :fixedCtType) {
                 if (!modified.getSimpleName().equals(fixed.getSimpleName()))
                     continue;
-                Diff diff = PatchComparator.getDiffResult(modified, fixed);
-                solutionFound = solutionFound || PatchComparator.sameComparedByDiff(diff);
+                solutionFound = solutionFound || PatchComparator.sameComparedByStr(fixed, modified);
             }
         }
         return solutionFound;
