@@ -104,7 +104,7 @@ public class VBAPR4Exhausted extends VBAPR {
         this.setOutputStatus(AstorOutputStatus.EXHAUSTIVE_NAVIGATED);
     }
 
-    private List<OperatorInstance> createInstancesOfOperators(SuspiciousModificationPoint modifPoint) {//for exhausted
+    public List<OperatorInstance> createInstancesOfOperators(SuspiciousModificationPoint modifPoint) {//for exhausted
         List<OperatorInstance> ops = new ArrayList<>();
         AstorOperator[] operators = getOperatorSpace().values();
         for (AstorOperator astorOperator : operators) {
@@ -150,7 +150,7 @@ public class VBAPR4Exhausted extends VBAPR {
         return computePatchDiff(new PatchDiffCalculator(), this.solutions.indexOf(programVariant), solutions_f);
     }
 
-    private boolean computePatchDiff(PatchDiffCalculator cdiff, int idx,
+    public boolean computePatchDiff(PatchDiffCalculator cdiff, int idx,
                                   List<String> solutions_f) throws Exception {
         ProgramVariant solutionVariant = this.solutions.get(idx);
 

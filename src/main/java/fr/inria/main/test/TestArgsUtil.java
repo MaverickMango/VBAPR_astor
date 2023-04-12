@@ -10,7 +10,7 @@ import java.util.List;
 public class TestArgsUtil {
 
     private CommandSummary cs = null;
-    public static final String root = "/home/liumengjiao/Desktop/";
+    public static final String root = "/mnt/workspace/";
     public static final String baseDir = root + "vbaprinfo/d4j_bug_info/";//util files
     public static final String outputSrc = root + "VBAPRResult/";//working dir
     private String srcPathDir = baseDir + "src_path/";//...proj/version.txt
@@ -22,15 +22,15 @@ public class TestArgsUtil {
     }
     public TestArgsUtil() {
         this.cs = new CommandSummary();
-        cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR4Exhausted");
-        cs.command.put("-maxgen", "1");
+        cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR4ExhaustedGA");
+        cs.command.put("-maxgen", "3");
 //        cs.command.put("-scope", "file");
         cs.command.put("-skipValidation", "true");
         cs.command.put("-skipfaultlocalization", "true");
 //        cs.command.put("-useGTsizeAsPopSize", "true");
         cs.command.put("-useVariableEdit", "true");
 //        cs.command.put("-addSimilarityComparasion", "true");
-//        cs.command.put("-stopfirst", "true");
+        cs.command.put("-stopfirst", "true");
         cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");
 //        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
         cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");

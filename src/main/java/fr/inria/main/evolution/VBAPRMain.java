@@ -78,6 +78,7 @@ public class VBAPRMain extends AbstractMain {
 			core = new ScaffoldRepairEngine(mutSupporter, projectFacade);
 
 		} else {
+			FileTools.getInfos();
 			// If the execution mode is any of the predefined, Astor
 			// interpretes as
 			// a custom engine, where the value corresponds to the class name of
@@ -92,7 +93,6 @@ public class VBAPRMain extends AbstractMain {
 
 		core.initModel();
 
-		FileTools.getInfos();
 		FileTools.getGTs(FileTools.getInfos());
 		if (!FileTools.setGTElements())
 			return null;

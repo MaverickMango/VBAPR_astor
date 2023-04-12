@@ -41,10 +41,6 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
             case 4:
                 operators.add(getNextOperator("ReplaceTypeOp"));
                 break;
-            case 5:
-                operators.add(getNextOperator("InsertBeforeOp"));
-                operators.add(getNextOperator("ReplaceExpressionOp"));
-                break;
             default:break;
         }
         return operators;
@@ -84,6 +80,6 @@ public class GTBRepairOperatorSpace  extends OperatorSelectionStrategy {
         if (element instanceof CtLocalVariable) {
             operators.addAll(this.getNextOperator(4));
         }
-        return null;
+        return operators.isEmpty() ? null : operators.get(RandomManager.nextInt(operators.size()));
     }
 }

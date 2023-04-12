@@ -525,6 +525,18 @@ public class FileTools {
         return list;
     }
 
+    public static CtType getCtTypeFromFile(String filePath) throws FileNotFoundException{
+        Factory factory = MutationSupporter.createFactory();
+        SpoonModelBuilder compiler = new JDTBasedSpoonCompiler(factory);
+        compiler.addInputSource(SpoonResourceHelper.createResource(new File(filePath)));
+        compiler.build();
+        if (factory.Type().getAll().size() == 0) {
+            return null;
+        }
+        CtType type = factory.Type().getAll().get(0);//
+        return type;
+    }
+
     public static boolean setGTElements() throws FileNotFoundException {
         String lowerP = proj.toLowerCase();
         String buggyFileDir = FileTools.buggyFileDir + lowerP + "/" + lowerP + "_" + version + "_buggy";
@@ -534,14 +546,10 @@ public class FileTools {
             return false;
         }
         for (String str :buggyFilePath) {
-            Factory factory = MutationSupporter.createFactory();
-            SpoonModelBuilder compiler = new JDTBasedSpoonCompiler(factory);
-            compiler.addInputSource(SpoonResourceHelper.createResource(new File(str)));
-            compiler.build();
-            if (factory.Type().getAll().size() == 0) {
+            CtType type = getCtTypeFromFile(str);//
+            if (type == null) {
                 continue;
             }
-            CtType type = factory.Type().getAll().get(0);//
             for (GroundTruth gt :gts) {
                 if (!str.replace(".java", "")
                         .replace("/", ".").endsWith(gt.getLocation())) {
