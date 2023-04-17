@@ -46,7 +46,7 @@ public class TestArgsUtil {
                 cs.command.put("-maxgen", "1");
                 cs.command.put("-skipValidation", "true");
             }
-            cs.command.put("-saveall", "true");
+//            cs.command.put("-saveall", "true");
             cs.command.put("-stopfirst", "false");
             cs.command.put("-useGTsizeAsPopSize", "false");
             cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelecIngreSearchStrategy4Exhausted");

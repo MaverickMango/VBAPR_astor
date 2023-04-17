@@ -156,6 +156,55 @@ public class PatchDiffCalculator {
 		return diffResults.toString();
 	}
 
+	public String getDiff(ProjectRepairFacade projectFacade,
+						  ProgramVariant programVariant, boolean format, MutationSupporter mutsupporter) throws Exception {
+
+		StringBuilder diffResults = new StringBuilder();
+
+		String difftype = ConfigurationProperties.getProperty("diff_type");
+
+		final String suffix = format ? DIFF_SUFFIX : "";
+
+		// Get the path where the Default variant is located:
+		String srcOutputfDefaultOriginal = projectFacade
+				.getInDirWithPrefix(ProgramVariant.DEFAULT_ORIGINAL_VARIANT + suffix);
+
+		// get the path of a Particular variant
+		String srcOutputSolutionVariant = projectFacade
+				.getInDirWithPrefix(programVariant.currentMutatorIdentifier() + suffix);
+		HashSet<String> types = new HashSet<>();
+
+		for (CtType<?> t : programVariant.computeAffectedClassesByOperators()) {
+			if (types.contains(t.getQualifiedName()))
+				continue;
+			types.add(t.getQualifiedName());
+			String fileName = t.getQualifiedName().replace(".", File.separator) + ".java";
+			File foriginal = new File(srcOutputfDefaultOriginal + File.separator + fileName);
+			File ffixed = new File(srcOutputSolutionVariant + File.separator + fileName);
+
+			log.debug(foriginal.getAbsolutePath());
+			log.debug(ffixed.getAbsolutePath());
+			if (!foriginal.exists() || !ffixed.exists()) {
+				log.error("A file with a solution does not exist");
+				return null;
+			}
+
+			String fileLeft = getPrefixOriginal(difftype, t, fileName);
+			String fileRight = getPrefixPatched(difftype, t, fileName);
+
+			String diff = getDiff(foriginal, ffixed, fileLeft, fileRight);
+			diffResults.append(diff).append('\n');
+		}
+
+		// save the default variant according to the format
+		FileWriter patchWriter = new FileWriter(srcOutputSolutionVariant + File.separator + PATCH_DIFF_FILE_NAME);
+		patchWriter.write(diffResults.toString());
+		patchWriter.flush();
+		patchWriter.close();
+
+		return diffResults.toString();
+	}
+
 
 	public String getPrefixOriginal(String difftype, CtType<?> t, String fileName) {
 		return getPrefix(difftype, t, fileName, true);

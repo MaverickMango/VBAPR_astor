@@ -1,15 +1,13 @@
 package fr.inria.astor.approaches.jgenprog.extension;
 
 import com.martiansoftware.jsap.JSAPException;
-import fr.inria.astor.core.entities.ModificationPoint;
-import fr.inria.astor.core.entities.OperatorInstance;
-import fr.inria.astor.core.entities.ProgramVariant;
-import fr.inria.astor.core.entities.SuspiciousModificationPoint;
+import fr.inria.astor.core.entities.*;
 import fr.inria.astor.core.manipulation.MutationSupporter;
 import fr.inria.astor.core.setup.ConfigurationProperties;
 import fr.inria.astor.core.setup.ProjectRepairFacade;
 import fr.inria.astor.core.stats.Stats;
 import fr.inria.astor.util.FileTools;
+import fr.inria.astor.util.PatchDiffCalculator;
 import fr.inria.main.AstorOutputStatus;
 import fr.inria.main.test.PatchComparator;
 import fr.inria.main.test.TestArgsUtil;
@@ -141,12 +139,20 @@ public class VBAPR4ExhaustedGA extends VBAPR4Exhausted {
 
                         // We validate the variant after applying the operator
                         ProgramVariant solutionVariant = variantFactory.createProgramVariantFromAnother(parentVariant,
-                                generationsExecuted);
-                        solutionVariant.getOperations().put(generationsExecuted, Arrays.asList(pointOperation));
+                                generation);
+                        if (solutionVariant.getAllOperations().contains(pointOperation))
+                            continue;
+                        solutionVariant.getOperations().put(generation, Arrays.asList(pointOperation));
 
-                        applyNewMutationOperationToSpoonElement(pointOperation);
+                        applyPreviousOperationsToVariantModel(solutionVariant, generation);
+                        boolean appliedOperations = applyNewOperationsToVariantModel(solutionVariant, generation);
 
                         boolean solution = false;
+                        if (!appliedOperations) {
+                            log.debug("---Not Operation applied in child variant:" + solutionVariant);
+                            reverseOperationInModel(solutionVariant, generation);
+                            return solutionFound;
+                        }
 
                         if (!ConfigurationProperties.getPropertyBool("skipCompilation")) {
                             solution = processCreatedVariant(solutionVariant, generationsExecuted);
@@ -157,21 +163,22 @@ public class VBAPR4ExhaustedGA extends VBAPR4Exhausted {
 //                            currentStat.increment(Stats.GeneralStatEnum.TOTAL_VARIANTS_COMPILED);
 //                            solutionFound = compareWithFix(solutionVariant);
                             solutionFound = solution;
-                            saveVariant(solutionVariant);
+                            saveVariantWithoutCheck(solutionVariant);
                             this.solutions.add(solutionVariant);
 
                             if (solutionFound && ConfigurationProperties.getPropertyBool("stopfirst")) {
                                 this.setOutputStatus(AstorOutputStatus.STOP_BY_PATCH_FOUND);
+                                reverseOperationInModel(solutionVariant, generation);
                                 return solutionFound;
                             }
                         }
+                        // We undo the operator (for try the next one)
+                        reverseOperationInModel(solutionVariant, generation);
                     } catch (Exception e) {
                         log.error(e);
                     }
 
                     foundOneVariant = true;
-                    // We undo the operator (for try the next one)
-                    undoOperationToSpoonElement(pointOperation);
 
                     if (!belowMaxTime(dateInitEvolution, maxMinutes)) {
 
@@ -193,6 +200,38 @@ public class VBAPR4ExhaustedGA extends VBAPR4Exhausted {
 
         return solutionFound;
     }
+
+    public boolean saveVariantWithoutCheck(ProgramVariant programVariant) throws Exception {
+        final boolean codeFormated = true;
+        savePatchDiff(programVariant, codeFormated);
+        savePatchDiff(programVariant, !codeFormated);
+        return computePatchDiff(new PatchDiffCalculator(), programVariant);
+    }
+
+    private boolean computePatchDiff(PatchDiffCalculator cdiff, ProgramVariant solutionVariant) throws Exception {
+        if (solutionVariant.getPatchDiff() != null) {
+            return true;
+        }
+
+        PatchDiff pdiff = new PatchDiff();
+        boolean format = false;
+
+        String diffPatchOriginalAlign = cdiff.getDiff(getProjectFacade(), solutionVariant,
+                format, this.mutatorSupporter);
+
+        pdiff.setOriginalStatementAlignmentDiff(diffPatchOriginalAlign);
+
+        format = true;
+
+        String diffPatchFormated = cdiff.getDiff(getProjectFacade(), solutionVariant,
+                format, this.mutatorSupporter);
+
+        pdiff.setFormattedDiff(diffPatchFormated);
+
+        solutionVariant.setPatchDiff(pdiff);
+        return true;
+    }
+
 
     public boolean compareWithFix(ProgramVariant solutionVariant) {
         boolean solutionFound = false;
