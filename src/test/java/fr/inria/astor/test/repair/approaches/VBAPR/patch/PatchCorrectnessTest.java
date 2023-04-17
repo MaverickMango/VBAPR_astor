@@ -2,8 +2,6 @@ package fr.inria.astor.test.repair.approaches.VBAPR.patch;
 
 import fr.inria.astor.util.FileTools;
 import fr.inria.main.test.PatchComparator;
-import gumtree.spoon.AstComparator;
-import gumtree.spoon.diff.Diff;
 import org.junit.Test;
 
 import java.io.File;
@@ -11,7 +9,7 @@ import java.util.*;
 
 public class PatchCorrectnessTest {
     String[] projsConsidered = {"Chart", "Math", "Time", "Lang"};
-    String baseDir = "/home/liumengjiao/Desktop/";
+    String baseDir = "/mnt/workspacd/";
 
     @Test
     public void testSolutionFound() {

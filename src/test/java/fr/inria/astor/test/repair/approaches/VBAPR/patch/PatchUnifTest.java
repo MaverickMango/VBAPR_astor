@@ -19,10 +19,10 @@ public class PatchUnifTest {
     String[] projsConsidered = {"Chart", "Math", "Time", "Lang"};//
 
     public void extractFixFilesTest4Astor() throws Exception {
-        String baseDir = "/home/liumengjiao/Desktop/";
+        String baseDir = "/mnt/workspace/";
         String srcBase = baseDir + "vbaprinfo/d4j_bug_info/src_path/";
         String fixBase = baseDir + "vbaprinfo/d4j_bug_info/fixfiles/";
-        TestArgsUtil argsUtil = new TestArgsUtil();
+        TestArgsUtil argsUtil = new TestArgsUtil("");
         VBAPRMain main = new VBAPRMain();
         List<String> projs = FileTools.getDirNames(fixBase);
         for (String proj :projs) {
@@ -43,6 +43,7 @@ public class PatchUnifTest {
                         main.execute(argsUtil.getArgs(FileTools.firstToUpperCase(proj), version));
                     } catch (AssertionError | Exception e) {
                         System.err.println("something went wrong for " + buggyDir);
+                        e.printStackTrace();
                         continue;
                     }
                     CtType ctType = MutationSupporter.getFactory().Type().get(qualifiedName);//
@@ -54,6 +55,5 @@ public class PatchUnifTest {
 
     @Test
     public void test() throws Exception {
-        extractFixFilesTest4Astor();
     }
 }

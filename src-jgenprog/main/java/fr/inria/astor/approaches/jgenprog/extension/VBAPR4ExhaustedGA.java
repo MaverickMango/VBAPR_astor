@@ -13,8 +13,6 @@ import fr.inria.astor.util.FileTools;
 import fr.inria.main.AstorOutputStatus;
 import fr.inria.main.test.PatchComparator;
 import fr.inria.main.test.TestArgsUtil;
-import gumtree.spoon.AstComparator;
-import gumtree.spoon.diff.Diff;
 import org.apache.log4j.Logger;
 import spoon.reflect.declaration.CtType;
 
@@ -155,11 +153,14 @@ public class VBAPR4ExhaustedGA extends VBAPR4Exhausted {
                         }
 
                         if (solution) {
-                            currentStat.increment(Stats.GeneralStatEnum.TOTAL_VARIANTS_COMPILED);
                             variantsForOneGen.add(solutionVariant);
-                            solutionFound = compareWithFix(solutionVariant);
+//                            currentStat.increment(Stats.GeneralStatEnum.TOTAL_VARIANTS_COMPILED);
+//                            solutionFound = compareWithFix(solutionVariant);
+                            solutionFound = solution;
+                            saveVariant(solutionVariant);
+                            this.solutions.add(solutionVariant);
 
-                            if (ConfigurationProperties.getPropertyBool("stopfirst")) {
+                            if (solutionFound && ConfigurationProperties.getPropertyBool("stopfirst")) {
                                 this.setOutputStatus(AstorOutputStatus.STOP_BY_PATCH_FOUND);
                                 return solutionFound;
                             }
@@ -195,11 +196,13 @@ public class VBAPR4ExhaustedGA extends VBAPR4Exhausted {
 
     public boolean compareWithFix(ProgramVariant solutionVariant) {
         boolean solutionFound = false;
-        Set<CtType> modifiedTypes = new HashSet<>();
-        for (OperatorInstance op :solutionVariant.getAllOperations()) {
-            CtType ctType = op.getModificationPoint().getCodeElement().getParent(CtType.class);
-            modifiedTypes.add(ctType);
-        }
+        Set<CtType> modifiedTypes = new HashSet<>(solutionVariant.getClassesAffectedByOperators());
+//        for (OperatorInstance op :solutionVariant.getAllOperations()) {
+//            CtType ctType = op.getModificationPoint().getCodeElement().getParent(CtType.class);
+//            modifiedTypes.add(ctType);
+//        }
+        if (modifiedTypes.size() != fixedCtType.size())
+            return solutionFound;
         for (CtType modified: modifiedTypes) {
             for (CtType fixed :fixedCtType) {
                 if (!modified.getSimpleName().equals(fixed.getSimpleName()))

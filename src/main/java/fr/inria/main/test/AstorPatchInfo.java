@@ -7,6 +7,7 @@ public class AstorPatchInfo {
     private String proj;
     private String id;
     private String mappingIdx;
+    private String status;
     private boolean testSuccess;//1:success; 0:fail
     private int patchSize;
     private double totalTime;
@@ -46,6 +47,14 @@ public class AstorPatchInfo {
     }
     public void addOperatorSize(String key) {
         operatorSize.put(key, getOperatorSize(key) + 1);
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getProj() {

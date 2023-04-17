@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 public class PatchStatTest {
     @Test
     public void testPatchesNums() {
-        String buggyBase = "/home/liumengjiao/Desktop/";
+        String buggyBase = "/mnt/workspace/";
         String repairBase = "VBAPRResult/";//_exhausted_Edit4Exp_compiled
         String proj = "Math";
         String id = "33";
@@ -156,14 +156,14 @@ public class PatchStatTest {
 
     @Test
     public void testBugsStats() {
-        String buggyBase = "/home/liumengjiao/Desktop/";
-        String repairBase = "VBAPRResult_exhausted_Edit_compiled/";
+        String buggyBase = "/mnt/workspace/";
+        String repairBase = "VBAPRResult/";//_exhausted_Edit_compiled
         List<String> mapping = FileTools.readEachLine(buggyBase + repairBase + "/mapping");
-        List<String> success = Arrays.asList(FileTools.readOneLine(buggyBase + repairBase + "/success_bugs").split(","));
+        List<String> success = mapping;//Arrays.asList(FileTools.readOneLine(buggyBase + repairBase + "/success_bugs").split(","));
         List<String> proj_ids = new ArrayList<>();
         for (String map : mapping) {
             String[] temp = map.split(",");
-            if (success.contains(temp[0]))//successful bugs condition: success.contains(temp[0])；failed bugs condition: !success.contains(temp[0])
+            if (!success.contains(temp[0]))//successful bugs condition: success.contains(temp[0])；failed bugs condition: !success.contains(temp[0])
                 proj_ids.add(temp[1] + "_" + temp[2]);
         }
         Integer[] failed = {4, 7, 16, 18, 20, 21, 23, 34, 37, 38, 40};
@@ -197,22 +197,28 @@ public class PatchStatTest {
             double total_time = general.getAsJsonPrimitive("TOTAL_TIME").getAsDouble();
             double engine_creation_time = general.getAsJsonPrimitive("ENGINE_CREATION_TIME") != null ?
                     general.getAsJsonPrimitive("ENGINE_CREATION_TIME").getAsDouble() : 0;
+            String staus = general.getAsJsonPrimitive("OUTPUT_STATUS").getAsString();
             patchInfo.setTotalTime(total_time);
             patchInfo.setEngineCreationTime(engine_creation_time);
+            patchInfo.setStatus(staus);
             System.out.println(proj_id);
+            System.out.println("是否找到真实补丁：" + staus.equals("STOP_BY_PATCH_FOUND"));
             System.out.println("补丁总数：" + patches.size());
             System.out.println("补丁生成时间：" + total_time);
+            System.out.println("准备时间：" + engine_creation_time);
             System.out.println("准备时间：" + engine_creation_time);
 
         }
         int successCount = (int) patchInfos.stream().filter(AstorPatchInfo::isTestSuccess).count();
         double totalTimes = patchInfos.stream().filter(AstorPatchInfo::isTestSuccess).mapToDouble(AstorPatchInfo::getTotalTime).sum();
-        int patchGenCount = (int) patchInfos.stream().filter(AstorPatchInfo::isTestSuccess).filter(AstorPatchInfo::isPatchGen).count();
+        int patchGenCount = (int) patchInfos.stream().filter(AstorPatchInfo::isTestSuccess).filter(o -> "STOP_BY_PATCH_FOUND".equals(o.getStatus())).count();
         double engineCreationTimes = patchInfos.stream().filter(AstorPatchInfo::isTestSuccess).mapToDouble(AstorPatchInfo::getEngineCreationTime).sum();
         int totalPatches = patchInfos.stream().filter(AstorPatchInfo::isTestSuccess).filter(AstorPatchInfo::isPatchGen).mapToInt(AstorPatchInfo::getPatchSize).sum();
         System.out.println("--------------------");
         System.out.println("bug总数：" + patchInfos.size());
         System.out.println("成功运行数：" + successCount);
+        successCount = successCount == 0 ? 1 : successCount;
+        patchGenCount = patchGenCount == 0 ? 1 : patchGenCount;
         System.out.println("平均准备时间：" + engineCreationTimes / successCount);
         System.out.println("平均补丁生成时间：" + totalTimes / successCount);
         System.out.println("成功生成补丁数：" + patchGenCount);
@@ -233,14 +239,20 @@ public class PatchStatTest {
         }
 
         StringBuilder stringBuilder = new StringBuilder();
+        Map<String, List<String>> statusMap = new HashMap<>();
         for (AstorPatchInfo info : patchInfos) {
-            stringBuilder.append(info.getPatchSize()).append(',')
+            stringBuilder.append("STOP_BY_PATCH_FOUND".equals(info.getStatus())).append(',')
                     .append(info.getMappingIdx()).append(',')
                     .append(info.getProj()).append(',')
                     .append(info.getId()).append(',')
                     .append('\n');
+            if (!statusMap.containsKey(info.getStatus())) {
+                statusMap.put(info.getStatus(), new ArrayList<>());
+            }
+            statusMap.get(info.getStatus()).add(info.getProj() + info.getId());
         }
         FileTools.writeToFile(stringBuilder.toString(), buggyBase + repairBase + "patchinfo_stats");
+        FileTools.writeToFile(FileTools.getMap2String(statusMap).toString(), buggyBase + repairBase + "patch_stats");
         System.out.println(patchInfos);
     }
 

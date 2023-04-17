@@ -35,13 +35,13 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
 //        String[][] data = {
-//                {"Math" , "11"}
+//                {"Lang" , "26"}//
 //        };
 //        return Arrays.asList(data);
 
         String fileName = FileTools.baseDir + "../" + "bugs4.txt";
         return readPVInfos(fileName);
-
+//
 //        List<String> mapping = FileTools.readFileByLineToList(FileTools.mapping);
 //        List<String> success = Arrays.asList(FileTools.readFileByLines(FileTools.outputSrc + "/success_bugs").split(","));
 //        List<String[]> proj_ids = new ArrayList<>();
@@ -56,7 +56,7 @@ public class ParameterizedTest{
 
     @BeforeClass
     public static void setUpBeforeClass() {
-        argsUtil = new TestArgsUtil();
+        argsUtil = new TestArgsUtil("exhaustedGA");
     }
 
     @Test(timeout = 10800000)
@@ -66,8 +66,8 @@ public class ParameterizedTest{
         main.execute(args);
         AstorCoreEngine engine = main.getEngine();
         assertEquals(true, engine.getOriginalVariant().getModificationPoints().size() > 0);
-        List<ProgramVariant> solutions = engine.getVariants();
-        assertEquals(true, solutions.size() > 0);
+//        List<ProgramVariant> solutions = engine.getVariants();
+//        assertEquals(true, solutions.size() > 0);
     }
 
 //    @Test

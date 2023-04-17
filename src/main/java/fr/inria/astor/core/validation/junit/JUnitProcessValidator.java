@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import fr.inria.astor.core.stats.Stats;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
@@ -84,6 +85,7 @@ public class JUnitProcessValidator extends ProgramVariantValidator {
 			TestCaseVariantValidationResult r = null;
 
 			if (trfailing.wasSuccessful() || forceExecuteRegression) {
+				Stats.getCurrentStat().increment(GeneralStatEnum.PASSED_FAILING_TESTS);
 				r = runRegression(mutatedVariant, projectFacade, bc);
 			} else {
 				r = new TestCasesProgramValidationResult(trfailing, trfailing.wasSuccessful(), false);

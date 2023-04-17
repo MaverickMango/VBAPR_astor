@@ -115,7 +115,7 @@ public class VBAPR4Exhausted extends VBAPR {
 
                     //make sure operators without ingredients also do not produce duplicate instances.
                     if (instances != null && !instances.isEmpty()) {
-                        if (!isOpInstanceUsed(modifPoint, astorOperator))
+//                        if (!isOpInstanceUsed(modifPoint, astorOperator))
                             ops.addAll(instances);
                     }
 
@@ -132,7 +132,7 @@ public class VBAPR4Exhausted extends VBAPR {
                                     this.ingredientTransformationStrategy));
                         }
                         for (OperatorInstance op :instances) {
-                            if (!isOpInstanceUsed(op))
+//                            if (!isOpInstanceUsed(op))
                                 ops.add(op);
                         }
                     }

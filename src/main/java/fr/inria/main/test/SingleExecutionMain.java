@@ -17,7 +17,7 @@ public class SingleExecutionMain {
     public static void main(String[] args) throws Exception {
         proj = args[0];
         version = args[1];
-        argsUtil = new TestArgsUtil();
+        argsUtil = new TestArgsUtil("exhaustedGA");
         main = new VBAPRMain();
         main.execute(argsUtil.getArgs(proj, version));
         AstorCoreEngine engine = main.getEngine();

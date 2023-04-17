@@ -20,25 +20,37 @@ public class TestArgsUtil {
     public TestArgsUtil(CommandSummary cs){
         this.cs = cs;
     }
-    public TestArgsUtil() {
+    public TestArgsUtil(String mode) {
         this.cs = new CommandSummary();
-        cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR4ExhaustedGA");
-        cs.command.put("-maxgen", "3");
-//        cs.command.put("-scope", "file");
-        cs.command.put("-skipValidation", "true");
         cs.command.put("-skipfaultlocalization", "true");
-//        cs.command.put("-useGTsizeAsPopSize", "true");
+        cs.command.put("-useGTsizeAsPopSize", "true");
         cs.command.put("-useVariableEdit", "true");
+//        cs.command.put("-scope", "file");
 //        cs.command.put("-addSimilarityComparasion", "true");
-        cs.command.put("-stopfirst", "true");
         cs.command.put("-populationcontroller", "fr.inria.astor.core.solutionsearch.population.DiffBasedFitnessPopulationController");
 //        cs.command.put("-faultlocalization", "fr.inria.astor.core.faultlocalization.gzoltar.GZoltarFaultLocalizationWithGT");
         cs.command.put("-operatorspace", "fr.inria.astor.approaches.jgenprog.extension.VBAPRSpace");
         cs.command.put("-modificationpointnavigation","fr.inria.astor.core.solutionsearch.navigation.ForceOrderSuspiciousNavitation");
         cs.command.put("-targetelementprocessor", "fr.inria.astor.core.manipulation.filters.SingleExpressionFixSpaceProcessor");
         cs.command.put("-opselectionstrategy", "fr.inria.astor.core.solutionsearch.spaces.operators.GTBRepairOperatorSpace");//ReplaceExpOperatorSpace Type
-        cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelecIngreSearchStrategy4Exhausted");
         cs.command.put("-ingredienttransformstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.transformations.GTBIngredientTransformationStrategy");
+        if (mode.contains("exhausted")) {
+            if (mode.equals("exhaustedGA")) {
+                cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR4ExhaustedGA");
+                cs.command.put("-maxgen", "2");
+                cs.command.put("-skipValidation", "false");
+                cs.command.put("-stopfirst", "true");
+            }
+            if (mode.equals("exhausted")) {
+                cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR4Exhausted");
+                cs.command.put("-maxgen", "1");
+                cs.command.put("-skipValidation", "true");
+            }
+            cs.command.put("-saveall", "true");
+            cs.command.put("-stopfirst", "false");
+            cs.command.put("-useGTsizeAsPopSize", "false");
+            cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelecIngreSearchStrategy4Exhausted");
+        }
     }
 
     public String[] getArgs(String proj, String version) {

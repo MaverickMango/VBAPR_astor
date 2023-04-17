@@ -548,7 +548,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 		storeModifiedModel(programVariant);
 
 		if (ConfigurationProperties.getPropertyBool("saveall")) {
-			this.saveVariant(programVariant);
+			this.savePatch(programVariant);
 		}
 		if (childCompiles) {
 
@@ -556,6 +556,7 @@ public abstract class AstorCoreEngine implements AstorExtensionPoint {
 			currentStat.increment(GeneralStatEnum.NR_RIGHT_COMPILATIONS);
 
 			if (ConfigurationProperties.getPropertyBool("skipValidation")) {
+				Stats.currentStat.getIngredientsStats().storeIngCounterFromFailingPatch(programVariant.getId());
 				return childCompiles;
 			}
 			VariantValidationResult validationResult = setFitnessForVariant(programVariant);

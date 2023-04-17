@@ -6,6 +6,7 @@ import fr.inria.astor.approaches.jmutrepair.operators.ExpresionMutOp;
 import fr.inria.astor.core.entities.ModificationPoint;
 import fr.inria.astor.core.entities.OperatorInstance;
 import fr.inria.astor.core.manipulation.MutationSupporter;
+import fr.inria.astor.core.setup.ConfigurationProperties;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtReturn;
@@ -42,14 +43,18 @@ public class BinaryExpressionMutOp extends ExpressionMutOp {
      */
     @Override
     public List<MutantCtElement> getMutants(CtElement element) {
-        List<MutantCtElement> mutations = null;
-        mutations = this.mutatorBinary.execute(element);
-//        List<CtBinaryOperator> list1 = element.getElements(new TypeFilter<>(CtBinaryOperator.class));
-//        List<CtUnaryOperator> list2 = element.getElements(new TypeFilter<>(CtUnaryOperator.class));
-//        if (list1.size() > 0)
-//            mutations = this.mutatorBinary.execute(list1.get(0));
-//        else if (list2.size() > 0)
-//            mutations = this.mutatorBinary.execute(list2.get(0));
+        List<MutantCtElement> mutations;
+        if (ConfigurationProperties.getPropertyBool("extractSubVar")) {
+            mutations = this.mutatorBinary.execute(element);
+            return mutations;
+        }
+        mutations = new ArrayList<>();
+        List<CtBinaryOperator> list1 = element.getElements(new TypeFilter<>(CtBinaryOperator.class));
+        List<CtUnaryOperator> list2 = element.getElements(new TypeFilter<>(CtUnaryOperator.class));
+        if (list1.size() > 0)
+            mutations.addAll(this.mutatorBinary.execute(list1.get(0)));
+        if (list2.size() > 0)
+            mutations.addAll(this.mutatorBinary.execute(list2.get(0)));
         return mutations;
     }
 

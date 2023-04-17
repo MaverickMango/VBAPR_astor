@@ -277,7 +277,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         }
 
         for (Ingredient in :base) {
-            if (in.getChacheCodeString().equals(point.getCodeElement().toString().replaceAll("\\s+"," ")))
+            if (in.getCode().equals(point.getCodeElement()) || in.getChacheCodeString().equals(point.getCodeElement().toString().replaceAll("\\s+"," ")))
                 continue;
             if (in.getCode() instanceof CtExpression && point.getCodeElement() instanceof CtExpression) {
                 CtTypeReference a = ((CtExpression) in.getCode()).getType();
@@ -324,7 +324,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                 exps.add(in);
             }
         }
-        return deduplicate(exps);
+        return exps;//deduplicate(exps);
     }
 
     boolean isCompatiblePrimitive(CtTypeReference element1, CtTypeReference element2) {
