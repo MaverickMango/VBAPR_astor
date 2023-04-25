@@ -375,7 +375,7 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
     List<Ingredient> deduplicate(List<Ingredient> bases) {
         HashSet<Ingredient> set = new HashSet<>(bases);
-        bases.clear();
+        bases = new ArrayList<>();
         bases.addAll(set);
         return bases;
     }
@@ -386,10 +386,8 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
         if (baseElements != null)
             return baseElements;
         try {
-            if (ConfigurationProperties.getPropertyBool("duplicateingredientsinspace"))
-                baseElements = deduplicate(geIngredientsFromSpace(modificationPoint, operationType));
-            else
-                baseElements = geIngredientsFromSpace(modificationPoint, operationType);
+            CtElement parent = modificationPoint.getCodeElement().getParent();
+            baseElements = geIngredientsFromSpace(modificationPoint, operationType);
 
             if (operationType instanceof InsertBeforeOp || operationType instanceof InsertAfterOp)
                 baseElements = getstmts(modificationPoint, baseElements, operationType);
@@ -399,7 +397,6 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
 
 //            if (operationType instanceof ReplaceExpressionOp)//same return type
 //                baseElements = getExpIngredientsSameType(baseElements, modificationPoint);
-            CtElement parent = modificationPoint.getCodeElement().getParent();
             if (operationType instanceof ReplaceExpressionOp/* &&
                     (modificationPoint.getCodeElement() instanceof CtInvocation
                             || modificationPoint.getCodeElement() instanceof CtVariableRead
@@ -408,10 +405,16 @@ public class GTBSelectionIngredientSearchStrategy extends SimpleRandomSelectionI
                             || modificationPoint.getCodeElement() instanceof CtConditional
                             || modificationPoint.getCodeElement() instanceof CtConstructorCall
                             || parent instanceof CtIf || parent instanceof CtAssignment
-                            || parent instanceof CtReturn)*/)
-                baseElements = limitIngredientsByElementType(baseElements, modificationPoint);
+                            || parent instanceof CtReturn)*/) {
+                if ((parent instanceof CtBlock && modificationPoint.getCodeElement() instanceof CtStatement))
+                    baseElements = getstmts(modificationPoint, baseElements, operationType);
+                else
+                    baseElements = limitIngredientsByElementType(baseElements, modificationPoint);
+            }
 
-            baseIngredientsCache.put(key, new ArrayList<>(baseElements));
+            if (ConfigurationProperties.getPropertyBool("duplicateingredientsinspace"))
+                baseElements = deduplicate(baseElements);
+            baseIngredientsCache.put(key, baseElements);
         } catch (Exception e) {
             log.error("error in create ingredient bases : " + e.getMessage());
             e.printStackTrace();

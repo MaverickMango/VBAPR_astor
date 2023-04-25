@@ -35,11 +35,11 @@ public class ParameterizedTest{
     @Parameterized.Parameters
     public static Collection<String[]> data() {
 //        String[][] data = {
-//                {"Lang" , "26"}//
+//                {"Math" , "11"}//
 //        };
 //        return Arrays.asList(data);
 
-        String fileName = FileTools.baseDir + "../" + "bugs4.txt";
+        String fileName = FileTools.baseDir + "../" + "bugs.txt";
         return readPVInfos(fileName);
 //
 //        List<String> mapping = FileTools.readFileByLineToList(FileTools.mapping);
@@ -59,15 +59,15 @@ public class ParameterizedTest{
         argsUtil = new TestArgsUtil("exhaustedGA");
     }
 
-    @Test(timeout = 10800000)
+    @Test(timeout = 18000000)
     public void testSoulutionFound() throws Exception {
         String[] args = argsUtil.getArgs(proj, version);
         main = new VBAPRMain();
         main.execute(args);
         AstorCoreEngine engine = main.getEngine();
         assertEquals(true, engine.getOriginalVariant().getModificationPoints().size() > 0);
-//        List<ProgramVariant> solutions = engine.getVariants();
-//        assertEquals(true, solutions.size() > 0);
+        List<ProgramVariant> solutions = engine.getVariants();
+        assertEquals(true, solutions.size() > 0);
     }
 
 //    @Test

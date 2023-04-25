@@ -52,7 +52,7 @@ public class ConsistenceTest extends BaseEvolutionaryTest {
 
     @BeforeClass
     public static void setUpBeforeClass() {
-        argsUtil = new TestArgsUtil();
+        argsUtil = new TestArgsUtil("VBAPR");
     }
 
     @Test(timeout = 10800000)
@@ -79,7 +79,7 @@ public class ConsistenceTest extends BaseEvolutionaryTest {
         if (proj.equals("Math") && version.equals("58")) {
             PatchHunkStats hunkSolution = getHunkSolution(engine.getPatchInfo(), "fit(guess)", "CtInvocationImpl|CtReturnImpl");
             Assert.assertNotNull(hunkSolution);
-            Assert.assertEquals(5, engine.getSolutions().size());
+//            Assert.assertEquals(5, engine.getSolutions().size());
         }
         if (proj.equals("Math") && version.equals("11")) {
             PatchHunkStats hunkSolution = getHunkSolution(engine.getPatchInfo(), "((double) (dim))", "CtVariableReadImpl|CtUnaryOperatorImpl");

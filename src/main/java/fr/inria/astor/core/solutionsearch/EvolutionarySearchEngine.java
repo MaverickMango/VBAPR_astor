@@ -47,7 +47,7 @@ public class EvolutionarySearchEngine extends AstorCoreEngine {
 		nrGenerationWithoutModificatedVariant = 0;
 		boolean stopSearch = false;
 
-		dateInitEvolution = new Date();
+//		dateInitEvolution = new Date();
 
 		int maxMinutes = ConfigurationProperties.getPropertyInt("maxtime");
 

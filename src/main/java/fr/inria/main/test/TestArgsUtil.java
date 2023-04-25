@@ -10,7 +10,7 @@ import java.util.List;
 public class TestArgsUtil {
 
     private CommandSummary cs = null;
-    public static final String root = "/mnt/workspace/";
+    public static final String root = "/mnt/workspace/";//"";/home/liumengjiao/Desktop/
     public static final String baseDir = root + "vbaprinfo/d4j_bug_info/";//util files
     public static final String outputSrc = root + "VBAPRResult/";//working dir
     private String srcPathDir = baseDir + "src_path/";//...proj/version.txt
@@ -50,6 +50,13 @@ public class TestArgsUtil {
             cs.command.put("-stopfirst", "false");
             cs.command.put("-useGTsizeAsPopSize", "false");
             cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelecIngreSearchStrategy4Exhausted");
+        }else if (mode.equals("VBAPR")){
+            cs.command.put("-customengine", "fr.inria.astor.approaches.jgenprog.extension.VBAPR");
+            cs.command.put("-maxgen", "500");
+            cs.command.put("-skipValidation", "false");
+            cs.command.put("-stopfirst", "false");
+            cs.command.put("-useGTsizeAsPopSize", "false");
+            cs.command.put("-ingredientstrategy", "fr.inria.astor.core.solutionsearch.spaces.ingredients.ingredientSearch.GTBSelectionIngredientSearchStrategy");
         }
     }
 

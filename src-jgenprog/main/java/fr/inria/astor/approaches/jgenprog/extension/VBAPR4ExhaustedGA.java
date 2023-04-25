@@ -156,10 +156,11 @@ public class VBAPR4ExhaustedGA extends VBAPR4Exhausted {
 
                         if (!ConfigurationProperties.getPropertyBool("skipCompilation")) {
                             solution = processCreatedVariant(solutionVariant, generationsExecuted);
+                            if (solutionVariant.getCompilation().compiles())
+                                variantsForOneGen.add(solutionVariant);
                         }
 
                         if (solution) {
-                            variantsForOneGen.add(solutionVariant);
 //                            currentStat.increment(Stats.GeneralStatEnum.TOTAL_VARIANTS_COMPILED);
 //                            solutionFound = compareWithFix(solutionVariant);
                             solutionFound = solution;

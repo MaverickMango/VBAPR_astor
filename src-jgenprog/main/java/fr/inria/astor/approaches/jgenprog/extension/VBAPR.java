@@ -216,7 +216,7 @@ public class VBAPR  extends JGenProg {
 
         beforeGenerate(generation);
         detailLog.info("----------------- Generation " + generation);
-        detailLog.info("after apply crossover, we got " + variants.size() + " variants to mutate.");
+        log.info("after apply crossover, we got " + variants.size() + " variants to mutate.");
         logProgramVariant(variants, generation, false);
 
         for (int i = 0; i < variants.size(); i++) {
@@ -258,6 +258,11 @@ public class VBAPR  extends JGenProg {
                     affectedMap = newVariant.computeAffectedStringOfClassesAndBlocks(false);
                 }
 
+                for (OperatorInstance op :newVariant.getOperations(generation)) {
+                    log.info("mod_point " + op.getModificationPoint());
+                    log.info("-->op: " + op);
+                }
+
                 boolean succ = false;
                 if (solution) {
                     foundSolution = true;
@@ -294,7 +299,7 @@ public class VBAPR  extends JGenProg {
             }
 
         }
-        detailLog.info("after generation " + generation + ", we got " + temporalInstances.size() + " children");
+        log.info("after generation " + generation + ", we got " + temporalInstances.size() + " children");
         logProgramVariant(temporalInstances, generation, true);
         prepareNextGeneration(temporalInstances, generation);
 
@@ -801,8 +806,7 @@ public class VBAPR  extends JGenProg {
                     FileWriter fw = new FileWriter(noout + File.separator + "suspicious_"
                             + this.projectFacade.getProperties().getFixid() + ".json");
                     for (SuspiciousCode suspiciousCode : susp) {
-                        fw.append(suspiciousCode.getClassName() + "," + suspiciousCode.getLineNumber() + ","
-                                + suspiciousCode.getSuspiciousValueString());
+                        fw.append(suspiciousCode.toString());
                         fw.append("\n");
                     }
                     fw.flush();
